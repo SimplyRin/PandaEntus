@@ -1,9 +1,12 @@
 package net.simplyrin.pandaentus.listeners;
 
+import java.util.Date;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
@@ -108,6 +111,17 @@ public class Listener extends ListenerAdapter {
 		}
 
 		if (voiceChannels.size() == count) {
+			try {
+				GuildChannel guildChannel = (GuildChannel) category.getChannels().get(1);
+				Date time = Date.from(guildChannel.getTimeCreated().toInstant());
+
+				Category textChannels = (Category) guild.getCategoriesByName("Text Channels", true).get(0);
+				TextChannel textChannel = (TextChannel) textChannels.getChannels().get(0);
+				textChannel.sendMessage("通話終了: " + this.instance.getUptime(time)).complete();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 			for (VoiceChannel voiceChannel : voiceChannels) {
 				voiceChannel.delete().complete();
 			}
