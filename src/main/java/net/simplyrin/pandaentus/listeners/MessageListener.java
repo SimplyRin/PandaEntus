@@ -1,8 +1,10 @@
 package net.simplyrin.pandaentus.listeners;
 
+import java.awt.Color;
 import java.util.Date;
 import java.util.List;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
@@ -11,6 +13,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.utils.TimeManager;
 
 /**
  * Created by SimplyRin on 2019/04/04.
@@ -57,6 +60,28 @@ public class MessageListener extends ListenerAdapter {
 
 		if (args.length > 0) {
 			if (args[0].equalsIgnoreCase("!uptime")) {
+				if (args.length > 1) {
+					String id = args[1].replace("<@", "").replace(">", "");
+
+					if (id.length() != 18) {
+						id = event.getAuthor().getId();
+					}
+
+					TimeManager timeManager = this.instance.getTimeManager().getUser(id);
+					if (!timeManager.isJoined()) {
+						channel.sendMessage("このユーザーは現在通話していません。").complete();
+						return;
+					}
+
+					EmbedBuilder embedBuilder = new EmbedBuilder();
+					embedBuilder.setColor(Color.GREEN);
+					embedBuilder.addField("参加時間", timeManager.getJoinedTime(), true);
+					embedBuilder.addField("通話時間", timeManager.getCurrentTime(), true);
+
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
+				}
+
 				List<GuildChannel> channels = category.getChannels();
 				if (channels.size() == 1) {
 					channel.sendMessage("現在通話していません。").complete();

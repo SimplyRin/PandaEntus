@@ -47,6 +47,7 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
+		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).joined();
 		this.check(event.getGuild());
 	}
 
@@ -84,6 +85,9 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
+		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).quit();
+
+
 		Guild guild = event.getGuild();
 
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);

@@ -13,6 +13,7 @@ import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.MessageListener;
+import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.rinstream.RinStream;
 
 /**
@@ -26,6 +27,8 @@ public class Main {
 
 	@Getter
 	private Configuration config;
+	@Getter
+	private TimeManager timeManager;
 
 	@Getter
 	private JDA jda;
@@ -50,6 +53,7 @@ public class Main {
 		}
 
 		this.config = Config.getConfig(file);
+		this.timeManager = new TimeManager(this);
 
 		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
 
