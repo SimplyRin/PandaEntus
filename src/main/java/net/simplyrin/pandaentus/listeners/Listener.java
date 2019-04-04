@@ -1,8 +1,10 @@
 package net.simplyrin.pandaentus.listeners;
 
+import java.awt.Color;
 import java.util.Date;
 import java.util.List;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
@@ -121,7 +123,13 @@ public class Listener extends ListenerAdapter {
 
 				Category textChannels = (Category) guild.getCategoriesByName("Text Channels", true).get(0);
 				TextChannel textChannel = (TextChannel) textChannels.getChannels().get(0);
-				textChannel.sendMessage("通話終了: " + this.instance.getUptime(time)).complete();
+
+				EmbedBuilder embedBuilder = new EmbedBuilder();
+				embedBuilder.setColor(Color.GREEN);
+				embedBuilder.addField("通話終了", this.instance.getUptime(time), true);
+
+				textChannel.sendMessage(embedBuilder.build()).complete();
+				return;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

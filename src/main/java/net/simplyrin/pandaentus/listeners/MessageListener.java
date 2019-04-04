@@ -84,14 +84,20 @@ public class MessageListener extends ListenerAdapter {
 
 				List<GuildChannel> channels = category.getChannels();
 				if (channels.size() == 1) {
-					channel.sendMessage("現在通話していません。").complete();
+					EmbedBuilder embedBuilder = new EmbedBuilder();
+					embedBuilder.setDescription("現在通話していません。");
+					embedBuilder.setColor(Color.GREEN);
+					channel.sendMessage(embedBuilder.build()).complete();
 					return;
 				}
 
 				GuildChannel guildChannel = category.getChannels().get(1);
 				Date time = Date.from(guildChannel.getTimeCreated().toInstant());
 
-				channel.sendMessage("現在の通話時間: " + this.instance.getUptime(time)).complete();
+				EmbedBuilder embedBuilder = new EmbedBuilder();
+				embedBuilder.setColor(Color.GREEN);
+				embedBuilder.addField("現在の通話時間", this.instance.getUptime(time), true);
+				channel.sendMessage(embedBuilder.build()).complete();
 				return;
 			}
 		}
