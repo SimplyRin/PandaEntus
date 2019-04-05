@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -45,6 +46,11 @@ public class MessageListener extends ListenerAdapter {
 
 	public MessageListener(Main instance) {
 		this.instance = instance;
+	}
+
+	@Override
+	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
+		new PrivateChatMessage(this.instance).onPrivateMessageReceived(event);
 	}
 
 	@Override

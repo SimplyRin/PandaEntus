@@ -61,6 +61,7 @@ public class Main {
 			Configuration config = Config.getConfig(file);
 			config.set("Token", "BOT_TOKEN_HERE");
 			config.set("Pastebin.API-Key", "PASTEBIN_API_KEY_HERE");
+			config.set("Message-Type.Enable-Simple-Mode", false);
 
 			Config.saveConfig(config, file);
 		}
@@ -189,7 +190,7 @@ public class Main {
 		pasteBuilder.setRaw(result);
 		pasteBuilder.setMachineFriendlyLanguage("text");
 		pasteBuilder.setVisiblity(PasteVisiblity.Unlisted);
-		pasteBuilder.setExpire(PasteExpire.OneWeek);
+		pasteBuilder.setExpire(PasteExpire.OneDay);
 
 		String url = pastebin.post(pasteBuilder.build()).get();
 
