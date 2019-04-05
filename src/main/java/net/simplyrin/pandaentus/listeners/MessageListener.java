@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
@@ -52,6 +53,7 @@ public class MessageListener extends ListenerAdapter {
 			return;
 		}
 
+		User user = event.getAuthor();
 		Guild guild = event.getGuild();
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 		MessageChannel channel = event.getChannel();
@@ -64,7 +66,7 @@ public class MessageListener extends ListenerAdapter {
 					String id = args[1].replace("<@", "").replace(">", "");
 
 					if (id.length() != 18) {
-						id = event.getAuthor().getId();
+						id = user.getId();
 					}
 
 					TimeManager timeManager = this.instance.getTimeManager().getUser(id);
@@ -75,6 +77,7 @@ public class MessageListener extends ListenerAdapter {
 
 					EmbedBuilder embedBuilder = new EmbedBuilder();
 					embedBuilder.setColor(Color.GREEN);
+					embedBuilder.setAuthor(user.getName(), null, user.getAvatarUrl());
 					embedBuilder.addField("参加時間", timeManager.getJoinedTime(), true);
 					embedBuilder.addField("通話時間", timeManager.getCurrentTime(), true);
 

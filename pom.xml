@@ -55,6 +55,10 @@
       <name>api</name>
       <url>https://api.simplyrin.net/maven/</url>
     </repository>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -78,6 +82,11 @@
       <groupId>net.dv8tion</groupId>
       <artifactId>JDA</artifactId>
       <version>4.ALPHA.0_58</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.marcoacierno</groupId>
+      <artifactId>pastebin-java-api</artifactId>
+      <version>0.2.1</version>
     </dependency>
   </dependencies>
 </project>

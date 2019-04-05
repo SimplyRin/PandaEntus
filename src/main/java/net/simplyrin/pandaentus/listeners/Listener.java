@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.utils.GuildCallManager;
 
 /**
  * Created by SimplyRin on 2019/03/13.
@@ -50,15 +52,15 @@ public class Listener extends ListenerAdapter {
 	@Override
 	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).joined();
-		this.check(event.getGuild());
+		this.check(event.getMember(), event.getGuild());
 	}
 
 	@Override
 	public void onGuildVoiceMove(GuildVoiceMoveEvent event) {
-		this.check(event.getGuild());
+		this.check(event.getMember(), event.getGuild());
 	}
 
-	public void check(Guild guild) {
+	public void check(Member member, Guild guild) {
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
@@ -81,14 +83,17 @@ public class Listener extends ListenerAdapter {
 
 		if (voiceChannels.size() == count) {
 			int c = (count + 1);
-			category.createVoiceChannel("General-" + c).complete().getManager().setUserLimit(99).complete();
+			VoiceChannel voiceChannel = category.createVoiceChannel("General-" + c).complete();
+			voiceChannel.getManager().setUserLimit(99).complete();
+			if (c == 2) {
+				this.instance.getGuildCallManager(voiceChannel.getId()).joined(member.getId());
+			}
 		}
 	}
 
 	@Override
 	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).quit();
-
 
 		Guild guild = event.getGuild();
 
@@ -124,14 +129,33 @@ public class Listener extends ListenerAdapter {
 				Category textChannels = (Category) guild.getCategoriesByName("Text Channels", true).get(0);
 				TextChannel textChannel = (TextChannel) textChannels.getChannels().get(0);
 
+				GuildCallManager guildCallManager = this.instance.getGuildCallManager(guildChannel.getId());
+				Member member = guild.getMemberById(guildCallManager.getJoinUserId());
+
 				EmbedBuilder embedBuilder = new EmbedBuilder();
 				embedBuilder.setColor(Color.GREEN);
-				embedBuilder.addField("通話終了", this.instance.getUptime(time), true);
+				embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
+				embedBuilder.addField("開始時刻", this.instance.getNowTime(time), true);
+				embedBuilder.addField("終了時刻", this.instance.getNowTime(), true);
+
+				embedBuilder.addField("開始ユーザー", member.getUser().getName(), true);
+				if (event.getMember().getNickname() != null) {
+					embedBuilder.addField("最終ユーザー", event.getMember().getNickname(), true);
+				} else {
+					embedBuilder.addField("最終ユーザー", event.getMember().getUser().getName(), true);
+				}
 
 				textChannel.sendMessage(embedBuilder.build()).complete();
-				return;
 			} catch (Exception e) {
-				e.printStackTrace();
+				GuildChannel guildChannel = (GuildChannel) category.getChannels().get(1);
+				Date time = Date.from(guildChannel.getTimeCreated().toInstant());
+
+				EmbedBuilder embedBuilder = new EmbedBuilder();
+				embedBuilder.setColor(Color.GREEN);
+				embedBuilder.addField("開始時刻", this.instance.getNowTime(time), true);
+				embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
+
+				this.instance.postError(e);
 			}
 
 			for (VoiceChannel voiceChannel : voiceChannels) {

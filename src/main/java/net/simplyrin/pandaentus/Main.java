@@ -2,17 +2,29 @@ package net.simplyrin.pandaentus;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
+
+import com.besaba.revonline.pastebinapi.Pastebin;
+import com.besaba.revonline.pastebinapi.impl.factory.PastebinFactory;
+import com.besaba.revonline.pastebinapi.paste.PasteBuilder;
+import com.besaba.revonline.pastebinapi.paste.PasteExpire;
+import com.besaba.revonline.pastebinapi.paste.PasteVisiblity;
 
 import lombok.Getter;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.User;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.MessageListener;
+import net.simplyrin.pandaentus.utils.GuildCallManager;
 import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.rinstream.RinStream;
 
@@ -48,6 +60,7 @@ public class Main {
 
 			Configuration config = Config.getConfig(file);
 			config.set("Token", "BOT_TOKEN_HERE");
+			config.set("Pastebin.API-Key", "PASTEBIN_API_KEY_HERE");
 
 			Config.saveConfig(config, file);
 		}
@@ -82,6 +95,25 @@ public class Main {
 				System.out.println("Config ファイルを保存しました。");
 			}
 		});
+	}
+
+	@Getter
+	private HashMap<String, GuildCallManager> guildCallMaps = new HashMap<>();
+
+	public GuildCallManager getGuildCallManager(String channelId) {
+		if (this.guildCallMaps.get(channelId) == null) {
+			this.guildCallMaps.put(channelId, new GuildCallManager(this, channelId));
+		}
+		return this.guildCallMaps.get(channelId);
+	}
+
+	public String getNowTime() {
+		Date date = new Date();
+		return this.getNowTime(date);
+	}
+
+	public String getNowTime(Date date) {
+		return date.getHours() + "時" + date.getMinutes() + "分";
 	}
 
 	public String getUptime(Date createdTime) {
@@ -136,6 +168,40 @@ public class Main {
 		}
 
 		return uptime;
+	}
+
+	/**
+	 * https://qiita.com/sifue/items/07388fdada096734fa7f
+	 */
+	public void postError(Exception e) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		pw.flush();
+		String result = sw.toString();
+
+		final PastebinFactory factory = new PastebinFactory();
+		final Pastebin pastebin = factory.createPastebin(this.config.getString("Pastebin.API-Key"));
+		final PasteBuilder pasteBuilder = factory.createPaste();
+
+		// Title paste
+		pasteBuilder.setTitle("Error message " + UUID.randomUUID().toString().split("-")[0]);
+		pasteBuilder.setRaw(result);
+		pasteBuilder.setMachineFriendlyLanguage("text");
+		pasteBuilder.setVisiblity(PasteVisiblity.Unlisted);
+		pasteBuilder.setExpire(PasteExpire.OneWeek);
+
+		String url = pastebin.post(pasteBuilder.build()).get();
+
+		String localMessage;
+		if (result.length() >= 1800) {
+			localMessage = "```" +  result.substring(0, 1000) + "...```";
+		} else {
+			localMessage = "```" + result + "...```";
+		}
+
+		User user = this.jda.getUserById("224428706209202177");
+		user.openPrivateChannel().complete().sendMessage("An error occured of PandaEntus discord bot!\r\nYou can visit error contents at " + url + localMessage).complete();
 	}
 
 }
