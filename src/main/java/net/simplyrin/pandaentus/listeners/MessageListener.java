@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -85,8 +86,23 @@ public class MessageListener extends ListenerAdapter {
 						id = user.getId();
 					}
 
+					boolean _if = false;
+					for (VoiceChannel voiceChannel : guild.getVoiceChannels()) {
+						for (Member member : voiceChannel.getMembers()) {
+							if (member.getId().equals(id)) {
+								_if = true;
+							}
+						}
+					}
+					if (!_if) {
+						embedBuilder.setColor(Color.RED);
+						embedBuilder.setDescription("このユーザーは現在通話していません。");
+						channel.sendMessage(embedBuilder.build()).complete();
+						return;
+					}
+
 					TimeManager timeManager = this.instance.getTimeManager().getUser(id);
-					if (!timeManager.isJoined()) {
+					if ((!timeManager.isJoined()) || (!_if)) {
 						embedBuilder.setColor(Color.RED);
 						embedBuilder.setDescription("このユーザーは現在通話していません。");
 						channel.sendMessage(embedBuilder.build()).complete();

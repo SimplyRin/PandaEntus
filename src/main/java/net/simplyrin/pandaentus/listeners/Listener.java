@@ -139,7 +139,6 @@ public class Listener extends ListenerAdapter {
 					} catch (Exception e) {
 					} */
 
-					embedBuilder.setAuthor("通話終了");
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
