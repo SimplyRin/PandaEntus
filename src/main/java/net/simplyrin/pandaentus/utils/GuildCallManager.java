@@ -2,6 +2,7 @@ package net.simplyrin.pandaentus.utils;
 
 import java.util.Date;
 
+import lombok.Getter;
 import net.simplyrin.pandaentus.Main;
 
 /**
@@ -69,6 +70,7 @@ public class GuildCallManager {
 		this.channelId = channelId;
 	}
 
+	@Getter
 	private boolean isCalling;
 	private String joinUserId;
 	private Date date;

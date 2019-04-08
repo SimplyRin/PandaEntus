@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -66,8 +67,17 @@ public class MessageListener extends ListenerAdapter {
 
 		String[] args = event.getMessage().getContentRaw().split(" ");
 
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+
 		if (args.length > 0) {
 			if (args[0].equalsIgnoreCase("!uptime")) {
+				if (this.instance.getConfig().getBoolean("Disable")) {
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setDescription("この機能は現在一時的に無効にされています。");
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
+				}
+
 				if (args.length > 1) {
 					String id = args[1].replace("<@", "").replace(">", "");
 
@@ -77,13 +87,14 @@ public class MessageListener extends ListenerAdapter {
 
 					TimeManager timeManager = this.instance.getTimeManager().getUser(id);
 					if (!timeManager.isJoined()) {
-						channel.sendMessage("このユーザーは現在通話していません。").complete();
+						embedBuilder.setColor(Color.RED);
+						embedBuilder.setDescription("このユーザーは現在通話していません。");
+						channel.sendMessage(embedBuilder.build()).complete();
 						return;
 					}
 
-					EmbedBuilder embedBuilder = new EmbedBuilder();
 					embedBuilder.setColor(Color.GREEN);
-					embedBuilder.setAuthor(user.getName(), null, user.getAvatarUrl());
+					embedBuilder.setAuthor(this.getNickname(event.getMember()), user.getAvatarUrl(), user.getAvatarUrl());
 					embedBuilder.addField("参加時間", timeManager.getJoinedTime(), true);
 					embedBuilder.addField("通話時間", timeManager.getCurrentTime(), true);
 
@@ -93,7 +104,6 @@ public class MessageListener extends ListenerAdapter {
 
 				List<GuildChannel> channels = category.getChannels();
 				if (channels.size() == 1) {
-					EmbedBuilder embedBuilder = new EmbedBuilder();
 					embedBuilder.setDescription("現在通話していません。");
 					embedBuilder.setColor(Color.GREEN);
 					channel.sendMessage(embedBuilder.build()).complete();
@@ -103,13 +113,19 @@ public class MessageListener extends ListenerAdapter {
 				GuildChannel guildChannel = category.getChannels().get(1);
 				Date time = Date.from(guildChannel.getTimeCreated().toInstant());
 
-				EmbedBuilder embedBuilder = new EmbedBuilder();
 				embedBuilder.setColor(Color.GREEN);
-				embedBuilder.addField("現在の通話時間", this.instance.getUptime(time), true);
+				embedBuilder.addField("グループ合計通話時間", this.instance.getUptime(time), false);
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
 			}
 		}
+	}
+
+	public String getNickname(Member member) {
+		if (member.getNickname() != null) {
+			return member.getNickname();
+		}
+		return member.getUser().getName();
 	}
 
 }

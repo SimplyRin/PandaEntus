@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.utils.GuildCallManager;
 
 /**
  * Created by SimplyRin on 2019/03/13.
@@ -129,14 +128,18 @@ public class Listener extends ListenerAdapter {
 				Category textChannels = (Category) guild.getCategoriesByName("Text Channels", true).get(0);
 				TextChannel textChannel = (TextChannel) textChannels.getChannels().get(0);
 
-				GuildCallManager guildCallManager = this.instance.getGuildCallManager(guildChannel.getId());
-				Member member = guild.getMemberById(guildCallManager.getJoinUserId());
+				Member member = event.getMember();
 
 				EmbedBuilder embedBuilder = new EmbedBuilder();
 				embedBuilder.setColor(Color.GREEN);
 
-
 				if (this.instance.getConfig().getBoolean("Message-Type.Enable-Simple-Mode")) {
+					/* try {
+						embedBuilder.addField("通話時間", this.instance.getGuildCallManager(guildChannel.getId()).getCurrentTime(), true);
+					} catch (Exception e) {
+					} */
+
+					embedBuilder.setAuthor("通話終了");
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
@@ -145,10 +148,14 @@ public class Listener extends ListenerAdapter {
 
 					embedBuilder.addField("開始ユーザー", member.getUser().getName(), true);
 					if (event.getMember().getNickname() != null) {
-						embedBuilder.addField("最終ユーザー", event.getMember().getNickname(), true);
+						embedBuilder.addField("最終ユーザー", member.getNickname(), true);
 					} else {
-						embedBuilder.addField("最終ユーザー", event.getMember().getUser().getName(), true);
+						embedBuilder.addField("最終ユーザー", member.getUser().getName(), true);
 					}
+				}
+
+				if (this.instance.getConfig().getBoolean("Disable")) {
+					return;
 				}
 
 				textChannel.sendMessage(embedBuilder.build()).complete();
@@ -166,7 +173,10 @@ public class Listener extends ListenerAdapter {
 			}
 
 			for (VoiceChannel voiceChannel : voiceChannels) {
-				voiceChannel.delete().complete();
+				try {
+					voiceChannel.delete().complete();
+				} catch (Exception e) {
+				}
 			}
 
 			category.createVoiceChannel("General-1").complete().getManager().setUserLimit(99).complete();

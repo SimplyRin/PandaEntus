@@ -59,7 +59,19 @@ public class PrivateChatMessage {
 			if (args[0].equalsIgnoreCase("!help")) {
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.addField("!help", "`Show this help message`", false);
+				embedBuilder.addField("!toggle", "`Toggle this bot`", false);
 				embedBuilder.addField("!simplemode", "`Display only talk time when call ends`", false);
+
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!toggle")) {
+				boolean bool = this.instance.getConfig().getBoolean("Disable");
+				this.instance.getConfig().set("Disable", !bool);
+
+				embedBuilder.setColor(Color.GREEN);
+				embedBuilder.setDescription("Disable call notification messages: `" + (!bool ? "Enabled" : "Disabled") + "`");
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
@@ -70,7 +82,7 @@ public class PrivateChatMessage {
 				this.instance.getConfig().set("Message-Type.Enable-Simple-Mode", !bool);
 
 				embedBuilder.setColor(Color.GREEN);
-				embedBuilder.setDescription("Simple mode: " + (!bool ? "enabled" : "disabled"));
+				embedBuilder.setDescription("Simple mode: `" + (!bool ? "Enabled" : "Disabled") + "`");
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
