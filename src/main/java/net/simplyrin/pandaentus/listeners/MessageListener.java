@@ -71,6 +71,48 @@ public class MessageListener extends ListenerAdapter {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		if (args.length > 0) {
+			// Admin
+			if (user.getId().equals("224428706209202177")) {
+				if (args[0].equalsIgnoreCase("!add-vc")) {
+					if (args.length > 1) {
+						int i;
+						try {
+							i = Integer.valueOf(args[1]).intValue();
+						} catch (Exception e) {
+							embedBuilder.setColor(Color.RED);
+							embedBuilder.setDescription("Invalid usage!");
+							channel.sendMessage(embedBuilder.build()).complete();
+							return;
+						}
+
+						List<VoiceChannel> voiceChannels = category.getVoiceChannels();
+						int size = voiceChannels.size() + 1;
+
+						int count = 0;
+						while (true) {
+							if (i == count) {
+								break;
+							}
+
+							VoiceChannel voiceChannel = category.createVoiceChannel("General-" + size).complete();
+							voiceChannel.getManager().setUserLimit(99).complete();
+
+							if (size == 50) {
+								break;
+							}
+
+							size++;
+							count++;
+						}
+
+						embedBuilder.setColor(Color.GREEN);
+						embedBuilder.setDescription("Created!");
+						channel.sendMessage(embedBuilder.build()).complete();
+					}
+				}
+			}
+
+			// General
 			if (args[0].equalsIgnoreCase("!uptime")) {
 				if (this.instance.getConfig().getBoolean("Disable")) {
 					embedBuilder.setColor(Color.RED);
