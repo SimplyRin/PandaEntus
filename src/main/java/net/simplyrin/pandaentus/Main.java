@@ -168,6 +168,10 @@ public class Main {
 			uptime += second + "秒";
 		}
 
+		if (uptime.trim().length() == 0) {
+			uptime += "0秒";
+		}
+
 		return uptime;
 	}
 

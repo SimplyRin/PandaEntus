@@ -138,19 +138,19 @@ public class Listener extends ListenerAdapter {
 						embedBuilder.addField("通話時間", this.instance.getGuildCallManager(guildChannel.getId()).getCurrentTime(), true);
 					} catch (Exception e) {
 					} */
-
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
 					embedBuilder.addField("開始時刻", this.instance.getNowTime(time), true);
 					embedBuilder.addField("終了時刻", this.instance.getNowTime(), true);
 
+					/**
 					embedBuilder.addField("開始ユーザー", member.getUser().getName(), true);
 					if (event.getMember().getNickname() != null) {
 						embedBuilder.addField("最終ユーザー", member.getNickname(), true);
 					} else {
 						embedBuilder.addField("最終ユーザー", member.getUser().getName(), true);
-					}
+					} */
 				}
 
 				if (this.instance.getConfig().getBoolean("Disable")) {
