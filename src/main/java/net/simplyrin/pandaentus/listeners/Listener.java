@@ -65,12 +65,21 @@ public class Listener extends ListenerAdapter {
 
 		boolean[] max = new boolean[voiceChannels.size()];
 		int current = 0;
+
+		int membersSize = 0;
 		for (VoiceChannel voiceChannel : voiceChannels) {
-			if (voiceChannel.getMembers().size() >= 1) {
+			for (Member vcMember : voiceChannel.getMembers()) {
+				if ((!vcMember.getUser().isBot()) && (!vcMember.getUser().isFake())) {
+					membersSize++;
+				}
+			}
+			if (membersSize >= 1) {
 				max[current] = true;
 			}
 
 			current++;
+
+			membersSize = 0;
 		}
 
 		int count = 0;
@@ -105,12 +114,21 @@ public class Listener extends ListenerAdapter {
 
 		boolean[] free = new boolean[voiceChannels.size()];
 		int current = 0;
+
+		int membersSize = 0;
 		for (VoiceChannel voiceChannel : voiceChannels) {
-			if (voiceChannel.getMembers().size() == 0) {
+			for (Member vcMember : voiceChannel.getMembers()) {
+				if ((!vcMember.getUser().isBot()) && (!vcMember.getUser().isFake())) {
+					membersSize++;
+				}
+			}
+			if (membersSize == 0) {
 				free[current] = true;
 			}
 
 			current++;
+
+			membersSize = 0;
 		}
 
 		int count = 0;

@@ -94,8 +94,11 @@ public class MessageListener extends ListenerAdapter {
 								break;
 							}
 
-							VoiceChannel voiceChannel = category.createVoiceChannel("General-" + size).complete();
-							voiceChannel.getManager().setUserLimit(99).complete();
+							try {
+								VoiceChannel voiceChannel = category.createVoiceChannel("General-" + size).complete();
+								voiceChannel.getManager().setUserLimit(99).complete();
+							} catch (Exception e) {
+							}
 
 							if (size == 50) {
 								break;
