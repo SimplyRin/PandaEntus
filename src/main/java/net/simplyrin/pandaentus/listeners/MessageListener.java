@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gson.JsonObject;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -16,6 +18,7 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.utils.TimeManager;
 
@@ -176,6 +179,42 @@ public class MessageListener extends ListenerAdapter {
 
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.addField("グループ合計通話時間", this.instance.getUptime(time), false);
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!text-gen") || args[0].equalsIgnoreCase("!text-generate")) {
+				if (args.length > 1) {
+					String text = args[1];
+					channel.sendTyping().complete();
+
+					HttpClient httpClient = new HttpClient("https://ja.cooltext.com/PostChange");
+
+					// httpClient.addHeader("cookie", "_ga=GA1.2.1279499266.1558787537; _gid=GA1.2.1065377376.1558787537; ASP.NET_SessionId=" + UUID.randomUUID().toString().split("-")[0]);
+					httpClient.addHeader("origin", "https://ja.cooltext.com");
+					httpClient.addHeader("accept-encoding", "gzip, deflate, br");
+					httpClient.addHeader("accept-language", "ja-JP,ja;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6");
+					httpClient.addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
+					httpClient.addHeader("content-type", "application/x-www-form-urlencoded; charset=UTF-8");
+					httpClient.addHeader("accept", "*/*");
+					httpClient.addHeader("referer", "https://ja.cooltext.com/Logo-Design-Particle");
+					httpClient.addHeader("authority", "ja.cooltext.com");
+					httpClient.addHeader("x-requested-with", "XMLHttpRequest");
+
+					// httpClient.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
+					httpClient.setData("LogoID=39&Text=" + text + "&FontSize=70&Color1_color=23320000&Integer5=3&Integer7=0&Integer8=0&Integer14_color=#23000000^&Integer6=95&Integer9=0&Integer13=on&Integer12=on&FileFormat=6&BackgroundColor_color=#23FFFFFF");
+					JsonObject result = httpClient.getAsJsonObject();
+					System.out.println("Result: " + result);
+
+					embedBuilder.setColor(Color.GREEN);
+					embedBuilder.setDescription("Image generated!");
+					embedBuilder.setImage(result.get("renderLocation").getAsString());
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
+				}
+
+				embedBuilder.setColor(Color.RED);
+				embedBuilder.setDescription("使用方法: " + args[0] + " <テキスト>");
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
 			}

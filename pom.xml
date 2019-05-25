@@ -79,6 +79,11 @@
       <version>1.0</version>
     </dependency>
     <dependency>
+      <groupId>net.simplyrin.httpclient</groupId>
+      <artifactId>HttpClient</artifactId>
+      <version>1.2</version>
+    </dependency>
+    <dependency>
       <groupId>net.dv8tion</groupId>
       <artifactId>JDA</artifactId>
       <version>4.ALPHA.0_58</version>
