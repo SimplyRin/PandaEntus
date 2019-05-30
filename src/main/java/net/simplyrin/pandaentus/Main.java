@@ -164,8 +164,7 @@ public class Main {
 		return uptime;
 	}
 
-	public String getLTime(Date createdTime) {
-		Time time = this.getTimeFromDate(createdTime);
+	public String getLTime(Time time) {
 
 		String uptime = "";
 		int hour = time.getHour();
@@ -221,7 +220,7 @@ public class Main {
 		return time;
 	}
 
-	public Time addTime(Time time1, Time time2) {
+	public static Time addTime(Time time1, Time time2) {
 		int[] units = { Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND };
 		int[] result = new int[units.length];
 
@@ -233,6 +232,7 @@ public class Main {
 		try {
 			d1 = simpleDateFormat.parse(time1.year + "/" + time1.month + "/" + time1.day + " " + time1.hour + ":" + time1.minute + ":" + time1.second);
 		} catch (ParseException e) {
+			e.printStackTrace();
 		}
 		sCal.setTime(d1);
 
@@ -240,6 +240,7 @@ public class Main {
 		try {
 			d2 = simpleDateFormat.parse(time2.year + "/" + time2.month + "/" + time2.day + " " + time2.hour + ":" + time2.minute + ":" + time2.second);
 		} catch (ParseException e) {
+			e.printStackTrace();
 		}
 		tCal.setTime(d2);
 
@@ -298,7 +299,7 @@ public class Main {
 		user.openPrivateChannel().complete().sendMessage("An error occured of PandaEntus discord bot!\r\nYou can visit error contents at " + url + localMessage).complete();
 	}
 
-	public Date timeToDate(Time time) {
+	public static Date timeToDate(Time time) {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = null;
 		try {
@@ -308,7 +309,7 @@ public class Main {
 		return date;
 	}
 
-	public Time dateToTime(Date date) {
+	public static Time dateToTime(Date date) {
 		Time time = new Time();
 
 		time.year = date.getYear();
@@ -322,7 +323,7 @@ public class Main {
 	}
 
 	@Data
-	public class Time {
+	public static class Time {
 		int year;
 		int month;
 		int day;
@@ -335,11 +336,32 @@ public class Main {
 		}
 
 		public void addTime(Date d) {
-			Time date = Main.this.addTime(this, dateToTime(d));
+			Time date = Main.addTime(this, dateToTime(d));
 
 			this.hour = date.getHour();
 			this.minute = date.getMinute();
 			this.second = date.getSecond();
+		}
+
+		@Override
+		public String toString() {
+			String uptime = "";
+
+			if (hour > 0) {
+				uptime += hour + "時間";
+			}
+			if (minute > 0) {
+				uptime += minute + "分";
+			}
+			if (second > 0) {
+				uptime += second + "秒";
+			}
+
+			if (uptime.trim().length() == 0) {
+				uptime += "0秒";
+			}
+
+			return uptime;
 		}
 	}
 

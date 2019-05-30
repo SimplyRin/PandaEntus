@@ -67,6 +67,7 @@ public class CallTimeManager {
 
 		public CallTime(User user) {
 			this.user = user;
+			this.time = new Main.Time();
 		}
 
 		public void join() {
@@ -74,8 +75,36 @@ public class CallTimeManager {
 		}
 
 		public void quit() {
-			this.time = instance.getTimeFromDate(this.tempJoinedTime);
-			this.time.addTime(new Date());
+			/*try {
+				Time addedTime = instance.addTime(this.time, instance.dateToTime(new Date()));
+				this.time.addTime(addedTime);
+			} catch (Exception e) {
+				this.time = instance.getTimeFromDate(this.tempJoinedTime);
+			}*/
+
+			Time t1 = instance.getTimeFromDate(this.tempJoinedTime);
+
+			time.setYear(time.getYear() + t1.getYear());
+			time.setMonth(time.getMonth() + t1.getMonth());
+			time.setDay(time.getDay() + t1.getDay());
+			time.setHour(time.getHour() + t1.getHour());
+			time.setMinute(time.getMinute() + t1.getMinute());
+			time.setSecond(time.getSecond() + t1.getSecond());
+
+			if (time.getSecond() > 60) {
+				time.setSecond(time.getSecond() - 60);
+				time.setMinute(time.getMinute() + 1);
+			}
+			if (time.getMinute() > 60) {
+				time.setMinute(time.getMinute() - 60);
+				time.setHour(time.getMinute() + 1);
+			}
+			if (time.getHour() > 24) {
+				time.setMinute(time.getMinute() - 24);
+				time.setDay(time.getDay() + 1);
+			}
+
+			System.out.println(user.getName() + " quit " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond());
 		}
 
 		public Date getDate() {
@@ -84,6 +113,7 @@ public class CallTimeManager {
 			try {
 				date = simpleDateFormat.parse(time.getYear() + "/" + time.getMonth() + "/" + time.getDay() + " " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond());
 			} catch (ParseException e) {
+				e.printStackTrace();
 			}
 			return date;
 		}

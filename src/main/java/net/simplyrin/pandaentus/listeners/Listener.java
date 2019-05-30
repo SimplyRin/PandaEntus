@@ -163,7 +163,6 @@ public class Listener extends ListenerAdapter {
 
 				EmbedBuilder embedBuilder = new EmbedBuilder();
 				embedBuilder.setColor(Color.GREEN);
-
 				if (this.instance.getConfig().getBoolean("Message-Type.Enable-Simple-Mode")) {
 					/* try {
 						embedBuilder.addField("通話時間", this.instance.getGuildCallManager(guildChannel.getId()).getCurrentTime(), true);
@@ -173,8 +172,7 @@ public class Listener extends ListenerAdapter {
 					embedBuilder.setDescription("ユーザーごとの通話時間:");
 
 					for (CallTime callTime : this.map.get(event.getGuild().getId()).getMap().values()) {
-						Member mem = event.getGuild().getMember(callTime.getUser());
-						embedBuilder.addField(this.getNickname(mem), this.instance.getLTime(callTime.getDate()), true);
+						embedBuilder.addField(this.getNickname(member), callTime.getTime().toString(), true);
 					}
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
@@ -189,6 +187,8 @@ public class Listener extends ListenerAdapter {
 						embedBuilder.addField("最終ユーザー", member.getUser().getName(), true);
 					} */
 				}
+
+				this.map.put(event.getGuild().getId(), null);
 
 				if (this.instance.getConfig().getBoolean("Disable")) {
 					return;
