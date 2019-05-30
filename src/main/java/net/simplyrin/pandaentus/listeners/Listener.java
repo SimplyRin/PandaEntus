@@ -2,6 +2,7 @@ package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -16,6 +17,8 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.utils.CallTimeManager;
+import net.simplyrin.pandaentus.utils.CallTimeManager.CallTime;
 
 /**
  * Created by SimplyRin on 2019/03/13.
@@ -43,6 +46,8 @@ import net.simplyrin.pandaentus.Main;
 public class Listener extends ListenerAdapter {
 
 	private Main instance;
+	private HashMap<String, CallTimeManager> map = new HashMap<>();
+
 
 	public Listener(Main instance) {
 		this.instance = instance;
@@ -52,6 +57,12 @@ public class Listener extends ListenerAdapter {
 	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).joined();
 		this.check(event.getMember(), event.getGuild());
+
+		if (this.map.get(event.getGuild().getId()) == null) {
+			this.map.put(event.getGuild().getId(), new CallTimeManager(this.instance, event.getGuild().getId()));
+		}
+
+		this.map.get(event.getGuild().getId()).join(event.getMember().getUser());
 	}
 
 	@Override
@@ -102,6 +113,8 @@ public class Listener extends ListenerAdapter {
 	@Override
 	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).quit();
+
+		this.map.get(event.getGuild().getId()).quit(event.getMember().getUser());
 
 		Guild guild = event.getGuild();
 
@@ -156,7 +169,13 @@ public class Listener extends ListenerAdapter {
 						embedBuilder.addField("通話時間", this.instance.getGuildCallManager(guildChannel.getId()).getCurrentTime(), true);
 					} catch (Exception e) {
 					} */
-					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
+					embedBuilder.setAuthor("通話時間: " + this.instance.getUptime(time));
+					embedBuilder.setDescription("ユーザーごとの通話時間:");
+
+					for (CallTime callTime : this.map.get(event.getGuild().getId()).getMap().values()) {
+						Member mem = event.getGuild().getMember(callTime.getUser());
+						embedBuilder.addField(this.getNickname(mem), this.instance.getLTime(callTime.getDate()), true);
+					}
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
 					embedBuilder.addField("開始時刻", this.instance.getNowTime(time), true);
@@ -198,6 +217,13 @@ public class Listener extends ListenerAdapter {
 
 			category.createVoiceChannel("General-1").complete().getManager().setUserLimit(99).complete();
 		}
+	}
+
+	public String getNickname(Member member) {
+		if (member.getNickname() != null) {
+			return member.getNickname();
+		}
+		return member.getUser().getName();
 	}
 
 }
