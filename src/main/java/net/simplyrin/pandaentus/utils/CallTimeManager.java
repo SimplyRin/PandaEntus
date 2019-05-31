@@ -91,11 +91,11 @@ public class CallTimeManager {
 			time.setMinute(time.getMinute() + t1.getMinute());
 			time.setSecond(time.getSecond() + t1.getSecond());
 
-			if (time.getSecond() > 60) {
+			if (time.getSecond() >= 60) {
 				time.setSecond(time.getSecond() - 60);
 				time.setMinute(time.getMinute() + 1);
 			}
-			if (time.getMinute() > 60) {
+			if (time.getMinute() >= 60) {
 				time.setMinute(time.getMinute() - 60);
 				time.setHour(time.getMinute() + 1);
 			}

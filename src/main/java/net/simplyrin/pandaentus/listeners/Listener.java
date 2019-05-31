@@ -172,7 +172,7 @@ public class Listener extends ListenerAdapter {
 					embedBuilder.setDescription("ユーザーごとの通話時間:");
 
 					for (CallTime callTime : this.map.get(event.getGuild().getId()).getMap().values()) {
-						embedBuilder.addField(this.getNickname(member), callTime.getTime().toString(), true);
+						embedBuilder.addField(this.getNickname(guild.getMember(callTime.getUser())), callTime.getTime().toString(), true);
 					}
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
