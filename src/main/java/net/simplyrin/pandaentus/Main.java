@@ -11,8 +11,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.joor.Reflect;
-
 import com.besaba.revonline.pastebinapi.Pastebin;
 import com.besaba.revonline.pastebinapi.impl.factory.PastebinFactory;
 import com.besaba.revonline.pastebinapi.paste.PasteBuilder;
@@ -32,6 +30,7 @@ import net.simplyrin.pandaentus.listeners.MessageListener;
 import net.simplyrin.pandaentus.utils.CallTimeManager;
 import net.simplyrin.pandaentus.utils.GuildCallManager;
 import net.simplyrin.pandaentus.utils.TimeManager;
+import net.simplyrin.pandaentus.utils.Version;
 import net.simplyrin.rinstream.RinStream;
 
 /**
@@ -56,14 +55,8 @@ public class Main {
 	public void run() {
 		new RinStream();
 
-		String timestamp = Reflect.on("net.simplyrin.pandaentus.utils.Version").field("BUILD_TIME").get();
-		timestamp = timestamp.replace("T", " ");
-		timestamp = timestamp.replace("Z", "");
-
-		String buildTime = timestamp;
-
 		System.out.println("Loading files...");
-		System.out.println("Build-Version: " + buildTime);
+		System.out.println("Build-Version: " + Version.BUILD_TIME);
 
 		File file = new File("config.yml");
 		if (!file.exists()) {

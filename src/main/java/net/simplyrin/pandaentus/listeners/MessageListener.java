@@ -222,7 +222,7 @@ public class MessageListener extends ListenerAdapter {
 
 			if (args[0].equalsIgnoreCase("!version")) {
 				embedBuilder.setColor(Color.GREEN);
-				embedBuilder.addField("Currently running PandaEntus version (build date)", Version.BUILD_TIME + " (Asia/Toyo)", true);
+				embedBuilder.addField("Currently running PandaEntus version (build date)", Version.BUILD_TIME, false);
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;

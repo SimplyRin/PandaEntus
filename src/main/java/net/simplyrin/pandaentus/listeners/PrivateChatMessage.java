@@ -92,7 +92,7 @@ public class PrivateChatMessage {
 
 			if (args[0].equalsIgnoreCase("!version")) {
 				embedBuilder.setColor(Color.GREEN);
-				embedBuilder.setDescription("Currently running PandaEntus version (build date): " + Version.BUILD_TIME + " (Asia/Tokyo)");
+				embedBuilder.addField("Currently running PandaEntus version (build date)", Version.BUILD_TIME, false);
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;

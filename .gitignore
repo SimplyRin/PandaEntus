@@ -24,3 +24,4 @@ gradle
 libs
 target
 config.yml
+src/main/java/net/simplyrin/pandaentus/utils/Version.java
