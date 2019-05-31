@@ -21,6 +21,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.utils.TimeManager;
+import net.simplyrin.pandaentus.utils.Version;
 
 /**
  * Created by SimplyRin on 2019/04/04.
@@ -215,6 +216,14 @@ public class MessageListener extends ListenerAdapter {
 
 				embedBuilder.setColor(Color.RED);
 				embedBuilder.setDescription("使用方法: " + args[0] + " <テキスト>");
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!version")) {
+				embedBuilder.setColor(Color.GREEN);
+				embedBuilder.addField("Currently running PandaEntus version (build date)", Version.BUILD_TIME + " (Asia/Toyo)", true);
+
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
 			}

@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.joor.Reflect;
+
 import com.besaba.revonline.pastebinapi.Pastebin;
 import com.besaba.revonline.pastebinapi.impl.factory.PastebinFactory;
 import com.besaba.revonline.pastebinapi.paste.PasteBuilder;
@@ -54,7 +56,14 @@ public class Main {
 	public void run() {
 		new RinStream();
 
+		String timestamp = Reflect.on("net.simplyrin.pandaentus.utils.Version").field("BUILD_TIME").get();
+		timestamp = timestamp.replace("T", " ");
+		timestamp = timestamp.replace("Z", "");
+
+		String buildTime = timestamp;
+
 		System.out.println("Loading files...");
+		System.out.println("Build-Version: " + buildTime);
 
 		File file = new File("config.yml");
 		if (!file.exists()) {
@@ -93,6 +102,8 @@ public class Main {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		// this.jda.getPresence().setActivity(Activity.playing("Build " + buildTime));
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override

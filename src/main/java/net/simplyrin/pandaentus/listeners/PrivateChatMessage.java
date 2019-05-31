@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.utils.Version;
 
 /**
  * Created by SimplyRin on 2019/04/05.
@@ -61,6 +62,7 @@ public class PrivateChatMessage {
 				embedBuilder.addField("!help", "`Show this help message`", false);
 				embedBuilder.addField("!toggle", "`Toggle this bot`", false);
 				embedBuilder.addField("!simplemode", "`Display only talk time when call ends`", false);
+				embedBuilder.addField("!version", "`Display currently running PandaEntus version`", false);
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
@@ -83,6 +85,14 @@ public class PrivateChatMessage {
 
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.setDescription("Simple mode: `" + (!bool ? "Enabled" : "Disabled") + "`");
+
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!version")) {
+				embedBuilder.setColor(Color.GREEN);
+				embedBuilder.setDescription("Currently running PandaEntus version (build date): " + Version.BUILD_TIME + " (Asia/Tokyo)");
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;

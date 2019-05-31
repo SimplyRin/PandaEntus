@@ -14,10 +14,85 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+    <version.template.file>src/main/template/Version.java</version.template.file>
+    <version.file>src/main/java/net/simplyrin/pandaentus/utils/Version.java</version.file>
   </properties>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>timestamp-property</id>
+            <goals>
+              <goal>timestamp-property</goal>
+            </goals>
+            <configuration>
+              <name>build.time</name>
+              <pattern>yyyy-MM-dd HH:mm:ss</pattern>
+              <locale>ja_JP</locale>
+              <timeZone>Asia/Tokyo</timeZone>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Build-Timestamp>${build.time}</Build-Timestamp>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.20.1</version>
+        <configuration>
+          <systemPropertyVariables>
+            <user.timezone>Asia/Tokyo</user.timezone>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+          <artifactId>maven-replacer-plugin</artifactId>
+          <version>1.4.1</version>
+          <executions>
+            <execution>
+              <phase>process-sources</phase>
+                <goals>
+                  <goal>replace</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <file>${version.template.file}</file>
+              <outputFile>${version.file}</outputFile>
+              <replacements>
+                <replacement>
+                  <token>@buildnumber@</token>
+                  <value>${svn.revision}</value>
+                    </replacement>
+                    <replacement>
+                  <token>@buildtime@</token>
+                  <value>${build.time}</value>
+                    </replacement>
+                    <replacement>
+                  <token>@pomversion@</token>
+                  <value>${project.version}</value>
+                    </replacement>
+                </replacements>
+            </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>3.1.0</version>
@@ -92,6 +167,11 @@
       <groupId>com.github.marcoacierno</groupId>
       <artifactId>pastebin-java-api</artifactId>
       <version>0.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.maven-replacer-plugin</groupId>
+      <artifactId>replacer</artifactId>
+      <version>1.5.3</version>
     </dependency>
   </dependencies>
 </project>
