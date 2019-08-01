@@ -105,6 +105,8 @@ public class CallTimeManager {
 			}
 
 			System.out.println(user.getName() + " quit " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond());
+
+			this.tempJoinedTime = null;
 		}
 
 		public Date getDate() {

@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -220,12 +221,52 @@ public class MessageListener extends ListenerAdapter {
 				return;
 			}
 
+			if (args[0].equalsIgnoreCase("!profile")) {
+				embedBuilder.setColor(Color.ORANGE);
+
+				Member member = event.getMember();
+				if (args.length > 1) {
+					try {
+						member = guild.getMemberById(args[1]);
+					} catch (Exception e) {
+					}
+				}
+
+				Date date = new Date(member.getUser().getTimeCreated().toInstant().toEpochMilli());
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+				embedBuilder.addField("アカウント名", this.getNickname(member), false);
+				embedBuilder.addField("アカウント作成日", simpleDateFormat.format(date), false);
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!server")) {
+				embedBuilder.setColor(Color.ORANGE);
+
+				Date date = new Date(guild.getTimeCreated().toInstant().toEpochMilli());
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+				embedBuilder.addField("サーバー作成日", simpleDateFormat.format(date), true);
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
 			if (args[0].equalsIgnoreCase("!version")) {
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.addField("Currently running PandaEntus version (build date)", Version.BUILD_TIME, false);
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!ojichat")) {
+				String arg;
+				if (args.length > 1) {
+					arg = "";
+					for (int i = 1; i < args.length; i++) {
+						arg = arg + args[i] + " ";
+					}
+				}
+
 			}
 		}
 	}

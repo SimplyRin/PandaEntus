@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -58,11 +59,14 @@ public class Listener extends ListenerAdapter {
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).joined();
 		this.check(event.getMember(), event.getGuild());
 
-		if (this.map.get(event.getGuild().getId()) == null) {
-			this.map.put(event.getGuild().getId(), new CallTimeManager(this.instance, event.getGuild().getId()));
+		Guild guild = event.getGuild();
+		Member member = event.getMember();
+
+		if (this.map.get(guild.getId()) == null) {
+			this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
 		}
 
-		this.map.get(event.getGuild().getId()).join(event.getMember().getUser());
+		this.map.get(guild.getId()).join(member.getUser());
 	}
 
 	@Override
@@ -171,8 +175,10 @@ public class Listener extends ListenerAdapter {
 					embedBuilder.setAuthor("通話時間: " + this.instance.getUptime(time));
 					embedBuilder.setDescription("ユーザーごとの通話時間:");
 
-					for (CallTime callTime : this.map.get(event.getGuild().getId()).getMap().values()) {
+					Collection<CallTime> callTimes = this.map.get(event.getGuild().getId()).getMap().values();
+					for (CallTime callTime : callTimes) {
 						embedBuilder.addField(this.getNickname(guild.getMember(callTime.getUser())), callTime.getTime().toString(), true);
+						this.map.get(event.getGuild().getId()).getMap().remove(callTime.getUser());
 					}
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
@@ -212,6 +218,7 @@ public class Listener extends ListenerAdapter {
 				try {
 					voiceChannel.delete().complete();
 				} catch (Exception e) {
+					this.instance.postError(e);
 				}
 			}
 
