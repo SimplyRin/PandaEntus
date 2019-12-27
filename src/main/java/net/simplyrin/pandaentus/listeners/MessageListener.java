@@ -4,21 +4,25 @@ import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import com.google.gson.JsonObject;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.md_5.bungee.config.Configuration;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -55,9 +59,14 @@ public class MessageListener extends ListenerAdapter {
 		this.instance = instance;
 	}
 
+	private PrivateChatMessage privateChatMessage;
+
 	@Override
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
-		new PrivateChatMessage(this.instance).onPrivateMessageReceived(event);
+		if (this.privateChatMessage == null) {
+			this.privateChatMessage = new PrivateChatMessage(this.instance);
+		}
+		this.privateChatMessage.onPrivateMessageReceived(event);
 	}
 
 	@Override
@@ -116,7 +125,39 @@ public class MessageListener extends ListenerAdapter {
 						embedBuilder.setColor(Color.GREEN);
 						embedBuilder.setDescription("Created!");
 						channel.sendMessage(embedBuilder.build()).complete();
+						return;
 					}
+				}
+
+				if (args[0].equalsIgnoreCase("!setgame")) {
+					if (args.length > 1) {
+						String game = "";
+						for (int i = 1; i < args.length; i++) {
+							game = game + args[i] + " ";
+						}
+						game = game.trim();
+
+						if (game.equalsIgnoreCase("reset")) {
+							this.instance.getJda().getPresence().setActivity(null);
+
+							embedBuilder.setColor(Color.RED);
+							embedBuilder.setDescription("Reset");
+							channel.sendMessage(embedBuilder.build()).complete();
+							return;
+						}
+
+						this.instance.getJda().getPresence().setActivity(Activity.playing(game));
+
+						embedBuilder.setColor(Color.GREEN);
+						embedBuilder.setDescription("Playing game has been set to '" + game + "'!");
+						channel.sendMessage(embedBuilder.build()).complete();
+						return;
+					}
+
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setDescription("Usage: !setgame <game>");
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
 				}
 			}
 
@@ -181,6 +222,52 @@ public class MessageListener extends ListenerAdapter {
 
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.addField("グループ合計通話時間", this.instance.getUptime(time), false);
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!pool")) {
+				if (args.length > 1) {
+					if (user.getId().equals("224428706209202177") && args.length > 3 && args[1].equalsIgnoreCase("set")) {
+						String key = args[2];
+						String game = "";
+						for (int i = 3; i < args.length; i++) {
+							game += args[i] + " ";
+						}
+						game = game.trim();
+
+						this.instance.getPoolItems().setItem(key, game);
+
+						embedBuilder.setColor(Color.GREEN);
+						embedBuilder.setDescription("`" + key + "` を `" + game + "` として覚えました。");
+						channel.sendMessage(embedBuilder.build()).complete();
+						return;
+					}
+
+					int size = 0;
+					for (int i = 1; i < args.length; i++) {
+						if (i > 6) {
+							break;
+						}
+						size = i;
+						embedBuilder.addField(String.valueOf(i), this.instance.getPoolItems().getItem(args[i]), true);
+					}
+
+					embedBuilder.setColor(Color.GREEN);
+					embedBuilder.setDescription("投票が開始されました。");
+					Message message = channel.sendMessage(embedBuilder.build()).complete();
+
+					for (int integer = 1; integer <= size; integer++) {
+						String value = this.instance.getPoolItems().getReaction(integer);
+
+						System.out.println("Add: " + value);
+						message.addReaction(value).complete();
+					}
+					return;
+				}
+
+				embedBuilder.setColor(Color.RED);
+				embedBuilder.setDescription("使用方法: " + args[0] + " <1> <2> <3>... (max 6)");
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
 			}
@@ -252,7 +339,38 @@ public class MessageListener extends ListenerAdapter {
 
 			if (args[0].equalsIgnoreCase("!version")) {
 				embedBuilder.setColor(Color.GREEN);
-				embedBuilder.addField("Currently running PandaEntus version (build date)", Version.BUILD_TIME, false);
+				embedBuilder.addField("Version:", Version.BUILD_TIME, true);
+
+				String uptime = "unknown";
+
+				Runtime runtime = Runtime.getRuntime();
+				Process process = null;
+				try {
+					process = runtime.exec(new String[] {"uptime", "-p"});
+				} catch (Exception e) {
+					this.instance.postError(e);
+					return;
+				}
+				Scanner scanner = new Scanner(process.getInputStream());
+				if (scanner.hasNext()) {
+					uptime = scanner.nextLine();
+
+					uptime = uptime.replace("up ", "");
+					uptime = uptime.replace(",", "");
+					uptime = uptime.replace(" years", "年");
+					uptime = uptime.replace(" year", "年");
+
+					uptime = uptime.replace(" weeks", "週間");
+					uptime = uptime.replace(" week", "週間");
+					uptime = uptime.replace(" days", "日");
+					uptime = uptime.replace(" day", "日");
+					uptime = uptime.replace(" hours", "時間");
+					uptime = uptime.replace(" hour", "時間");
+					uptime = uptime.replace(" minutes", "分");
+					uptime = uptime.replace(" minute", "分");
+				}
+				scanner.close();
+				embedBuilder.addField("Server uptime", uptime, true);
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
@@ -302,6 +420,29 @@ public class MessageListener extends ListenerAdapter {
 				} else {
 					channel.sendMessage(embedBuilder.build()).complete();
 				}
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("<@!335322868755857409>")) {
+				channel.sendMessage("<@335322868755857409>").complete();
+				channel.sendMessage("<@335322868755857409>").complete();
+				channel.sendMessage("<@335322868755857409>").complete();
+				channel.sendMessage("<@335322868755857409>").complete();
+				channel.sendMessage("<@335322868755857409>").complete();
+			}
+
+			if (args[0].equalsIgnoreCase("!vanish")) {
+				Configuration config = this.instance.getConfig();
+
+				boolean bool = config.getBoolean("User." + user.getId() + "." + guild.getId() + ".Vanish");
+				bool = !bool;
+
+				this.instance.getConfig().set("User." + user.getId() + ".Vanish", bool);
+
+				embedBuilder.setColor(Color.GRAY);
+				embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
+
+				channel.sendMessage(embedBuilder.build()).complete();
 				return;
 			}
 		}

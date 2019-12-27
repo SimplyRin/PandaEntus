@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -175,10 +176,16 @@ public class Listener extends ListenerAdapter {
 					embedBuilder.setAuthor("通話時間: " + this.instance.getUptime(time));
 					embedBuilder.setDescription("ユーザーごとの通話時間:");
 
+					List<CallTime> list = new ArrayList<>();
+
 					Collection<CallTime> callTimes = this.map.get(event.getGuild().getId()).getMap().values();
 					for (CallTime callTime : callTimes) {
+						// vanish
+						if (this.instance.getConfig().getBoolean("User." + callTime.getUser().getId() + ".Vanish")) {
+							continue;
+						}
 						embedBuilder.addField(this.getNickname(guild.getMember(callTime.getUser())), callTime.getTime().toString(), true);
-						this.map.get(event.getGuild().getId()).getMap().remove(callTime.getUser());
+						list.add(callTime);
 					}
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
@@ -194,7 +201,7 @@ public class Listener extends ListenerAdapter {
 					} */
 				}
 
-				this.map.put(event.getGuild().getId(), null);
+				this.map.get(event.getGuild().getId()).getMap().clear();
 
 				if (this.instance.getConfig().getBoolean("Disable")) {
 					return;

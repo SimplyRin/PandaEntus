@@ -26,7 +26,7 @@ package net.simplyrin.pandaentus.utils;
 public class Version {
 
 	public static final String BUILD_NUMBER = "";
-    public static final String BUILD_TIME  ="2019-07-31 23:47:27";
+    public static final String BUILD_TIME  ="2019-12-27 13:26:35";
     public static final String POMVERSION = "1.1";
 
 }

@@ -29,6 +29,7 @@ import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.MessageListener;
 import net.simplyrin.pandaentus.utils.CallTimeManager;
 import net.simplyrin.pandaentus.utils.GuildCallManager;
+import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.pandaentus.utils.Version;
 import net.simplyrin.rinstream.RinStream;
@@ -36,20 +37,19 @@ import net.simplyrin.rinstream.RinStream;
 /**
  * Created by SimplyRin on 2019/03/09.
  */
+@Getter
 public class Main {
 
 	public static void main(String[] args) {
 		new Main().run();
 	}
 
-	@Getter
 	private Configuration config;
-	@Getter
 	private TimeManager timeManager;
-	@Getter
 	private CallTimeManager callTimeManager;
 
-	@Getter
+	private PoolItems poolItems;
+
 	private JDA jda;
 
 	public void run() {
@@ -77,6 +77,8 @@ public class Main {
 		this.config = Config.getConfig(file);
 		this.timeManager = new TimeManager(this);
 
+		this.poolItems = new PoolItems(this);
+
 		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
 
 		String token = this.config.getString("Token");
@@ -97,12 +99,14 @@ public class Main {
 		}
 
 		// this.jda.getPresence().setActivity(Activity.playing("Build " + buildTime));
+		// this.jda.getPresence().setActivity(Activity.playing("Source: github.com/SimplyRin/PandaEntus"));
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
 				jda.shutdown();
 				Config.saveConfig(Main.this.config, "config.yml");
+				poolItems.save();
 				System.out.println("Config ファイルを保存しました。");
 			}
 		});
