@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
+import com.github.ucchyocean.lc.japanize.IMEConverter;
+import com.github.ucchyocean.lc.japanize.YukiKanaConverter;
 import com.google.gson.JsonObject;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -31,25 +33,20 @@ import net.simplyrin.pandaentus.utils.Version;
 /**
  * Created by SimplyRin on 2019/04/04.
  *
- * Copyright (c) 2019 SimplyRin
+ * Copyright (C) 2019 SimplyRin
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 public class MessageListener extends ListenerAdapter {
 
@@ -80,9 +77,34 @@ public class MessageListener extends ListenerAdapter {
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 		MessageChannel channel = event.getChannel();
 
-		String[] args = event.getMessage().getContentRaw().split(" ");
+		String raw = event.getMessage().getContentRaw();
+		String[] args = raw.split(" ");
 
 		EmbedBuilder embedBuilder = new EmbedBuilder();
+
+		if (channel.getName().equalsIgnoreCase("translate")) {
+			if (user.isBot()) {
+				return;
+			}
+
+			channel.sendMessage(IMEConverter.convByGoogleIME(YukiKanaConverter.conv(raw))).complete();
+			return;
+		}
+
+		/* if (channel.getName().equalsIgnoreCase("english-to-japanese")) {
+			if (user.isBot()) {
+				return;
+			}
+
+			String result = HttpClient.fetch("https://script.google.com/macros/s/AKfycbzhliArfSms9uqI76PZS2dblAJV588-W19oBGO9g_-gCiznO3yI/exec?text=" + raw + "&target=ja");
+			System.out.println(result);
+			if (result.length() >= 1500) {
+				return;
+			}
+
+			channel.sendMessage(result).complete();
+			return;
+		} */
 
 		if (args.length > 0) {
 			// Admin
@@ -423,21 +445,15 @@ public class MessageListener extends ListenerAdapter {
 				return;
 			}
 
-			if (args[0].equalsIgnoreCase("<@!335322868755857409>")) {
-				channel.sendMessage("<@335322868755857409>").complete();
-				channel.sendMessage("<@335322868755857409>").complete();
-				channel.sendMessage("<@335322868755857409>").complete();
-				channel.sendMessage("<@335322868755857409>").complete();
-				channel.sendMessage("<@335322868755857409>").complete();
-			}
-
 			if (args[0].equalsIgnoreCase("!vanish")) {
 				Configuration config = this.instance.getConfig();
 
-				boolean bool = config.getBoolean("User." + user.getId() + "." + guild.getId() + ".Vanish");
+				String path = "User." + user.getId() + "." + guild.getId() + ".Vanish";
+
+				boolean bool = config.getBoolean(path);
 				bool = !bool;
 
-				this.instance.getConfig().set("User." + user.getId() + ".Vanish", bool);
+				this.instance.getConfig().set(path, bool);
 
 				embedBuilder.setColor(Color.GRAY);
 				embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
