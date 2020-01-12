@@ -51,17 +51,30 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
+		Guild guild = event.getGuild();
+		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
+		Category parentCategory = event.getChannelJoined().getParent();
+
+		Member member = event.getMember();
+
+		System.out.println("[" + guild.getName() + "@" + guild.getId() + "] #" + event.getChannelJoined().getName() + " JOINED: " + this.getNickname(member) + "@" + member.getId());
+
+		if (parentCategory == null) {
+			return;
+		}
+		if (!category.getName().equals(parentCategory.getName())) {
+			return;
+		}
+
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).joined();
 		this.check(event.getMember(), event.getGuild());
-
-		Guild guild = event.getGuild();
-		Member member = event.getMember();
 
 		if (this.map.get(guild.getId()) == null) {
 			this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
 		}
 
 		this.map.get(guild.getId()).join(member.getUser());
+		System.out.println("Joined " + event.getChannelJoined().getName());
 	}
 
 	@Override
@@ -111,13 +124,25 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
+		Guild guild = event.getGuild();
+		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
+		Category parentCategory = event.getChannelLeft().getParent();
+
+		Member member = event.getMember();
+
+		System.out.println("[" + guild.getName() + "@" + guild.getId() + "] #" + event.getChannelLeft().getName() + " LEAVE: " + this.getNickname(member) + "@" + member.getId());
+
+		if (parentCategory == null) {
+			return;
+		}
+		if (!category.getName().equals(parentCategory.getName())) {
+			return;
+		}
+
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).quit();
 
 		this.map.get(event.getGuild().getId()).quit(event.getMember().getUser());
 
-		Guild guild = event.getGuild();
-
-		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
 		if (voiceChannels.size() == 1) {
@@ -150,9 +175,6 @@ public class Listener extends ListenerAdapter {
 			}
 		}
 
-		System.out.println("voiceChannels.size() = " + voiceChannels.size());
-		System.out.println("count = " + count);
-
 		if (voiceChannels.size() == count) {
 			try {
 				GuildChannel guildChannel = (GuildChannel) category.getChannels().get(1);
@@ -160,8 +182,6 @@ public class Listener extends ListenerAdapter {
 
 				Category textChannels = (Category) guild.getCategoriesByName("Text Channels", true).get(0);
 				TextChannel textChannel = (TextChannel) textChannels.getChannels().get(0);
-
-				Member member = event.getMember();
 
 				EmbedBuilder embedBuilder = new EmbedBuilder();
 				embedBuilder.setColor(Color.GREEN);
