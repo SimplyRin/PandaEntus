@@ -181,6 +181,25 @@ public class MessageListener extends ListenerAdapter {
 					channel.sendMessage(embedBuilder.build()).complete();
 					return;
 				}
+
+				if (args[0].equalsIgnoreCase("!sendchat")) {
+					if (args.length > 3) {
+						Guild g = this.instance.getJda().getGuildById(args[1]);
+						MessageChannel mc = g.getTextChannelById(args[2]);
+
+						String name = "";
+						for (int i = 3; i < args.length; i++) {
+							name = name + args[i] + " ";
+						}
+						mc.sendMessage(name.trim()).complete();
+						return;
+					}
+
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setDescription("Usage: !sendchat <guild> <channel> <message>");
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
+				}
 			}
 
 			// General
@@ -396,6 +415,24 @@ public class MessageListener extends ListenerAdapter {
 
 				channel.sendMessage(embedBuilder.build()).complete();
 				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!jp")) {
+				if (args.length > 1) {
+					String text = "";
+					for (int i = 1; i < args.length; i++) {
+						text = text + args[i] + " ";
+					}
+
+					embedBuilder.setColor(Color.GREEN);
+					embedBuilder.setDescription(IMEConverter.convByGoogleIME(YukiKanaConverter.conv(text)));
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
+				}
+
+				embedBuilder.setColor(Color.RED);
+				embedBuilder.setDescription("Usage: !jp <text>");
+				channel.sendMessage(embedBuilder.build()).complete();
 			}
 
 			if (args[0].equalsIgnoreCase("!ojichat")) {

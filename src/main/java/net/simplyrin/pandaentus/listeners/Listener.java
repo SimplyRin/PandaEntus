@@ -197,9 +197,11 @@ public class Listener extends ListenerAdapter {
 							continue;
 						}
 
-						embedBuilder.setDescription("ユーザーごとの通話時間:");
-
-						embedBuilder.addField(this.getNickname(guild.getMember(callTime.getUser())), callTime.getTime().toString(), true);
+						try {
+							embedBuilder.addField(this.getNickname(guild.getMember(callTime.getUser())), callTime.getTime().toString(), true);
+							embedBuilder.setDescription("ユーザーごとの通話時間:");
+						} catch (Exception e) {
+						}
 						list.add(callTime);
 
 						callTime.resetTime();
