@@ -94,6 +94,8 @@ public class Main {
 
 		this.poolItems = new PoolItems(this);
 
+		this.callTimeManager = new CallTimeManager(this, null);
+
 		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
 
 		String token = this.config.getString("Token");

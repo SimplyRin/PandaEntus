@@ -59,11 +59,10 @@ public class Listener extends ListenerAdapter {
 
 		System.out.println("[" + guild.getName() + "@" + guild.getId() + "] #" + event.getChannelJoined().getName() + " JOINED: " + this.getNickname(member) + "@" + member.getId());
 
-		if (parentCategory == null) {
-			return;
-		}
-		if (!category.getName().equals(parentCategory.getName())) {
-			return;
+		if (parentCategory != null) {
+			if (!category.getName().equals(parentCategory.getName())) {
+				return;
+			}
 		}
 
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).joined();
@@ -73,12 +72,41 @@ public class Listener extends ListenerAdapter {
 			this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
 		}
 
-		this.map.get(guild.getId()).join(member.getUser());
+		this.map.get(guild.getId()).join(member.getIdLong());
 		System.out.println("Joined " + event.getChannelJoined().getName());
 	}
 
 	@Override
 	public void onGuildVoiceMove(GuildVoiceMoveEvent event) {
+		Member member = event.getMember();
+		Guild guild = event.getGuild();
+
+		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
+		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
+
+		boolean hasMember = false;
+		for (VoiceChannel voiceChannel : voiceChannels) {
+			for (Member vcMember : voiceChannel.getMembers()) {
+				if (vcMember.getId().equalsIgnoreCase(member.getId())) {
+					hasMember = true;
+				}
+			}
+		}
+
+		if (hasMember) {
+			System.out.println("Join with Channel Moving " + this.getNickname(member));
+
+			if (this.map.get(guild.getId()) == null) {
+				this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
+			}
+
+			this.map.get(guild.getId()).join(member.getIdLong());
+		} else {
+			System.out.println("Quit with Channel Moving " + this.getNickname(member));
+
+			this.quitMember(guild, category, null, member, event.getChannelLeft(), false);
+		}
+
 		this.check(event.getMember(), event.getGuild());
 	}
 
@@ -130,18 +158,26 @@ public class Listener extends ListenerAdapter {
 
 		Member member = event.getMember();
 
-		System.out.println("[" + guild.getName() + "@" + guild.getId() + "] #" + event.getChannelLeft().getName() + " LEAVE: " + this.getNickname(member) + "@" + member.getId());
+		this.quitMember(guild, category, parentCategory, member, event.getChannelLeft(), true);
+	}
 
-		if (parentCategory == null) {
-			return;
+	public void quitMember(Guild guild, Category category, Category parentCategory, Member member, VoiceChannel channelLeft, boolean leaveEvent) {
+		System.out.println("[" + guild.getName() + "@" + guild.getId() + "] #" + channelLeft.getName() + " LEAVE: " + this.getNickname(member) + "@" + member.getId());
+
+		if (leaveEvent) {
+			if (parentCategory == null) {
+				return;
+			}
+			if (!category.getName().equals(parentCategory.getName())) {
+				return;
+			}
 		}
-		if (!category.getName().equals(parentCategory.getName())) {
-			return;
+
+		this.instance.getTimeManager().getUser(member.getUser().getId()).quit();
+
+		if (this.map.get(guild.getId()) != null) {
+			this.map.get(guild.getId()).quit(member.getIdLong());
 		}
-
-		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).quit();
-
-		this.map.get(event.getGuild().getId()).quit(event.getMember().getUser());
 
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
@@ -190,15 +226,15 @@ public class Listener extends ListenerAdapter {
 
 					List<CallTime> list = new ArrayList<>();
 
-					Collection<CallTime> callTimes = this.map.get(event.getGuild().getId()).getMap().values();
+					Collection<CallTime> callTimes = this.map.get(guild.getId()).getMap().values();
 					for (CallTime callTime : callTimes) {
-						String path = "User." + callTime.getUser().getId() + "." + guild.getId() + ".Vanish";
+						String path = "User." + callTime.getUser() + "." + guild.getId() + ".Vanish";
 						if (this.instance.getConfig().getBoolean(path)) {
 							continue;
 						}
 
 						try {
-							embedBuilder.addField(this.getNickname(guild.getMember(callTime.getUser())), callTime.getTime().toString(), true);
+							embedBuilder.addField(this.getNickname(guild.getMemberById(callTime.getUser())), callTime.getTime().toString(), true);
 							embedBuilder.setDescription("ユーザーごとの通話時間:");
 						} catch (Exception e) {
 						}
@@ -212,7 +248,7 @@ public class Listener extends ListenerAdapter {
 					embedBuilder.addField("終了時刻", this.instance.getNowTime(), true);
 				}
 
-				this.map.get(event.getGuild().getId()).getMap().clear();
+				this.map.get(guild.getId()).getMap().clear();
 
 				if (this.instance.getConfig().getBoolean("Disable")) {
 					return;

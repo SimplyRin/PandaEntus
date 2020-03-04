@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 
 import lombok.Getter;
-import net.dv8tion.jda.api.entities.User;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.Main.Time;
 
@@ -34,22 +33,31 @@ public class CallTimeManager {
 	private String guildId;
 
 	@Getter
-	private HashMap<User, CallTime> map = new HashMap<>();
+	private HashMap<Long, CallTime> map = new HashMap<>();
 
 	public CallTimeManager(Main instance, String guildId) {
 		this.instance = instance;
 		this.guildId = guildId;
 	}
 
-	public void join(User user) {
+	private boolean alreadyJoin;
+
+	public void join(long user) {
 		if (this.map.get(user) == null) {
 			this.map.put(user, new CallTime(user));
 		}
 
+		if (this.alreadyJoin) {
+			return;
+		}
+		this.alreadyJoin = true;
+
 		this.map.get(user).join();
 	}
 
-	public void quit(User user) {
+	public void quit(long user) {
+		this.alreadyJoin = false;
+
 		if (this.map.get(user) != null) {
 			this.map.get(user).quit();
 		}
@@ -58,11 +66,11 @@ public class CallTimeManager {
 	@Getter
 	public class CallTime {
 
-		private User user;
+		private long user;
 		private Time time;
 		private Date tempJoinedTime;
 
-		public CallTime(User user) {
+		public CallTime(long user) {
 			this.user = user;
 			this.time = new Main.Time();
 		}
@@ -81,34 +89,34 @@ public class CallTimeManager {
 		public void quit() {
 			/*try {
 				Time addedTime = instance.addTime(this.time, instance.dateToTime(new Date()));
-				this.time.addTime(addedTime);
+				this.this.time.addTime(addedTime);
 			} catch (Exception e) {
 				this.time = instance.getTimeFromDate(this.tempJoinedTime);
 			}*/
 
 			Time t1 = instance.getTimeFromDate(this.tempJoinedTime);
 
-			time.setYear(time.getYear() + t1.getYear());
-			time.setMonth(time.getMonth() + t1.getMonth());
-			time.setDay(time.getDay() + t1.getDay());
-			time.setHour(time.getHour() + t1.getHour());
-			time.setMinute(time.getMinute() + t1.getMinute());
-			time.setSecond(time.getSecond() + t1.getSecond());
+			this.time.setYear(this.time.getYear() + t1.getYear());
+			this.time.setMonth(this.time.getMonth() + t1.getMonth());
+			this.time.setDay(this.time.getDay() + t1.getDay());
+			this.time.setHour(this.time.getHour() + t1.getHour());
+			this.time.setMinute(this.time.getMinute() + t1.getMinute());
+			this.time.setSecond(this.time.getSecond() + t1.getSecond());
 
-			if (time.getSecond() >= 60) {
-				time.setSecond(time.getSecond() - 60);
-				time.setMinute(time.getMinute() + 1);
+			if (this.time.getSecond() >= 60) {
+				this.time.setSecond(this.time.getSecond() - 60);
+				this.time.setMinute(this.time.getMinute() + 1);
 			}
-			if (time.getMinute() >= 60) {
-				time.setMinute(time.getMinute() - 60);
-				time.setHour(time.getMinute() + 1);
+			if (this.time.getMinute() >= 60) {
+				this.time.setMinute(this.time.getMinute() - 60);
+				this.time.setHour(this.time.getMinute() + 1);
 			}
-			if (time.getHour() > 24) {
-				time.setMinute(time.getMinute() - 24);
-				time.setDay(time.getDay() + 1);
+			if (this.time.getHour() > 24) {
+				this.time.setMinute(this.time.getMinute() - 24);
+				this.time.setDay(this.time.getDay() + 1);
 			}
 
-			System.out.println(user.getName() + " quit " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond());
+			System.out.println(user + " quit " + this.time.getHour() + ":" + this.time.getMinute() + ":" + this.time.getSecond());
 
 			this.tempJoinedTime = null;
 		}
@@ -117,7 +125,7 @@ public class CallTimeManager {
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = null;
 			try {
-				date = simpleDateFormat.parse(time.getYear() + "/" + time.getMonth() + "/" + time.getDay() + " " + time.getHour() + ":" + time.getMinute() + ":" + time.getSecond());
+				date = simpleDateFormat.parse(this.time.getYear() + "/" + this.time.getMonth() + "/" + this.time.getDay() + " " + this.time.getHour() + ":" + this.time.getMinute() + ":" + this.time.getSecond());
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
