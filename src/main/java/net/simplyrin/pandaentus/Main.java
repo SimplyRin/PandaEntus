@@ -27,7 +27,6 @@ import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.MessageListener;
-import net.simplyrin.pandaentus.utils.CallTimeManager;
 import net.simplyrin.pandaentus.utils.GuildCallManager;
 import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -61,7 +60,6 @@ public class Main {
 
 	private Configuration config;
 	private TimeManager timeManager;
-	private CallTimeManager callTimeManager;
 
 	private PoolItems poolItems;
 
@@ -93,8 +91,6 @@ public class Main {
 		this.timeManager = new TimeManager(this);
 
 		this.poolItems = new PoolItems(this);
-
-		this.callTimeManager = new CallTimeManager(this, null);
 
 		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
 
