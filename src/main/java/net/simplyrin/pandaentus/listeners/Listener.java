@@ -72,7 +72,7 @@ public class Listener extends ListenerAdapter {
 			this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
 		}
 
-		this.map.get(guild.getId()).join(member.getIdLong());
+		this.map.get(guild.getId()).join(member.getUser());
 		System.out.println("Joined " + event.getChannelJoined().getName());
 	}
 
@@ -100,7 +100,7 @@ public class Listener extends ListenerAdapter {
 				this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
 			}
 
-			this.map.get(guild.getId()).join(member.getIdLong());
+			this.map.get(guild.getId()).join(member.getUser());
 		} else {
 			System.out.println("Quit with Channel Moving " + this.getNickname(member));
 
@@ -142,8 +142,7 @@ public class Listener extends ListenerAdapter {
 
 		if (voiceChannels.size() == count) {
 			int c = (count + 1);
-			VoiceChannel voiceChannel = category.createVoiceChannel("General-" + c).complete();
-			voiceChannel.getManager().setUserLimit(99).complete();
+			VoiceChannel voiceChannel = category.createVoiceChannel("General-" + c).setUserlimit(99).complete();
 			if (c == 2) {
 				this.instance.getGuildCallManager(voiceChannel.getId()).joined(member.getId());
 			}
@@ -176,7 +175,7 @@ public class Listener extends ListenerAdapter {
 		this.instance.getTimeManager().getUser(member.getUser().getId()).quit();
 
 		if (this.map.get(guild.getId()) != null) {
-			this.map.get(guild.getId()).quit(member.getIdLong());
+			this.map.get(guild.getId()).quit(member.getUser());
 		}
 
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
@@ -234,7 +233,7 @@ public class Listener extends ListenerAdapter {
 						}
 
 						try {
-							embedBuilder.addField(this.getNickname(guild.getMemberById(callTime.getUser())), callTime.getTime().toString(), true);
+							embedBuilder.addField(this.getNickname(guild.getMember(callTime.getUser())), callTime.getTime().toString(), true);
 							embedBuilder.setDescription("ユーザーごとの通話時間:");
 						} catch (Exception e) {
 						}
@@ -276,7 +275,7 @@ public class Listener extends ListenerAdapter {
 				}
 			}
 
-			category.createVoiceChannel("General-1").complete().getManager().setUserLimit(99).complete();
+			category.createVoiceChannel("General-1").setUserlimit(99).complete();
 		}
 	}
 
