@@ -41,24 +41,15 @@ public class CallTimeManager {
 		this.guildId = guildId;
 	}
 
-	private boolean alreadyJoin;
-
 	public void join(User user) {
 		if (this.map.get(user) == null) {
 			this.map.put(user, new CallTime(user));
 		}
 
-		if (this.alreadyJoin) {
-			return;
-		}
-		this.alreadyJoin = true;
-
 		this.map.get(user).join();
 	}
 
 	public void quit(User user) {
-		this.alreadyJoin = false;
-
 		if (this.map.get(user) != null) {
 			this.map.get(user).quit();
 		}
@@ -76,15 +67,22 @@ public class CallTimeManager {
 			this.time = new Main.Time();
 		}
 
+		private boolean alreadyJoin;
+
 		public void join() {
 			if (this.time == null) {
 				this.time = new Main.Time();
 			}
+			if (this.alreadyJoin) {
+				return;
+			}
+			this.alreadyJoin = true;
 			this.tempJoinedTime = new Date();
 		}
 
 		public void resetTime() {
 			this.time = null;
+			this.alreadyJoin = false;
 		}
 
 		public void quit() {
@@ -120,6 +118,7 @@ public class CallTimeManager {
 			System.out.println(user.getName() + " quit " + this.time.getHour() + ":" + this.time.getMinute() + ":" + this.time.getSecond());
 
 			this.tempJoinedTime = null;
+			this.alreadyJoin = false;
 		}
 
 		public Date getDate() {

@@ -155,9 +155,7 @@ public class Listener extends ListenerAdapter {
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 		Category parentCategory = event.getChannelLeft().getParent();
 
-		Member member = event.getMember();
-
-		this.quitMember(guild, category, parentCategory, member, event.getChannelLeft(), true);
+		this.quitMember(guild, category, parentCategory, event.getMember(), event.getChannelLeft(), true);
 	}
 
 	public void quitMember(Guild guild, Category category, Category parentCategory, Member member, VoiceChannel channelLeft, boolean leaveEvent) {
