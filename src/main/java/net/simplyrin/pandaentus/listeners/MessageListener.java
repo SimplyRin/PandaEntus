@@ -417,6 +417,30 @@ public class MessageListener extends ListenerAdapter {
 				return;
 			}
 
+			if (args[0].startsWith("=")) {
+				String input = args[0].replace("=", "");
+				if (input.length() == 0) {
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setDescription("使用方法: =<計算式>\n=1+1");
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
+				}
+
+				Runtime runtime = Runtime.getRuntime();
+				Process process = null;
+				try {
+					process = runtime.exec(new String[] {"calc", input});
+				} catch (Exception e) {
+					this.instance.postError(e);
+					return;
+				}
+				Scanner scanner = new Scanner(process.getInputStream());
+				if (scanner.hasNext()) {
+					channel.sendMessage("結果: **" + scanner.nextLine().trim() + "**").complete();
+				}
+				scanner.close();
+			}
+
 			if (args[0].equalsIgnoreCase("!jp")) {
 				if (args.length > 1) {
 					String text = "";
