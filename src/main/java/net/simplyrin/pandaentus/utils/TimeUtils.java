@@ -107,6 +107,8 @@ public class TimeUtils {
 			long minute = this.totalTime / 60;
 			if (minute >= 1) {
 				print += minute + "分 ";
+			} else if (hour >= 1) {
+				print += "0分 ";
 			}
 			/** if (minute >= 11) {
 				print += minute + " 分 ";
@@ -117,6 +119,8 @@ public class TimeUtils {
 			long seconds = this.totalTime - (hour * 3600) - (minute * 60);
 			if (seconds >= 1) {
 				print += seconds + "秒";
+			} else if (hour >= 1 || minute >= 1) {
+				print += "0秒 ";
 			}
 			/** if (seconds >= 11) {
 				print += seconds + " 秒 ";

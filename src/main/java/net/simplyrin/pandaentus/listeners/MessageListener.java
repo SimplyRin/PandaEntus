@@ -161,24 +161,6 @@ public class MessageListener extends ListenerAdapter {
 					return;
 				}
 
-				if (args[0].equalsIgnoreCase("!config")) {
-					if (args.length > 2) {
-						String key = args[1];
-						String value = args[2];
-
-
-
-						embedBuilder.setDescription("Value updated.");
-						channel.sendMessage(embedBuilder.build()).complete();
-						return;
-					}
-
-					embedBuilder.setColor(Color.RED);
-					embedBuilder.setDescription("Usage: !default <key> <value>");
-					channel.sendMessage(embedBuilder.build()).complete();
-					return;
-				}
-
 				if (args[0].equalsIgnoreCase("!sendchat")) {
 					if (args.length > 3) {
 						Guild g = this.instance.getJda().getGuildById(args[1]);
