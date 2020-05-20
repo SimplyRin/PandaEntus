@@ -42,7 +42,7 @@ public class TimeUtils {
 
 	public void resetGuild(String guildId) {
 		for (CallTime callTime : this.getList()) {
-			if (callTime.name.startsWith(guildId)) {
+			if (callTime.key.startsWith(guildId)) {
 				this.callTime.remove(callTime.key);
 			}
 		}

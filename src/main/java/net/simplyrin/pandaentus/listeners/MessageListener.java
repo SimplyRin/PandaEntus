@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.github.ucchyocean.lc.japanize.IMEConverter;
-import com.github.ucchyocean.lc.japanize.YukiKanaConverter;
 import com.google.gson.JsonObject;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -87,14 +85,6 @@ public class MessageListener extends ListenerAdapter {
 
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		if (channel.getName().equalsIgnoreCase("translate")) {
-			if (user.isBot()) {
-				return;
-			}
-
-			channel.sendMessage(IMEConverter.convByGoogleIME(YukiKanaConverter.conv(raw))).complete();
-			return;
-		}
 
 		if (args.length > 0) {
 			// Admin
@@ -446,24 +436,6 @@ public class MessageListener extends ListenerAdapter {
 					channel.sendMessage("結果: **" + scanner.nextLine().trim() + "**").complete();
 				}
 				scanner.close();
-			}
-
-			if (args[0].equalsIgnoreCase("!jp")) {
-				if (args.length > 1) {
-					String text = "";
-					for (int i = 1; i < args.length; i++) {
-						text = text + args[i] + " ";
-					}
-
-					embedBuilder.setColor(Color.GREEN);
-					embedBuilder.setDescription(IMEConverter.convByGoogleIME(YukiKanaConverter.conv(text)));
-					channel.sendMessage(embedBuilder.build()).complete();
-					return;
-				}
-
-				embedBuilder.setColor(Color.RED);
-				embedBuilder.setDescription("Usage: !jp <text>");
-				channel.sendMessage(embedBuilder.build()).complete();
 			}
 
 			if (args[0].equalsIgnoreCase("!ojichat")) {
