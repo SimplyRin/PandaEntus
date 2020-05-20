@@ -98,11 +98,6 @@ public class TimeUtils {
 			if (hour >= 1) {
 				print += hour + "時間 ";
 			}
-			/** if (hour >= 11) {
-				print += hour + " 時間 ";
-			} else {
-				print += "0" + hour + " 時間 ";
-			} */
 
 			long minute = this.totalTime / 60;
 			if (minute >= 1) {
@@ -110,11 +105,6 @@ public class TimeUtils {
 			} else if (hour >= 1) {
 				print += "0分 ";
 			}
-			/** if (minute >= 11) {
-				print += minute + " 分 ";
-			} else {
-				print += "0" + minute + " 分 ";
-			} */
 
 			long seconds = this.totalTime - (hour * 3600) - (minute * 60);
 			if (seconds >= 1) {
@@ -122,11 +112,6 @@ public class TimeUtils {
 			} else if (hour >= 1 || minute >= 1) {
 				print += "0秒 ";
 			}
-			/** if (seconds >= 11) {
-				print += seconds + " 秒 ";
-			} else {
-				print += "0" + seconds + " 秒 ";
-			} */
 
 			return print;
 		}
