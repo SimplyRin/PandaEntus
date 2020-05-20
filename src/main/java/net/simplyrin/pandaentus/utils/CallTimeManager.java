@@ -41,7 +41,7 @@ public class CallTimeManager {
 		this.guildId = guildId;
 	}
 
-	public void join(User user) {
+	/* public void join(User user) {
 		if (this.map.get(user) == null) {
 			this.map.put(user, new CallTime(user));
 		}
@@ -53,7 +53,7 @@ public class CallTimeManager {
 		if (this.map.get(user) != null) {
 			this.map.get(user).quit();
 		}
-	}
+	} */
 
 	@Getter
 	public class CallTime {

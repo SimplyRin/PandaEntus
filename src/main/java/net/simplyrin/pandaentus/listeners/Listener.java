@@ -2,9 +2,7 @@ package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -19,8 +17,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.utils.CallTimeManager;
-import net.simplyrin.pandaentus.utils.CallTimeManager.CallTime;
+import net.simplyrin.pandaentus.utils.TimeUtils.CallTime;
 
 /**
  * Created by SimplyRin on 2019/03/13.
@@ -43,7 +40,7 @@ import net.simplyrin.pandaentus.utils.CallTimeManager.CallTime;
 public class Listener extends ListenerAdapter {
 
 	private Main instance;
-	private HashMap<String, CallTimeManager> map = new HashMap<>();
+	// private HashMap<String, CallTimeManager> map = new HashMap<>();
 
 	public Listener(Main instance) {
 		this.instance = instance;
@@ -68,11 +65,8 @@ public class Listener extends ListenerAdapter {
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).joined();
 		this.check(event.getMember(), event.getGuild());
 
-		if (this.map.get(guild.getId()) == null) {
-			this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
-		}
-
-		this.map.get(guild.getId()).join(member.getUser());
+		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getId());
+		timeUtils.join();
 		System.out.println("Joined " + event.getChannelJoined().getName());
 	}
 
@@ -96,11 +90,11 @@ public class Listener extends ListenerAdapter {
 		if (hasMember) {
 			System.out.println("Join with Channel Moving " + this.getNickname(member));
 
-			if (this.map.get(guild.getId()) == null) {
+			/** if (this.map.get(guild.getId()) == null) {
 				this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
 			}
 
-			this.map.get(guild.getId()).join(member.getUser());
+			this.map.get(guild.getId()).join(member.getUser()); */
 		} else {
 			System.out.println("Quit with Channel Moving " + this.getNickname(member));
 
@@ -172,9 +166,8 @@ public class Listener extends ListenerAdapter {
 
 		this.instance.getTimeManager().getUser(member.getUser().getId()).quit();
 
-		if (this.map.get(guild.getId()) != null) {
-			this.map.get(guild.getId()).quit(member.getUser());
-		}
+		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getUser().getId());
+		timeUtils.quit();
 
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
@@ -223,29 +216,28 @@ public class Listener extends ListenerAdapter {
 
 					List<CallTime> list = new ArrayList<>();
 
-					Collection<CallTime> callTimes = this.map.get(guild.getId()).getMap().values();
-					for (CallTime callTime : callTimes) {
-						String path = "User." + callTime.getUser() + "." + guild.getId() + ".Vanish";
+					for (CallTime callTime : this.instance.getTimeUtils().getList(guild.getId())) {
+						String path = "User." + callTime.getName() + "." + guild.getId() + ".Vanish";
 						if (this.instance.getConfig().getBoolean(path)) {
 							continue;
 						}
 
 						try {
-							embedBuilder.addField(this.getNickname(guild.getMember(callTime.getUser())), callTime.getTime().toString(), true);
 							embedBuilder.setDescription("ユーザーごとの通話時間:");
+							embedBuilder.addField(this.getNickname(guild.getMemberById(callTime.getName())), callTime.getTime(), true);
+
+							System.out.println(callTime.getName() + " -> " + callTime.getTime());
 						} catch (Exception e) {
 						}
 						list.add(callTime);
 
-						callTime.resetTime();
+						this.instance.getTimeUtils().resetGuild(guild.getId());
 					}
 				} else {
 					embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
 					embedBuilder.addField("開始時刻", this.instance.getNowTime(time), true);
 					embedBuilder.addField("終了時刻", this.instance.getNowTime(), true);
 				}
-
-				this.map.get(guild.getId()).getMap().clear();
 
 				if (this.instance.getConfig().getBoolean("Disable")) {
 					return;

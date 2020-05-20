@@ -3,7 +3,9 @@ package net.simplyrin.pandaentus.listeners;
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import com.github.ucchyocean.lc.japanize.IMEConverter;
@@ -27,6 +29,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.utils.AkinatorManager;
+import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.pandaentus.utils.Version;
 
@@ -51,12 +55,13 @@ import net.simplyrin.pandaentus.utils.Version;
 public class MessageListener extends ListenerAdapter {
 
 	private Main instance;
+	private PrivateChatMessage privateChatMessage;
+	private Map<String, AkinatorManager> akiMap;
 
 	public MessageListener(Main instance) {
 		this.instance = instance;
+		this.akiMap = new HashMap<>();
 	}
-
-	private PrivateChatMessage privateChatMessage;
 
 	@Override
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
@@ -91,21 +96,6 @@ public class MessageListener extends ListenerAdapter {
 			return;
 		}
 
-		/* if (channel.getName().equalsIgnoreCase("english-to-japanese")) {
-			if (user.isBot()) {
-				return;
-			}
-
-			String result = HttpClient.fetch("https://script.google.com/macros/s/AKfycbzhliArfSms9uqI76PZS2dblAJV588-W19oBGO9g_-gCiznO3yI/exec?text=" + raw + "&target=ja");
-			System.out.println(result);
-			if (result.length() >= 1500) {
-				return;
-			}
-
-			channel.sendMessage(result).complete();
-			return;
-		} */
-
 		if (args.length > 0) {
 			// Admin
 			if (user.getId().equals("224428706209202177")) {
@@ -131,8 +121,7 @@ public class MessageListener extends ListenerAdapter {
 							}
 
 							try {
-								VoiceChannel voiceChannel = category.createVoiceChannel("General-" + size).complete();
-								voiceChannel.getManager().setUserLimit(99).complete();
+								category.createVoiceChannel("General-" + size).setUserlimit(99).complete();
 							} catch (Exception e) {
 							}
 
@@ -178,6 +167,24 @@ public class MessageListener extends ListenerAdapter {
 
 					embedBuilder.setColor(Color.RED);
 					embedBuilder.setDescription("Usage: !setgame <game>");
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
+				}
+
+				if (args[0].equalsIgnoreCase("!config")) {
+					if (args.length > 2) {
+						String key = args[1];
+						String value = args[2];
+
+
+
+						embedBuilder.setDescription("Value updated.");
+						channel.sendMessage(embedBuilder.build()).complete();
+						return;
+					}
+
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setDescription("Usage: !default <key> <value>");
 					channel.sendMessage(embedBuilder.build()).complete();
 					return;
 				}
@@ -520,6 +527,20 @@ public class MessageListener extends ListenerAdapter {
 				embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
 
 				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!akinator")) {
+				channel.sendMessage("**~~アｋ~~...バカネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**").complete();
+				channel.sendTyping().complete();
+				ThreadPool.run(() -> {
+					this.akiMap.put(channel.getId(), new AkinatorManager(guild, channel.getId()));
+					AkinatorManager am = this.akiMap.get(channel.getId());
+
+					am.setEmbed(embedBuilder);
+					String latestId = channel.sendMessage(embedBuilder.build()).complete().getId();
+					am.setLatestMessageId(latestId);
+				});
 				return;
 			}
 		}

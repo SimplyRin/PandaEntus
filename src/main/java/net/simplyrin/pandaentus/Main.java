@@ -30,6 +30,7 @@ import net.simplyrin.pandaentus.listeners.MessageListener;
 import net.simplyrin.pandaentus.utils.GuildCallManager;
 import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.TimeManager;
+import net.simplyrin.pandaentus.utils.TimeUtils;
 import net.simplyrin.pandaentus.utils.Version;
 import net.simplyrin.rinstream.RinStream;
 
@@ -65,6 +66,8 @@ public class Main {
 
 	private JDA jda;
 
+	private TimeUtils timeUtils;
+
 	public void run() {
 		new RinStream();
 
@@ -91,6 +94,8 @@ public class Main {
 		this.timeManager = new TimeManager(this);
 
 		this.poolItems = new PoolItems(this);
+
+		this.timeUtils = new TimeUtils();
 
 		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
 
