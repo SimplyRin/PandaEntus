@@ -94,19 +94,21 @@ public class TimeUtils {
 		public String getTime() {
 			String print = "";
 
+			System.out.println("Total Time: " + this.totalTime);
+
 			long hour = this.totalTime / 3600;
 			if (hour >= 1) {
 				print += hour + "時間 ";
 			}
 
-			long minute = this.totalTime / 60;
+			long minute = this.totalTime % 3600 / 60;
 			if (minute >= 1) {
 				print += minute + "分 ";
 			} else if (hour >= 1) {
 				print += "0分 ";
 			}
 
-			long seconds = this.totalTime - (hour * 3600) - (minute * 60);
+			long seconds = this.totalTime % 3600 % 60;
 			if (seconds >= 1) {
 				print += seconds + "秒";
 			} else if (hour >= 1 || minute >= 1) {
