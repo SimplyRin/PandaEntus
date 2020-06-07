@@ -1,14 +1,26 @@
 package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.UUID;
 
 import com.google.gson.JsonObject;
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -19,14 +31,17 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.managers.AudioManager;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.utils.AkinatorManager;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -56,9 +71,19 @@ public class MessageListener extends ListenerAdapter {
 	private PrivateChatMessage privateChatMessage;
 	private Map<String, AkinatorManager> akiMap;
 
+	private final AudioPlayerManager playerManager;
+	private final Map<Long, GuildMusicManager> musicManagers;
+
 	public MessageListener(Main instance) {
 		this.instance = instance;
 		this.akiMap = new HashMap<>();
+
+		this.musicManagers = new HashMap<>();
+
+		this.playerManager = new DefaultAudioPlayerManager();
+		this.playerManager.createPlayer();
+		AudioSourceManagers.registerRemoteSources(this.playerManager);
+		AudioSourceManagers.registerLocalSource(this.playerManager);
 	}
 
 	@Override
@@ -84,7 +109,6 @@ public class MessageListener extends ListenerAdapter {
 		String[] args = raw.split(" ");
 
 		EmbedBuilder embedBuilder = new EmbedBuilder();
-
 
 		if (args.length > 0) {
 			// Admin
@@ -497,7 +521,173 @@ public class MessageListener extends ListenerAdapter {
 				});
 				return;
 			}
+
+			if (args[0].equalsIgnoreCase("!play")) {
+				if (args.length > 1) {
+					String url = args[1];
+
+					VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+					AudioManager audioManager = guild.getAudioManager();
+					audioManager.openAudioConnection(voiceChannel);
+					audioManager.setAutoReconnect(false);
+
+					GuildMusicManager musicManager = getGuildAudioPlayer(guild);
+
+					this.playerManager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
+						@Override
+						public void trackLoaded(AudioTrack track) {
+							channel.sendMessage("次に " + track.getInfo().title + " を再生します").queue();
+							play(guild, musicManager, track);
+						}
+
+						@Override
+						public void playlistLoaded(AudioPlaylist playlist) {
+							AudioTrack firstTrack = playlist.getSelectedTrack();
+
+							if (firstTrack == null) {
+								firstTrack = playlist.getTracks().get(0);
+							}
+
+							play(guild, musicManager, firstTrack);
+						}
+
+						@Override
+						public void noMatches() {
+						}
+
+						@Override
+						public void loadFailed(FriendlyException exception) {
+							channel.sendMessage("Could not play: " + exception.getMessage()).queue();
+						}
+					});
+					return;
+				}
+
+				embedBuilder.setColor(Color.RED);
+				embedBuilder.setDescription("使用方法: " + args[0] + " <URL>");
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!skip")) {
+				this.skipTrack(event.getTextChannel());
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!kv")) {
+				Member member = event.getMember();
+
+				if (member.getVoiceState() == null && member.getVoiceState().getChannel() == null) {
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setDescription("ボイスチャンネルに接続してください！");
+					channel.sendMessage(embedBuilder.build()).complete();
+					return;
+				}
+
+				if (args.length > 1) {
+					String uniqueId = UUID.randomUUID().toString().split("-")[0] + ".wav";
+					File file = new File(uniqueId);
+
+					String value = "";
+					for (int i = 1; i < args.length; i++) {
+						value = value + args[i] + " ";
+					}
+					value = value.trim();
+
+					String[] command = new String[] { "curl", "https://api.voicetext.jp/v1/tts",
+							"-o", uniqueId,
+							"-u", this.instance.getVoiceTextApiKey() + ":",
+							"-d", "text=" + value,
+							"-d", "speaker=show",
+							"-d", "pitch=150",
+							"-d", "format=wav" };
+
+					event.getMessage().delete().complete();
+
+					this.runCommand(command, new Callback() {
+						@Override
+						public void response(String response) {
+							System.out.println(response);
+						}
+						@Override
+						public void processEnded() {
+							try {
+								Thread.sleep(500);
+							} catch (Exception e) {
+							}
+
+							VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+							AudioManager audioManager = guild.getAudioManager();
+							audioManager.openAudioConnection(voiceChannel);
+							audioManager.setAutoReconnect(false);
+
+							GuildMusicManager musicManager = getGuildAudioPlayer(guild);
+
+							file.deleteOnExit();
+
+							playerManager.loadItemOrdered(musicManager, file.getAbsolutePath(), new AudioLoadResultHandler() {
+								@Override
+								public void trackLoaded(AudioTrack track) {
+									play(guild, musicManager, track);
+								}
+
+								@Override
+								public void playlistLoaded(AudioPlaylist playlist) {
+									AudioTrack firstTrack = playlist.getSelectedTrack();
+
+									if (firstTrack == null) {
+										firstTrack = playlist.getTracks().get(0);
+									}
+
+									play(guild, musicManager, firstTrack);
+								}
+
+								@Override
+								public void noMatches() {
+								}
+
+								@Override
+								public void loadFailed(FriendlyException exception) {
+									channel.sendMessage("Could not play: " + exception.getMessage()).queue();
+								}
+							});
+						}
+					});
+					return;
+				}
+
+				embedBuilder.setColor(Color.RED);
+				embedBuilder.setDescription("使用方法: " + args[0] + " <ボイス>");
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
+			}
 		}
+	}
+
+	private synchronized GuildMusicManager getGuildAudioPlayer(Guild guild) {
+		long guildId = Long.parseLong(guild.getId());
+		GuildMusicManager musicManager = musicManagers.get(guildId);
+
+		if (musicManager == null) {
+			musicManager = new GuildMusicManager(playerManager);
+			musicManagers.put(guildId, musicManager);
+		}
+
+		guild.getAudioManager().setSendingHandler(musicManager.getSendHandler());
+
+		return musicManager;
+	}
+
+	private void play(Guild guild, GuildMusicManager musicManager, AudioTrack track) {
+		musicManager.player.setVolume(20);
+		musicManager.scheduler.queue(track);
+	}
+
+	private void skipTrack(TextChannel channel) {
+		GuildMusicManager musicManager = getGuildAudioPlayer(channel.getGuild());
+		musicManager.scheduler.nextTrack();
+
+		channel.sendMessage("Skipped to next track.").queue();
 	}
 
 	public String getNickname(Member member) {
@@ -505,6 +695,48 @@ public class MessageListener extends ListenerAdapter {
 			return member.getNickname();
 		}
 		return member.getUser().getName();
+	}
+
+	private void runCommand(String[] command, Callback callback) {
+		final Process process;
+		try {
+			ProcessBuilder processBuilder = new ProcessBuilder(command);
+			processBuilder.redirectErrorStream(true);
+
+			process = processBuilder.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		new Thread(() -> {
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line = null;
+			try {
+				while ((line = bufferedReader.readLine()) != null) {
+					if (callback != null) {
+						callback.response(line);
+					}
+				}
+			} catch (Exception e) {
+			}
+		}).start();
+
+		new Thread(() -> {
+			try {
+				process.waitFor();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if (callback != null) {
+				callback.processEnded();
+			}
+		}).start();
+	}
+
+	public interface Callback {
+		void response(String response);
+		void processEnded();
 	}
 
 }

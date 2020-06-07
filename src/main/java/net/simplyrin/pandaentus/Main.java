@@ -68,8 +68,12 @@ public class Main {
 
 	private TimeUtils timeUtils;
 
+	private String voiceTextApiKey;
+
 	public void run() {
-		new RinStream();
+		RinStream rinStream = new RinStream();
+		rinStream.setSaveLog(true);
+		System.out.println("setSavingLog : true");
 
 		System.out.println("Loading files...");
 		System.out.println("Build-Version: " + Version.BUILD_TIME);
@@ -85,6 +89,7 @@ public class Main {
 			Configuration config = Config.getConfig(file);
 			config.set("Token", "BOT_TOKEN_HERE");
 			config.set("Pastebin.API-Key", "PASTEBIN_API_KEY_HERE");
+			config.set("VoiceTextApiKey", "VOICETEXT_API_KEY_HERE");
 			config.set("Message-Type.Enable-Simple-Mode", false);
 
 			Config.saveConfig(config, file);
@@ -96,6 +101,8 @@ public class Main {
 		this.poolItems = new PoolItems(this);
 
 		this.timeUtils = new TimeUtils();
+
+		this.voiceTextApiKey = this.config.getString("VoiceTextApiKey");
 
 		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
 

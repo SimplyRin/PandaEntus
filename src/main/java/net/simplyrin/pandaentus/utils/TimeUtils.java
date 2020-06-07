@@ -1,7 +1,6 @@
 package net.simplyrin.pandaentus.utils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,8 +58,14 @@ public class TimeUtils {
 		return list;
 	}
 
-	public Collection<CallTime> getList() {
-		return this.callTime.values();
+	public List<CallTime> getList() {
+		List<CallTime> list = new ArrayList<>();
+
+		for (CallTime callTime : this.callTime.values()) {
+			list.add(callTime);
+		}
+
+		return list;
 	}
 
 	public class CallTime {
@@ -81,6 +86,9 @@ public class TimeUtils {
 		}
 
 		public void quit() {
+			if (this.joined == 0) {
+				return;
+			}
 			long end = (System.currentTimeMillis() - this.joined) / 1000;
 			this.joined = 0;
 
@@ -93,8 +101,6 @@ public class TimeUtils {
 
 		public String getTime() {
 			String print = "";
-
-			System.out.println("Total Time: " + this.totalTime);
 
 			long hour = this.totalTime / 3600;
 			if (hour >= 1) {
@@ -112,7 +118,11 @@ public class TimeUtils {
 			if (seconds >= 1) {
 				print += seconds + "秒";
 			} else if (hour >= 1 || minute >= 1) {
-				print += "0秒 ";
+				print += "0秒";
+			}
+
+			if (print.length() == 0) {
+				print = "0秒";
 			}
 
 			return print;

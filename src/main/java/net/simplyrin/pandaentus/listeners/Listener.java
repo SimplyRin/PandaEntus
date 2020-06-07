@@ -50,6 +50,7 @@ public class Listener extends ListenerAdapter {
 	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
 		Guild guild = event.getGuild();
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
+		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 		Category parentCategory = event.getChannelJoined().getParent();
 
 		Member member = event.getMember();
@@ -65,8 +66,19 @@ public class Listener extends ListenerAdapter {
 		this.instance.getTimeManager().getUser(event.getMember().getUser().getId()).joined();
 		this.check(event.getMember(), event.getGuild());
 
-		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getId());
-		timeUtils.join();
+		boolean hasMember = false;
+		for (VoiceChannel voiceChannel : voiceChannels) {
+			for (Member vcMember : voiceChannel.getMembers()) {
+				if (vcMember.getId().equalsIgnoreCase(member.getId())) {
+					hasMember = true;
+				}
+			}
+		}
+
+		if (hasMember) {
+			CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getId());
+			timeUtils.join();
+		}
 		System.out.println("Joined " + event.getChannelJoined().getName());
 	}
 
@@ -87,16 +99,13 @@ public class Listener extends ListenerAdapter {
 			}
 		}
 
+		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getId());
 		if (hasMember) {
-			System.out.println("Join with Channel Moving " + this.getNickname(member));
-
-			/** if (this.map.get(guild.getId()) == null) {
-				this.map.put(guild.getId(), new CallTimeManager(this.instance, guild.getId()));
-			}
-
-			this.map.get(guild.getId()).join(member.getUser()); */
+			System.out.println("Join @ " + this.getNickname(member));
+			timeUtils.join();
 		} else {
-			System.out.println("Quit with Channel Moving " + this.getNickname(member));
+			timeUtils.quit();
+			System.out.println("Quit @ " + this.getNickname(member));
 
 			this.quitMember(guild, category, null, member, event.getChannelLeft(), false);
 		}
@@ -114,9 +123,10 @@ public class Listener extends ListenerAdapter {
 		int membersSize = 0;
 		for (VoiceChannel voiceChannel : voiceChannels) {
 			for (Member vcMember : voiceChannel.getMembers()) {
-				if ((!vcMember.getUser().isBot()) && (!vcMember.getUser().isFake())) {
-					membersSize++;
+				if (vcMember.getUser().isBot() || vcMember.getUser().isFake()) {
+					continue;
 				}
+				membersSize++;
 			}
 			if (membersSize >= 1) {
 				max[current] = true;
@@ -149,6 +159,11 @@ public class Listener extends ListenerAdapter {
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 		Category parentCategory = event.getChannelLeft().getParent();
 
+		Member member = event.getMember();
+
+		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getUser().getId());
+		timeUtils.quit();
+
 		this.quitMember(guild, category, parentCategory, event.getMember(), event.getChannelLeft(), true);
 	}
 
@@ -163,11 +178,6 @@ public class Listener extends ListenerAdapter {
 				return;
 			}
 		}
-
-		this.instance.getTimeManager().getUser(member.getUser().getId()).quit();
-
-		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getUser().getId());
-		timeUtils.quit();
 
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
@@ -224,7 +234,10 @@ public class Listener extends ListenerAdapter {
 
 						try {
 							embedBuilder.setDescription("ユーザーごとの通話時間:");
-							embedBuilder.addField(this.getNickname(guild.getMemberById(callTime.getName())), callTime.getTime(), true);
+							String tt = callTime.getTime();
+							if (!tt.equals("0秒")) {
+								embedBuilder.addField(this.getNickname(guild.getMemberById(callTime.getName())), callTime.getTime(), true);
+							}
 
 							System.out.println(callTime.getName() + " -> " + callTime.getTime());
 						} catch (Exception e) {
