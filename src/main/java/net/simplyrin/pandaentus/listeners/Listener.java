@@ -243,9 +243,9 @@ public class Listener extends ListenerAdapter {
 						}
 
 						try {
-							embedBuilder.setDescription("ユーザーごとの通話時間:");
 							String tt = callTime.getTime();
 							if (!tt.equals("0秒")) {
+								embedBuilder.setDescription("ユーザーごとの通話時間:");
 								embedBuilder.addField(this.getNickname(guild.getMemberById(callTime.getName())), callTime.getTime(), true);
 							}
 
