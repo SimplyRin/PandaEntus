@@ -1,10 +1,7 @@
 package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +23,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
@@ -41,6 +39,7 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.Main.Callback;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.utils.AkinatorManager;
 import net.simplyrin.pandaentus.utils.ThreadPool;
@@ -522,6 +521,28 @@ public class MessageListener extends ListenerAdapter {
 				return;
 			}
 
+			if (args[0].startsWith("https://www.youtube.com/watch?v=") || args[0].startsWith("https://youtu.be/")) {
+				Emote emote = null;
+				for (Emote temp : guild.getEmotes()) {
+					if (emote == null) {
+						emote = temp;
+					}
+
+					if (temp.getName().equals("download")) {
+						emote = temp;
+					}
+				}
+				event.getMessage().addReaction(emote).complete();
+				this.instance.getMessages().add(event.getMessage());
+				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!emojis")) {
+				for (Emote emote : guild.getEmotes()) {
+					System.out.println(emote.getName() + ":" + emote.getImageUrl());
+				}
+			}
+
 			if (args[0].equalsIgnoreCase("!play")) {
 				if (args.length > 1) {
 					String url = args[1];
@@ -533,7 +554,7 @@ public class MessageListener extends ListenerAdapter {
 
 					GuildMusicManager musicManager = getGuildAudioPlayer(guild);
 
-					this.playerManager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
+					playerManager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
 						@Override
 						public void trackLoaded(AudioTrack track) {
 							channel.sendMessage("次に " + track.getInfo().title + " を再生します").queue();
@@ -604,7 +625,7 @@ public class MessageListener extends ListenerAdapter {
 
 					event.getMessage().delete().complete();
 
-					this.runCommand(command, new Callback() {
+					this.instance.runCommand(command, new Callback() {
 						@Override
 						public void response(String response) {
 							System.out.println(response);
@@ -695,48 +716,6 @@ public class MessageListener extends ListenerAdapter {
 			return member.getNickname();
 		}
 		return member.getUser().getName();
-	}
-
-	private void runCommand(String[] command, Callback callback) {
-		final Process process;
-		try {
-			ProcessBuilder processBuilder = new ProcessBuilder(command);
-			processBuilder.redirectErrorStream(true);
-
-			process = processBuilder.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
-
-		new Thread(() -> {
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			String line = null;
-			try {
-				while ((line = bufferedReader.readLine()) != null) {
-					if (callback != null) {
-						callback.response(line);
-					}
-				}
-			} catch (Exception e) {
-			}
-		}).start();
-
-		new Thread(() -> {
-			try {
-				process.waitFor();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if (callback != null) {
-				callback.processEnded();
-			}
-		}).start();
-	}
-
-	public interface Callback {
-		void response(String response);
-		void processEnded();
 	}
 
 }

@@ -1,14 +1,18 @@
 package net.simplyrin.pandaentus;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import com.besaba.revonline.pastebinapi.Pastebin;
@@ -22,11 +26,13 @@ import lombok.Getter;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.MessageListener;
+import net.simplyrin.pandaentus.listeners.ReactionListener;
 import net.simplyrin.pandaentus.utils.GuildCallManager;
 import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -61,14 +67,11 @@ public class Main {
 
 	private Configuration config;
 	private TimeManager timeManager;
-
 	private PoolItems poolItems;
-
 	private JDA jda;
-
 	private TimeUtils timeUtils;
-
 	private String voiceTextApiKey;
+	private List<Message> messages = new ArrayList<>();
 
 	public void run() {
 		RinStream rinStream = new RinStream();
@@ -115,6 +118,7 @@ public class Main {
 		jdaBuilder.setToken(token);
 		jdaBuilder.addEventListeners(new Listener(this));
 		jdaBuilder.addEventListeners(new MessageListener(this));
+		jdaBuilder.addEventListeners(new ReactionListener(this));
 
 		this.jda = null;
 		try {
@@ -126,15 +130,18 @@ public class Main {
 		// this.jda.getPresence().setActivity(Activity.playing("Build " + buildTime));
 		// this.jda.getPresence().setActivity(Activity.playing("Source: github.com/SimplyRin/PandaEntus"));
 
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				jda.shutdown();
-				Config.saveConfig(Main.this.config, "config.yml");
-				poolItems.save();
-				System.out.println("Config ファイルを保存しました。");
-			}
+		this.addShutdownHook(() -> {
+			jda.shutdown();
+			Config.saveConfig(Main.this.config, "config.yml");
+			poolItems.save();
+			System.out.println("Config ファイルを保存しました。");
+
+			rinStream.close();
 		});
+	}
+
+	public void addShutdownHook(Runnable runnable) {
+		Runtime.getRuntime().addShutdownHook(new Thread(runnable));
 	}
 
 	@Getter
@@ -396,6 +403,48 @@ public class Main {
 
 			return uptime;
 		}
+	}
+
+	public void runCommand(String[] command, Callback callback) {
+		final Process process;
+		try {
+			ProcessBuilder processBuilder = new ProcessBuilder(command);
+			processBuilder.redirectErrorStream(true);
+
+			process = processBuilder.start();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		new Thread(() -> {
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line = null;
+			try {
+				while ((line = bufferedReader.readLine()) != null) {
+					if (callback != null) {
+						callback.response(line);
+					}
+				}
+			} catch (Exception e) {
+			}
+		}).start();
+
+		new Thread(() -> {
+			try {
+				process.waitFor();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if (callback != null) {
+				callback.processEnded();
+			}
+		}).start();
+	}
+
+	public interface Callback {
+		void response(String response);
+		void processEnded();
 	}
 
 }

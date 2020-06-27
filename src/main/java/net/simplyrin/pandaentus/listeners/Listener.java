@@ -48,6 +48,10 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
+		if (event.getMember().getUser().isBot() || event.getMember().getUser().isFake()) {
+			return;
+		}
+
 		Guild guild = event.getGuild();
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
@@ -84,6 +88,9 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceMove(GuildVoiceMoveEvent event) {
+		if (event.getMember().getUser().isBot() || event.getMember().getUser().isFake()) {
+			return;
+		}
 		Member member = event.getMember();
 		Guild guild = event.getGuild();
 
@@ -155,6 +162,9 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
+		if (event.getMember().getUser().isBot() || event.getMember().getUser().isFake()) {
+			return;
+		}
 		Guild guild = event.getGuild();
 		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 		Category parentCategory = event.getChannelLeft().getParent();

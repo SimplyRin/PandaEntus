@@ -27,3 +27,5 @@ config.yml
 src/main/java/net/simplyrin/pandaentus/utils/Version.java
 *.log
 *.mp3
+*.m4a
+*.wav
