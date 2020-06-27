@@ -80,10 +80,9 @@ public class ReactionListener extends ListenerAdapter {
 
 		final User user = event.getUser();
 
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-
 		if (mp3.exists()) {
 			new Thread(() -> {
+				EmbedBuilder embedBuilder = new EmbedBuilder();
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.setAuthor("ファイルが準備できました。");
 				embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
@@ -100,7 +99,14 @@ public class ReactionListener extends ListenerAdapter {
 			return;
 		}
 
-		Message phase = channel.sendMessage(user.getAsMention() + " -> 処理中...").complete();
+		String loadingUrl = "https://static.simplyrin.net/gif/loading.gif";
+		String downloadingUrl = "https://static.simplyrin.net/gif/download.gif";
+		String uploadingUrl = "https://static.simplyrin.net/gif/upload-cat.gif";
+
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+		embedBuilder.setColor(Color.GREEN);
+		embedBuilder.setAuthor(user.getName() + " -> 処理中...", null, loadingUrl);
+		Message phase = channel.sendMessage(embedBuilder.build()).complete();
 
 		this.instance.runCommand(new String[]{ "youtube-dl", "--get-title", videoId }, new Callback() {
 			@Override
@@ -133,11 +139,14 @@ public class ReactionListener extends ListenerAdapter {
 				}
 
 				if (!ok) {
-					phase.editMessage(user.getAsMention() + " -> 動画が長すぎます！").complete();
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setAuthor(user.getName() + " -> 動画が長すぎます！", null, loadingUrl);
+					phase.editMessage(embedBuilder.build()).complete();
 					return;
 				}
 
-				phase.editMessage(user.getAsMention() + " -> ダウンロードしています...").complete();
+				embedBuilder.setAuthor(user.getName() + " -> ダウンロードしています...", null, downloadingUrl);
+				phase.editMessage(embedBuilder.build()).complete();
 				instance.runCommand(new String[] { "youtube-dl", videoId }, new Callback() {
 					private File file;
 					@Override
@@ -148,7 +157,8 @@ public class ReactionListener extends ListenerAdapter {
 							this.file = new File(title);
 						}
 						if (this.file != null) {
-							phase.editMessage(user.getAsMention() + " -> ダウンロード完了。変換中...").complete();
+							embedBuilder.setAuthor(user.getName() + " -> ダウンロード完了。変換中...", null, loadingUrl);
+							phase.editMessage(embedBuilder.build()).complete();
 						}
 					}
 
@@ -163,7 +173,8 @@ public class ReactionListener extends ListenerAdapter {
 							@Override
 							public void processEnded() {
 								instance.getConfig().set("YouTube." + videoId + ".Path", mp3.getAbsolutePath());
-								phase.editMessage(user.getAsMention() + " -> 変換完了。送信準備を行っています...").complete();
+								embedBuilder.setAuthor(user.getName() + " -> 変換完了。送信準備を行っています...", null, uploadingUrl);
+								phase.editMessage(embedBuilder.build()).complete();
 								System.out.println(mp3.exists());
 								if (mp3.exists()) {
 									EmbedBuilder embedBuilder = new EmbedBuilder();
