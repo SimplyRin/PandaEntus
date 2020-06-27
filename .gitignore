@@ -29,3 +29,4 @@ src/main/java/net/simplyrin/pandaentus/utils/Version.java
 *.mp3
 *.m4a
 *.wav
+*.mkv

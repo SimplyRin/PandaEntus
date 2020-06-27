@@ -2,10 +2,6 @@ package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
 import java.io.File;
-import java.net.URL;
-import java.util.UUID;
-
-import org.codehaus.plexus.util.FileUtils;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -88,10 +84,10 @@ public class ReactionListener extends ListenerAdapter {
 
 		if (mp3.exists()) {
 			new Thread(() -> {
-				embedBuilder.setDescription("ファイルが準備できました。\nファイルは48時間後削除されます。");
-				embedBuilder.setColor(Color.RED);
-				embedBuilder.addField("タイトル", this.instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
-				embedBuilder.addField("長さ", this.instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
+				embedBuilder.setColor(Color.GREEN);
+				embedBuilder.setAuthor("ファイルが準備できました。");
+				embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
+				embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
 				Message tempMessage = channel.sendFile(mp3).embed(embedBuilder.build()).complete();
 
 				try {
@@ -141,67 +137,53 @@ public class ReactionListener extends ListenerAdapter {
 					return;
 				}
 
-				instance.runCommand(new String[]{ "youtube-dl", "-x", "--audio-format", "m4a", "-g", videoId } , new Callback() {
+				phase.editMessage(user.getAsMention() + " -> ダウンロードしています...").complete();
+				instance.runCommand(new String[] { "youtube-dl", videoId }, new Callback() {
+					private File file;
 					@Override
 					public void response(String response) {
-						System.out.println("YouTube-DL: " + response);
-						if (response.startsWith("https://")) {
-
-							String id = UUID.randomUUID().toString().split("-")[0];
-							try {
-								phase.editMessage(user.getAsMention() + " -> ダウンロードしています...").complete();
-								System.out.println("Downloading file...");
-								File m4a = new File(file, id + ".m4a");
-								FileUtils.copyURLToFile(new URL(response), new File(file, id + ".m4a"));
-								System.out.println("Downloaded.");
-								phase.editMessage(user.getAsMention() + " -> ダウンロード完了。変換中...").complete();
-
-								instance.runCommand(new String[]{ "ffmpeg", "-i", m4a.getAbsolutePath(), mp3.getAbsolutePath() }, new Callback() {
-									@Override
-									public void response(String response) {
-										System.out.println(response);
-									}
-
-									@Override
-									public void processEnded() {
-										new Thread(() -> {
-											try {
-												Thread.sleep(1000);
-											} catch (InterruptedException e) {
-											}
-
-											phase.editMessage(user.getAsMention() + " -> 変換完了。送信準備を行っています...").complete();
-											System.out.println(mp3.exists());
-											if (mp3.exists()) {
-												EmbedBuilder embedBuilder = new EmbedBuilder();
-												embedBuilder.setColor(Color.RED);
-												embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
-												embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
-												embedBuilder.setDescription("ファイルが準備できました。\nファイルは48時間後削除されます。");
-												Message message = channel.sendFile(mp3).embed(embedBuilder.build()).complete();
-												phase.delete().complete();
-
-												try {
-													Thread.sleep(1000 * 60 * 60 * 48);
-												} catch (Exception e) {
-												}
-
-												message.delete().complete();
-											}
-										}).start();
-									}
-								});
-							} catch (Exception e) {
-								channel.sendMessage("エラー発生よ。").complete();
-								e.printStackTrace();
-							}
-						} else {
-							channel.sendMessage("エラー発生よ。").complete();
+						if (response.startsWith("[ffmpeg] Merging formats into")) {
+							String title = response.replace("[ffmpeg] Merging formats into", "").replace("\"", "").trim();
+							System.out.println("Title: " + title);
+							this.file = new File(title);
+						}
+						if (this.file != null) {
+							phase.editMessage(user.getAsMention() + " -> ダウンロード完了。変換中...").complete();
 						}
 					}
 
 					@Override
 					public void processEnded() {
+						instance.runCommand(new String[] { "ffmpeg", "-i", this.file.getAbsolutePath(), mp3.getAbsolutePath() }, new Callback() {
+							@Override
+							public void response(String response) {
+								System.out.println(response);
+							}
+
+							@Override
+							public void processEnded() {
+								instance.getConfig().set("YouTube." + videoId + ".Path", mp3.getAbsolutePath());
+								phase.editMessage(user.getAsMention() + " -> 変換完了。送信準備を行っています...").complete();
+								System.out.println(mp3.exists());
+								if (mp3.exists()) {
+									EmbedBuilder embedBuilder = new EmbedBuilder();
+									embedBuilder.setColor(Color.RED);
+									embedBuilder.setAuthor("ファイルが準備できました。");
+									embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
+									embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
+									Message message = channel.sendFile(mp3).embed(embedBuilder.build()).complete();
+									phase.delete().complete();
+									file.delete();
+
+									try {
+										Thread.sleep(1000 * 60 * 60 * 48);
+									} catch (Exception e) {
+									}
+
+									message.delete().complete();
+								}
+							}
+						});
 					}
 				});
 			}
