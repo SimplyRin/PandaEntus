@@ -149,6 +149,11 @@
       <version>1.2</version>
     </dependency>
     <dependency>
+      <groupId>net.simplyrin.processmanager</groupId>
+      <artifactId>ProcessManager</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
       <groupId>net.simplyrin.config</groupId>
       <artifactId>Config</artifactId>
       <version>1.0</version>

@@ -39,12 +39,13 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.Main.Callback;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.utils.AkinatorManager;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.pandaentus.utils.Version;
+import net.simplyrin.processmanager.Callback;
+import net.simplyrin.processmanager.ProcessManager;
 
 /**
  * Created by SimplyRin on 2019/04/04.
@@ -547,40 +548,55 @@ public class MessageListener extends ListenerAdapter {
 				if (args.length > 1) {
 					String url = args[1];
 
-					VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
-					AudioManager audioManager = guild.getAudioManager();
-					audioManager.openAudioConnection(voiceChannel);
-					audioManager.setAutoReconnect(false);
+					if (!(url.contains("youtube.com") || url.contains("youtu.be"))) {
+						channel.sendMessage("YouTube のみ対応しています。").complete();
+						return;
+					}
 
-					GuildMusicManager musicManager = getGuildAudioPlayer(guild);
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
+					Message message = channel.sendMessage(embedBuilder.build()).complete();
 
-					playerManager.loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
-						@Override
-						public void trackLoaded(AudioTrack track) {
-							channel.sendMessage("次に " + track.getInfo().title + " を再生します").queue();
-							play(guild, musicManager, track);
-						}
+					new Thread(() -> {
+						File file = this.instance.downloadFile(url);
+						String videoId = this.instance.getVideoId(url);
 
-						@Override
-						public void playlistLoaded(AudioPlaylist playlist) {
-							AudioTrack firstTrack = playlist.getSelectedTrack();
+						VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+						AudioManager audioManager = guild.getAudioManager();
+						audioManager.openAudioConnection(voiceChannel);
+						audioManager.setAutoReconnect(false);
 
-							if (firstTrack == null) {
-								firstTrack = playlist.getTracks().get(0);
+						GuildMusicManager musicManager = getGuildAudioPlayer(guild);
+
+						this.playerManager.loadItemOrdered(musicManager, file.getAbsolutePath(), new AudioLoadResultHandler() {
+							@Override
+							public void trackLoaded(AudioTrack track) {
+								embedBuilder.setAuthor("次に " + instance.getConfig().getString("YouTube." + videoId + ".Title") + " を再生します");
+								message.editMessage(embedBuilder.build()).complete();
+								play(guild, musicManager, track);
 							}
 
-							play(guild, musicManager, firstTrack);
-						}
+							@Override
+							public void playlistLoaded(AudioPlaylist playlist) {
+								AudioTrack firstTrack = playlist.getSelectedTrack();
 
-						@Override
-						public void noMatches() {
-						}
+								if (firstTrack == null) {
+									firstTrack = playlist.getTracks().get(0);
+								}
 
-						@Override
-						public void loadFailed(FriendlyException exception) {
-							channel.sendMessage("Could not play: " + exception.getMessage()).queue();
-						}
-					});
+								play(guild, musicManager, firstTrack);
+							}
+
+							@Override
+							public void noMatches() {
+							}
+
+							@Override
+							public void loadFailed(FriendlyException exception) {
+								channel.sendMessage("Could not play: " + exception.getMessage()).queue();
+							}
+						});
+					}).start();
 					return;
 				}
 
@@ -625,11 +641,12 @@ public class MessageListener extends ListenerAdapter {
 
 					event.getMessage().delete().complete();
 
-					this.instance.runCommand(command, new Callback() {
+					ProcessManager.runCommand(command, new Callback() {
 						@Override
-						public void response(String response) {
+						public void line(String response) {
 							System.out.println(response);
 						}
+
 						@Override
 						public void processEnded() {
 							try {
@@ -673,7 +690,7 @@ public class MessageListener extends ListenerAdapter {
 								}
 							});
 						}
-					});
+					}, true);
 					return;
 				}
 

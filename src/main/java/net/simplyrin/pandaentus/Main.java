@@ -1,9 +1,7 @@
 package net.simplyrin.pandaentus;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.ParseException;
@@ -20,6 +18,7 @@ import com.besaba.revonline.pastebinapi.impl.factory.PastebinFactory;
 import com.besaba.revonline.pastebinapi.paste.PasteBuilder;
 import com.besaba.revonline.pastebinapi.paste.PasteExpire;
 import com.besaba.revonline.pastebinapi.paste.PasteVisiblity;
+import com.google.common.io.Files;
 
 import lombok.Data;
 import lombok.Getter;
@@ -38,6 +37,8 @@ import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.pandaentus.utils.TimeUtils;
 import net.simplyrin.pandaentus.utils.Version;
+import net.simplyrin.processmanager.Callback;
+import net.simplyrin.processmanager.ProcessManager;
 import net.simplyrin.rinstream.RinStream;
 
 /**
@@ -76,7 +77,7 @@ public class Main {
 	public void run() {
 		RinStream rinStream = new RinStream();
 		rinStream.setSaveLog(true);
-		System.out.println("setSavingLog : true");
+		System.out.println("setSavingLog: true");
 
 		System.out.println("Loading files...");
 		System.out.println("Build-Version: " + Version.BUILD_TIME);
@@ -405,46 +406,92 @@ public class Main {
 		}
 	}
 
-	public void runCommand(String[] command, Callback callback) {
-		final Process process;
-		try {
-			ProcessBuilder processBuilder = new ProcessBuilder(command);
-			processBuilder.redirectErrorStream(true);
+	public File downloadFile(String url) {
+		final File file = new File("ytdl");
+		file.mkdirs();
 
-			process = processBuilder.start();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
+		final String videoId = this.getVideoId(url);
+
+		final File mp3 = new File(file, videoId + ".mp3");
+		if (mp3.exists()) {
+			System.out.println("Cache found, " + mp3.getName());
+			return mp3;
 		}
 
-		new Thread(() -> {
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			String line = null;
-			try {
-				while ((line = bufferedReader.readLine()) != null) {
-					if (callback != null) {
-						callback.response(line);
+		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-title", videoId }, new Callback() {
+			@Override
+			public void line(String response) {
+				if (!response.toLowerCase().startsWith("error:")) {
+					System.out.println("Title: " + response);
+					config.set("YouTube." + videoId + ".Title", response);
+				}
+			}
+		}, true);
+
+		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-duration", videoId }, new Callback() {
+			boolean ok = false;
+			@Override
+			public void line(String response) {
+				if (response.contains(":")) {
+					System.out.println("Duration: " + response);
+					config.set("YouTube." + videoId + ".Duration", response);
+				}
+				int ll = response.split(":").length;
+				if (ll == 2) {
+					int length = Integer.valueOf(response.split(":")[0]);
+					if (length <= 5) {
+						ok = true;
 					}
 				}
-			} catch (Exception e) {
 			}
-		}).start();
 
-		new Thread(() -> {
-			try {
-				process.waitFor();
-			} catch (Exception e) {
-				e.printStackTrace();
+			@Override
+			public void processEnded() {
+				if (!ok) {
+					System.out.println("Not Ready.");
+					return;
+				}
+
+				ProcessManager.runCommand(new String[] { "youtube-dl", "--audio-format", "mp3", "-x", videoId }, new Callback() {
+					private File file;
+					@Override
+					public void line(String response) {
+						if (response.startsWith("[ffmpeg] Destination:")) {
+							String title = response.replace("[ffmpeg] Destination:", "").replace("\"", "").trim();
+							System.out.println("Filename: " + title);
+							this.file = new File(title);
+						}
+					}
+
+					@Override
+					public void processEnded() {
+						System.out.println("processEnded()");
+						try {
+							Files.move(this.file, mp3);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+						config.set("YouTube." + videoId + ".Path", mp3.getAbsolutePath());
+						System.out.println("P1");
+					}
+				}, false);
 			}
-			if (callback != null) {
-				callback.processEnded();
-			}
-		}).start();
+		}, false);
+		System.out.println("Returning value.");
+		return mp3;
 	}
 
-	public interface Callback {
-		void response(String response);
-		void processEnded();
+	public String getVideoId(String url) {
+		String tempVideoId = url.replace("https://www.youtube.com/watch?v=", "");
+		if (tempVideoId.contains("&")) {
+			tempVideoId = tempVideoId.split("&")[0];
+		}
+		tempVideoId = tempVideoId.replace("https://youtu.be/", "");
+		tempVideoId = tempVideoId.replace("http://youtu.be/", "");
+		tempVideoId = tempVideoId.replace("http://music.youtube.com/watch?v=", "");
+		tempVideoId = tempVideoId.replace("http://www.youtube.com/watch?v=", "");
+		return tempVideoId;
 	}
 
 }

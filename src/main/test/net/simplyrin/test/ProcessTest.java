@@ -1,8 +1,5 @@
 package net.simplyrin.test;
 
-import java.io.File;
-import java.util.UUID;
-
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
 
@@ -29,39 +26,15 @@ import net.simplyrin.processmanager.ProcessManager;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class YTDL {
+public class ProcessTest {
 
 	public static void main(String[] args) {
-		ProcessManager.runCommand(new String[] { "youtube-dl", "https://music.youtube.com/watch?v=r7TfPL1npOY" }, new Callback() {
-			File file;
+		ProcessManager.runCommand(new String[] { "ffmpeg", "--help" }, new Callback() {
 			@Override
 			public void line(String response) {
-				if (response.startsWith("[ffmpeg] Merging formats into")) {
-					String title = response.replace("[ffmpeg] Merging formats into", "").replace("\"", "").trim();
-					System.out.println("Title: " + title);
-					this.file = new File(title + ".mkv");
-				}
-				if (response.startsWith("[download]") && response.contains(".mkv")) {
-					String title = response.replace("[download]", "").split(".mkv")[0].trim() + ".mkv";
-					System.out.println("Title: " + title);
-					this.file = new File(title);
-				}
+				System.out.println(response);
 			}
-
-			@Override
-			public void processEnded() {
-				File mp3 = new File("output_" + UUID.randomUUID().toString().split("-")[0] + ".mp3");
-
-				System.out.println(this.file.exists());
-
-				ProcessManager.runCommand(new String[] { "ffmpeg", "-i", this.file.getAbsolutePath(), mp3.getAbsolutePath() }, new Callback() {
-					@Override
-					public void line(String response) {
-						System.out.println(response);
-					}
-				}, true);
-			}
-		}, true);
+		}, false);
 	}
 
 }

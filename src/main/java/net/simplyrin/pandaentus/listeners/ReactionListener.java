@@ -13,7 +13,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.Main.Callback;
+import net.simplyrin.processmanager.Callback;
+import net.simplyrin.processmanager.ProcessManager;
 
 /**
  * Created by SimplyRin on 2020/06/21.
@@ -111,23 +112,19 @@ public class ReactionListener extends ListenerAdapter {
 		embedBuilder.setAuthor(user.getName() + " -> 処理中...", null, loadingUrl);
 		Message phase = channel.sendMessage(embedBuilder.build()).complete();
 
-		this.instance.runCommand(new String[]{ "youtube-dl", "--get-title", videoId }, new Callback() {
+		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-title", videoId }, new Callback() {
 			@Override
-			public void response(String response) {
+			public void line(String response) {
 				if (!response.toLowerCase().startsWith("error:")) {
 					System.out.println("Title: " + response);
 					instance.getConfig().set("YouTube." + videoId + ".Title", response);
 				}
 			}
+		}, true);
 
+		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-duration", videoId }, new Callback() {
 			@Override
-			public void processEnded() {
-			}
-		});
-
-		this.instance.runCommand(new String[]{ "youtube-dl", "--get-duration", videoId }, new Callback() {
-			@Override
-			public void response(String response) {
+			public void line(String response) {
 				if (response.contains(":")) {
 					System.out.println("Duration: " + response);
 					instance.getConfig().set("YouTube." + videoId + ".Duration", response);
@@ -150,10 +147,10 @@ public class ReactionListener extends ListenerAdapter {
 
 				embedBuilder.setAuthor(user.getName() + " -> ダウンロードしています...", null, downloadingUrl);
 				phase.editMessage(embedBuilder.build()).complete();
-				instance.runCommand(new String[] { "youtube-dl", "--audio-format", "mp3", "-x", videoId }, new Callback() {
+				ProcessManager.runCommand(new String[] { "youtube-dl", "--audio-format", "mp3", "-x", videoId }, new Callback() {
 					private File file;
 					@Override
-					public void response(String response) {
+					public void line(String response) {
 						if (response.startsWith("[ffmpeg] Destination:")) {
 							String title = response.replace("[ffmpeg] Destination:", "").replace("\"", "").trim();
 							System.out.println("Filename: " + title);
@@ -193,13 +190,9 @@ public class ReactionListener extends ListenerAdapter {
 							message.delete().complete();
 						}
 					}
-				});
+				}, true);
 			}
-
-			@Override
-			public void processEnded() {
-			}
-		});
+		}, true);
 		return;
 	}
 
