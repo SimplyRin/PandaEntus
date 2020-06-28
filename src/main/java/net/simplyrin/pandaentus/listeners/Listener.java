@@ -153,10 +153,7 @@ public class Listener extends ListenerAdapter {
 
 		if (voiceChannels.size() == count) {
 			int c = (count + 1);
-			VoiceChannel voiceChannel = category.createVoiceChannel("General-" + c).setUserlimit(99).complete();
-			if (c == 2) {
-				this.instance.getGuildCallManager(voiceChannel.getId()).joined(member.getId());
-			}
+			category.createVoiceChannel("General-" + c).setUserlimit(99).complete();
 		}
 	}
 
