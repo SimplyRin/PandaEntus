@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +31,6 @@ import net.simplyrin.config.Config;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.MessageListener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
-import net.simplyrin.pandaentus.utils.GuildCallManager;
 import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.pandaentus.utils.TimeUtils;
@@ -143,16 +141,6 @@ public class Main {
 
 	public void addShutdownHook(Runnable runnable) {
 		Runtime.getRuntime().addShutdownHook(new Thread(runnable));
-	}
-
-	@Getter
-	private HashMap<String, GuildCallManager> guildCallMaps = new HashMap<>();
-
-	public GuildCallManager getGuildCallManager(String channelId) {
-		if (this.guildCallMaps.get(channelId) == null) {
-			this.guildCallMaps.put(channelId, new GuildCallManager(this, channelId));
-		}
-		return this.guildCallMaps.get(channelId);
 	}
 
 	public String getNowTime() {
