@@ -27,13 +27,13 @@ import net.simplyrin.pandaentus.Main;
  */
 public class PoolItems {
 
-	private Main instance;
+	// private Main instance;
 
 	private File file;
 	private Configuration config;
 
 	public PoolItems(Main instance) {
-		this.instance = instance;
+		// this.instance = instance;
 
 		this.file = new File("pool.yml");
 		if (!this.file.exists()) {

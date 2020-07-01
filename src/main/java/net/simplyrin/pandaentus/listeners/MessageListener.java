@@ -203,6 +203,61 @@ public class MessageListener extends ListenerAdapter {
 					channel.sendMessage(embedBuilder.build()).complete();
 					return;
 				}
+
+				if (args[0].equalsIgnoreCase("!disk")) {
+					ProcessManager.runCommand(new String[] { "df", "-h", "/" }, new Callback() {
+						int i = 0;
+
+						String size, used, available, usePercent;
+						Color color;
+
+						@Override
+						public void line(String line) {
+							System.out.println(line);
+
+							if (this.i == 1) {
+								String[] args = line.trim().replaceAll(" +", " ").split(" ");
+								int i = 0;
+								for (String arg : args) {
+									System.out.println("args[" + i + "] -> " + arg);
+									i++;
+								}
+								this.size = args[1];
+								this.used = args[2];
+								this.available = args[3];
+								this.usePercent = args[4];
+
+								int percent = Integer.valueOf(this.usePercent.replace("%", "").trim());
+								if (percent >= 80) {
+									color = Color.RED;
+								} else if (percent >= 60) {
+									color = Color.YELLOW;
+								} else if (percent >= 0) {
+									color = Color.GREEN;
+								}
+							}
+
+							if (this.i == 0) {
+								this.i = 1;
+							}
+						}
+
+						@Override
+						public void processEnded() {
+							try {
+								Thread.sleep(100);
+							} catch (Exception e) {
+							}
+							embedBuilder.setColor(color);
+							embedBuilder.setAuthor("Disk usage (" + this.usePercent + "/100%)");
+							embedBuilder.addField("Size", this.size, true);
+							embedBuilder.addField("Used", this.used, true);
+							embedBuilder.addField("Free", this.available, true);
+							channel.sendMessage(embedBuilder.build()).complete();
+						}
+					}, true);
+					return;
+				}
 			}
 
 			// General
