@@ -1,5 +1,5 @@
 @echo off
-timeout 1
+timeout 2
 
 echo cd target
 cd target

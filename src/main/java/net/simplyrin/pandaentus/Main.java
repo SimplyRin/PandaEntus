@@ -21,6 +21,7 @@ import com.google.common.io.Files;
 
 import lombok.Data;
 import lombok.Getter;
+import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -81,7 +82,6 @@ public class Main {
 	public void run() {
 		RinStream rinStream = new RinStream();
 		rinStream.setSaveLog(true);
-		rinStream.enableError();
 
 		if (this.args.length > 0 && this.args[0].equalsIgnoreCase("-tail")) {
 			rinStream.tail();
@@ -125,13 +125,15 @@ public class Main {
 
 		this.voiceTextApiKey = this.config.getString("VoiceTextApiKey");
 
+		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
+
 		String token = this.config.getString("Token");
 		if (token.equals("BOT_TOKEN_HERE")) {
 			System.out.println("Discord Bot Token を config.yml に入力してください！");
 			System.exit(0);
 			return;
 		}
-		JDABuilder jdaBuilder = JDABuilder.createDefault(token);
+		jdaBuilder.setToken(token);
 		jdaBuilder.addEventListeners(new Listener(this));
 		jdaBuilder.addEventListeners(new MessageListener(this));
 		jdaBuilder.addEventListeners(new ReactionListener(this));
