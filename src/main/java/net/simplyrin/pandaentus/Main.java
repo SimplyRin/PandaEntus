@@ -32,6 +32,7 @@ import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.MessageListener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
 import net.simplyrin.pandaentus.utils.PoolItems;
+import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.pandaentus.utils.TimeUtils;
 import net.simplyrin.pandaentus.utils.Version;
@@ -61,8 +62,10 @@ import net.simplyrin.rinstream.RinStream;
 public class Main {
 
 	public static void main(String[] args) {
-		new Main().run();
+		new Main(args).run();
 	}
+
+	private String[] args;
 
 	private Configuration config;
 	private TimeManager timeManager;
@@ -72,9 +75,25 @@ public class Main {
 	private String voiceTextApiKey;
 	private List<Message> messages = new ArrayList<>();
 
+	public Main(String[] args) {
+		this.args = args;
+	}
+
 	public void run() {
 		RinStream rinStream = new RinStream();
 		rinStream.setSaveLog(true);
+
+		if (this.args.length > 0 && this.args[0].equalsIgnoreCase("-tail")) {
+			rinStream.tail();
+			ThreadPool.run(() -> {
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+				}
+				System.out.println("Tail test.");
+			});
+		}
+
 		System.out.println("setSavingLog: true");
 
 		System.out.println("Loading files...");
