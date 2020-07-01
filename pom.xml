@@ -146,7 +146,7 @@
     <dependency>
       <groupId>net.simplyrin.rinstream</groupId>
       <artifactId>RinStream</artifactId>
-      <version>1.2.1</version>
+      <version>1.2.2</version>
     </dependency>
     <dependency>
       <groupId>net.simplyrin.processmanager</groupId>
@@ -166,7 +166,7 @@
     <dependency>
       <groupId>net.dv8tion</groupId>
       <artifactId>JDA</artifactId>
-      <version>4.1.1_108</version>
+      <version>4.2.0_170</version>
     </dependency>
     <dependency>
       <groupId>com.sedmelluq</groupId>
