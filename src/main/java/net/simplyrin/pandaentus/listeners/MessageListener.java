@@ -615,6 +615,7 @@ public class MessageListener extends ListenerAdapter {
 					embedBuilder.setColor(Color.RED);
 					embedBuilder.setDescription("ループ再生を無効にしました。");
 					this.loopMap.remove(guild);
+					this.previousTrack.remove(guild);
 				} else {
 					embedBuilder.setColor(Color.GREEN);
 					embedBuilder.setDescription("ループ再生を有効にしました。");
@@ -637,7 +638,7 @@ public class MessageListener extends ListenerAdapter {
 					embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
 					Message message = channel.sendMessage(embedBuilder.build()).complete();
 
-					new Thread(() -> {
+					ThreadPool.run(() -> {
 						File file = this.instance.downloadFile(url);
 						String videoId = this.instance.getVideoId(url);
 
@@ -652,7 +653,8 @@ public class MessageListener extends ListenerAdapter {
 						this.playerManager.loadItemOrdered(musicManager, file.getAbsolutePath(), new AudioLoadResultHandler() {
 							@Override
 							public void trackLoaded(AudioTrack track) {
-								embedBuilder.setAuthor("次に " + instance.getConfig().getString("YouTube." + videoId + ".Title") + " を再生します");
+								String title = instance.getConfig().getString("YouTube." + videoId + ".Title");
+								embedBuilder.setAuthor("次に " + title + " を再生します");
 								message.editMessage(embedBuilder.build()).complete();
 								previousTrack.put(guild, track);
 
@@ -660,15 +662,23 @@ public class MessageListener extends ListenerAdapter {
 									String duration = instance.getConfig().getString("YouTube." + videoId + ".Duration");
 									int time = durationToTime(duration);
 
+									if (time == 0) {
+										System.out.println(title + " time is zero(0)! return.");
+										return;
+									}
+
 									try {
-										System.out.println("Sleep: " + time + "s");
 										TimeUnit.SECONDS.sleep(time);
 									} catch (Exception e) {
 									}
 
 									if (loopMap.get(guild) != null) {
-										System.out.println("ループが有効になっています。再生します。");
-										trackLoaded(loopMap.get(guild).makeClone());
+										VoiceChannel vc = guild.getVoiceChannelById(voiceChannel.getId());
+										if (vc != null) {
+											if (vc.getMembers().size() >= 1) {
+												trackLoaded(loopMap.get(guild).makeClone());
+											}
+										}
 									}
 								});
 
@@ -697,7 +707,7 @@ public class MessageListener extends ListenerAdapter {
 								channel.sendMessage("Could not play: " + exception.getMessage()).queue();
 							}
 						});
-					}).start();
+					});
 					return;
 				}
 
@@ -717,7 +727,7 @@ public class MessageListener extends ListenerAdapter {
 					Message message = null;
 
 					int type = 0;
-					for (int i = 0; i <= 8; i++) {
+					for (int i = 0; i <= 10; i++) {
 						if (message == null) {
 							message = channel.sendMessage("<o/").complete();
 						} else {
@@ -731,7 +741,7 @@ public class MessageListener extends ListenerAdapter {
 						}
 
 						try {
-							Thread.sleep(500);
+							Thread.sleep(400);
 						} catch (InterruptedException e) {
 						}
 					}
@@ -872,8 +882,6 @@ public class MessageListener extends ListenerAdapter {
 
 	public int durationToTime(String duration) {
 		int i = 0;
-
-		System.out.println("Duration: " + duration);
 
 		try {
 			if (duration.contains(":")) {
