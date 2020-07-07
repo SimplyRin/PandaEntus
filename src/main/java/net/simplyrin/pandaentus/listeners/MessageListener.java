@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonObject;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
@@ -70,6 +71,8 @@ public class MessageListener extends ListenerAdapter {
 	private Main instance;
 	private PrivateChatMessage privateChatMessage;
 	private Map<String, AkinatorManager> akiMap;
+	private Map<Guild, AudioTrack> loopMap;
+	private Map<Guild, AudioTrack> previousTrack;
 
 	private final AudioPlayerManager playerManager;
 	private final Map<Long, GuildMusicManager> musicManagers;
@@ -77,6 +80,8 @@ public class MessageListener extends ListenerAdapter {
 	public MessageListener(Main instance) {
 		this.instance = instance;
 		this.akiMap = new HashMap<>();
+		this.loopMap = new HashMap<>();
+		this.previousTrack = new HashMap<>();
 
 		this.musicManagers = new HashMap<>();
 
@@ -113,6 +118,12 @@ public class MessageListener extends ListenerAdapter {
 		if (args.length > 0) {
 			// Admin
 			if (user.getId().equals("224428706209202177")) {
+				if (args[0].equalsIgnoreCase("!shutdown")) {
+					channel.sendMessage(":wave:").complete();
+					System.exit(0);
+					return;
+				}
+
 				if (args[0].equalsIgnoreCase("!add-vc")) {
 					if (args.length > 1) {
 						int i;
@@ -599,6 +610,20 @@ public class MessageListener extends ListenerAdapter {
 				}
 			}
 
+			if (args[0].equalsIgnoreCase("!loop")) {
+				if (this.loopMap.get(guild) != null) {
+					embedBuilder.setColor(Color.RED);
+					embedBuilder.setDescription("ループ再生を無効にしました。");
+					this.loopMap.remove(guild);
+				} else {
+					embedBuilder.setColor(Color.GREEN);
+					embedBuilder.setDescription("ループ再生を有効にしました。");
+					this.loopMap.put(guild, this.previousTrack.get(guild));
+				}
+
+				channel.sendMessage(embedBuilder.build()).complete();
+			}
+
 			if (args[0].equalsIgnoreCase("!play")) {
 				if (args.length > 1) {
 					String url = args[1];
@@ -623,11 +648,30 @@ public class MessageListener extends ListenerAdapter {
 
 						GuildMusicManager musicManager = getGuildAudioPlayer(guild);
 
+						System.out.println("Loading item...");
 						this.playerManager.loadItemOrdered(musicManager, file.getAbsolutePath(), new AudioLoadResultHandler() {
 							@Override
 							public void trackLoaded(AudioTrack track) {
 								embedBuilder.setAuthor("次に " + instance.getConfig().getString("YouTube." + videoId + ".Title") + " を再生します");
 								message.editMessage(embedBuilder.build()).complete();
+								previousTrack.put(guild, track);
+
+								ThreadPool.run(() -> {
+									String duration = instance.getConfig().getString("YouTube." + videoId + ".Duration");
+									int time = durationToTime(duration);
+
+									try {
+										System.out.println("Sleep: " + time + "s");
+										TimeUnit.SECONDS.sleep(time);
+									} catch (Exception e) {
+									}
+
+									if (loopMap.get(guild) != null) {
+										System.out.println("ループが有効になっています。再生します。");
+										trackLoaded(loopMap.get(guild).makeClone());
+									}
+								});
+
 								play(guild, musicManager, track);
 							}
 
@@ -639,7 +683,9 @@ public class MessageListener extends ListenerAdapter {
 									firstTrack = playlist.getTracks().get(0);
 								}
 
-								play(guild, musicManager, firstTrack);
+								if (loopMap.get(guild) == null) {
+									play(guild, musicManager, firstTrack);
+								}
 							}
 
 							@Override
@@ -664,6 +710,40 @@ public class MessageListener extends ListenerAdapter {
 			if (args[0].equalsIgnoreCase("!skip")) {
 				this.skipTrack(event.getTextChannel());
 				return;
+			}
+
+			if (args[0].equalsIgnoreCase("!dab")) {
+				ThreadPool.run(() -> {
+					Message message = null;
+
+					int type = 0;
+					for (int i = 0; i <= 8; i++) {
+						if (message == null) {
+							message = channel.sendMessage("<o/").complete();
+						} else {
+							if (type == 1) {
+								type = 0;
+								message.editMessage("<o/").complete();
+							} else if (type == 0) {
+								type = 1;
+								message.editMessage("\\o>").complete();
+							}
+						}
+
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+						}
+					}
+
+					try {
+						Thread.sleep(2500);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+					message.delete().complete();
+				});
 			}
 
 			if (args[0].equalsIgnoreCase("!kv")) {
@@ -788,6 +868,28 @@ public class MessageListener extends ListenerAdapter {
 			return member.getNickname();
 		}
 		return member.getUser().getName();
+	}
+
+	public int durationToTime(String duration) {
+		int i = 0;
+
+		System.out.println("Duration: " + duration);
+
+		try {
+			if (duration.contains(":")) {
+				int min = Integer.valueOf(duration.split(":")[0]);
+				int sec = Integer.valueOf(duration.split(":")[1]);
+
+				i += min * 60;
+				i += sec;
+			} else {
+				i += Integer.valueOf(duration);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return i;
 	}
 
 }

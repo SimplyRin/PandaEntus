@@ -81,6 +81,7 @@ public class Main {
 
 	public void run() {
 		RinStream rinStream = new RinStream();
+		rinStream.enableError();
 		rinStream.setSaveLog(true);
 
 		if (this.args.length > 0 && this.args[0].equalsIgnoreCase("-tail")) {
@@ -90,7 +91,7 @@ public class Main {
 					Thread.sleep(1000);
 				} catch (Exception e) {
 				}
-				System.out.println("Tail test.");
+				System.out.println("Tail enabled.");
 			});
 		}
 
