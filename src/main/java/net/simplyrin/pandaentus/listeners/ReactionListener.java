@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
 
@@ -85,7 +86,7 @@ public class ReactionListener extends ListenerAdapter {
 		final User user = event.getUser();
 
 		if (mp3.exists()) {
-			new Thread(() -> {
+			ThreadPool.run(() -> {
 				EmbedBuilder embedBuilder = new EmbedBuilder();
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.setAuthor("ファイルが準備できました。");
@@ -99,7 +100,7 @@ public class ReactionListener extends ListenerAdapter {
 				}
 
 				tempMessage.delete().complete();
-			}).start();
+			});
 			return;
 		}
 

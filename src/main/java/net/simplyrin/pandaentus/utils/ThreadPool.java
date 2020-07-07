@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
  */
 public class ThreadPool {
 
-	private static ExecutorService executorService = Executors.newFixedThreadPool(64);
+	private static ExecutorService executorService = Executors.newFixedThreadPool(512);
 
 	public static void run(Runnable runnable) {
 		runAsync(runnable);
