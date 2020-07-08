@@ -110,6 +110,7 @@ public class Main {
 
 			Configuration config = Config.getConfig(file);
 			config.set("Token", "BOT_TOKEN_HERE");
+			config.set("Admin-ID", "YOUR_ACCOUNT_ID_HERE");
 			config.set("Pastebin.API-Key", "PASTEBIN_API_KEY_HERE");
 			config.set("VoiceTextApiKey", "VOICETEXT_API_KEY_HERE");
 			config.set("Message-Type.Enable-Simple-Mode", false);

@@ -99,6 +99,8 @@ public class MessageListener extends ListenerAdapter {
 		this.privateChatMessage.onPrivateMessageReceived(event);
 	}
 
+	boolean notice = false;
+
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
 		if (event.isFromType(ChannelType.PRIVATE)) {
@@ -116,11 +118,38 @@ public class MessageListener extends ListenerAdapter {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		if (args.length > 0) {
-			// Admin
-			if (user.getId().equals("224428706209202177")) {
+			// 管理者向けコマンド
+			String adminId = this.instance.getConfig().getString("Admin-ID");
+			if (adminId.equals("") || adminId == null) {
+				this.instance.getConfig().set("Admin-ID", "999");
+				if (!this.notice) {
+					System.out.println("Admin-ID が設定されていません。Config ファイルから Admin-ID を設定してください。");
+					this.notice = true;
+				}
+				adminId = "999";
+			}
+
+			if (user.getId().equals(adminId)) {
 				if (args[0].equalsIgnoreCase("!shutdown")) {
 					channel.sendMessage(":wave:").complete();
 					System.exit(0);
+					return;
+				}
+
+				if (args[0].equalsIgnoreCase("!init")) {
+					if (args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
+						Category textCategory = guild.createCategory("Text Channels").complete();
+						TextChannel textChannel = textCategory.createTextChannel("general-1").complete();
+						Category voiceCategory = guild.createCategory("Voice Channels").complete();
+						voiceCategory.createVoiceChannel("General-1").setUserlimit(99).complete();
+						textChannel.sendMessage("Bot で必要なカテゴリ、チャンネルを自動作成しました。").complete();
+						return;
+					}
+
+					channel.sendMessage("!init confirm と入力すると、Bot で必要なカテゴリ、チャンネルを自動的に作成します。\n"
+							+ "作成されるチャンネルは以下のとおりです。\nカテゴリ: `Text Channels`, `Voice Channels`"
+							+ "\nテキストチャンネル: `#general`"
+							+ "\nボイスチャンネル: `General-1`").complete();
 					return;
 				}
 
@@ -338,7 +367,7 @@ public class MessageListener extends ListenerAdapter {
 
 			if (args[0].equalsIgnoreCase("!pool")) {
 				if (args.length > 1) {
-					if (user.getId().equals("224428706209202177") && args.length > 3 && args[1].equalsIgnoreCase("set")) {
+					if (user.getId().equals(adminId) && args.length > 3 && args[1].equalsIgnoreCase("set")) {
 						String key = args[2];
 						String game = "";
 						for (int i = 3; i < args.length; i++) {
@@ -634,6 +663,11 @@ public class MessageListener extends ListenerAdapter {
 						return;
 					}
 
+					if (url.contains("playlist")) {
+						channel.sendMessage("現在プレイリストには対応していません。").complete();
+						return;
+					}
+
 					embedBuilder.setColor(Color.RED);
 					embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
 					Message message = channel.sendMessage(embedBuilder.build()).complete();
@@ -725,18 +759,19 @@ public class MessageListener extends ListenerAdapter {
 			if (args[0].equalsIgnoreCase("!dab")) {
 				ThreadPool.run(() -> {
 					Message message = null;
+					String asi = "\n   |\n  /\\";
 
 					int type = 0;
 					for (int i = 0; i <= 10; i++) {
 						if (message == null) {
-							message = channel.sendMessage("<o/").complete();
+							message = channel.sendMessage("<o/" + asi).complete();
 						} else {
 							if (type == 1) {
 								type = 0;
-								message.editMessage("<o/").complete();
+								message.editMessage("<o/" + asi).complete();
 							} else if (type == 0) {
 								type = 1;
-								message.editMessage("\\o>").complete();
+								message.editMessage("\\o>" + asi).complete();
 							}
 						}
 
@@ -752,6 +787,7 @@ public class MessageListener extends ListenerAdapter {
 						e.printStackTrace();
 					}
 
+					event.getMessage().delete().complete();
 					message.delete().complete();
 				});
 			}

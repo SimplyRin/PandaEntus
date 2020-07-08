@@ -279,9 +279,12 @@ public class Listener extends ListenerAdapter {
 
 			for (VoiceChannel voiceChannel : voiceChannels) {
 				try {
-					voiceChannel.delete().complete();
+					if (voiceChannel != null) {
+						voiceChannel.delete().complete();
+					}
 				} catch (Exception e) {
-					this.instance.postError(e);
+					e.printStackTrace();
+					// this.instance.postError(e);
 				}
 			}
 
