@@ -9,7 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.besaba.revonline.pastebinapi.Pastebin;
@@ -18,19 +20,30 @@ import com.besaba.revonline.pastebinapi.paste.PasteBuilder;
 import com.besaba.revonline.pastebinapi.paste.PasteExpire;
 import com.besaba.revonline.pastebinapi.paste.PasteVisiblity;
 import com.google.common.io.Files;
+import com.google.common.reflect.ClassPath;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import lombok.Data;
 import lombok.Getter;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
+import net.simplyrin.pandaentus.audio.GuildMusicManager;
+import net.simplyrin.pandaentus.listeners.CommandExecutor;
 import net.simplyrin.pandaentus.listeners.Listener;
-import net.simplyrin.pandaentus.listeners.MessageListener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
+import net.simplyrin.pandaentus.utils.BaseCommand;
 import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -62,10 +75,8 @@ import net.simplyrin.rinstream.RinStream;
 public class Main {
 
 	public static void main(String[] args) {
-		new Main(args).run();
+		new Main().run(args);
 	}
-
-	private String[] args;
 
 	private Configuration config;
 	private TimeManager timeManager;
@@ -75,16 +86,20 @@ public class Main {
 	private String voiceTextApiKey;
 	private List<Message> messages = new ArrayList<>();
 
-	public Main(String[] args) {
-		this.args = args;
-	}
+	private CommandExecutor commandRegister;
 
-	public void run() {
+	private Map<Guild, AudioTrack> loopMap;
+	private Map<Guild, AudioTrack> previousTrack;
+
+	private AudioPlayerManager playerManager;
+	private Map<Long, GuildMusicManager> musicManagers;
+
+	public void run(String[] args) {
 		RinStream rinStream = new RinStream();
 		rinStream.enableError();
 		rinStream.setSaveLog(true);
 
-		if (this.args.length > 0 && this.args[0].equalsIgnoreCase("-tail")) {
+		if (args.length > 0 && args[0].equalsIgnoreCase("-tail")) {
 			rinStream.tail();
 			ThreadPool.run(() -> {
 				try {
@@ -120,15 +135,13 @@ public class Main {
 
 		this.config = Config.getConfig(file);
 		this.timeManager = new TimeManager(this);
-
 		this.poolItems = new PoolItems(this);
-
 		this.timeUtils = new TimeUtils();
-
 		this.voiceTextApiKey = this.config.getString("VoiceTextApiKey");
 
-		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
+		this.commandRegister = new CommandExecutor(this);
 
+		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
 		String token = this.config.getString("Token");
 		if (token.equals("BOT_TOKEN_HERE")) {
 			System.out.println("Discord Bot Token を config.yml に入力してください！");
@@ -136,9 +149,25 @@ public class Main {
 			return;
 		}
 		jdaBuilder.setToken(token);
+		jdaBuilder.addEventListeners(this.commandRegister);
 		jdaBuilder.addEventListeners(new Listener(this));
-		jdaBuilder.addEventListeners(new MessageListener(this));
+		// jdaBuilder.addEventListeners(new MessageListener(this));
 		jdaBuilder.addEventListeners(new ReactionListener(this));
+
+		// 自動登録
+		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		try {
+			for (final ClassPath.ClassInfo classInfo : ClassPath.from(classLoader).getTopLevelClasses()) {
+				if (classInfo.getName().startsWith("net.simplyrin.pandaentus.command")) {
+					BaseCommand baseCommand = (BaseCommand) Class.forName(classInfo.getName()).newInstance();
+					this.commandRegister.registerCommand(baseCommand.getCommand(), baseCommand);
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Please report this error!");
+			e.printStackTrace();
+			return;
+		}
 
 		this.jda = null;
 		try {
@@ -147,7 +176,16 @@ public class Main {
 			e.printStackTrace();
 		}
 
-		// this.jda.getPresence().setActivity(Activity.playing("Build " + buildTime));
+		this.loopMap = new HashMap<>();
+		this.previousTrack = new HashMap<>();
+
+		this.musicManagers = new HashMap<>();
+		this.playerManager = new DefaultAudioPlayerManager();
+		this.playerManager.createPlayer();
+		AudioSourceManagers.registerRemoteSources(this.playerManager);
+		AudioSourceManagers.registerLocalSource(this.playerManager);
+
+		this.jda.getPresence().setActivity(Activity.playing("Try !help"));
 		// this.jda.getPresence().setActivity(Activity.playing("Source: github.com/SimplyRin/PandaEntus"));
 
 		this.addShutdownHook(() -> {
@@ -502,5 +540,73 @@ public class Main {
 		tempVideoId = tempVideoId.replace("http://www.youtube.com/watch?v=", "");
 		return tempVideoId;
 	}
+
+	public String getNickname(Member member) {
+		if (member.getNickname() != null) {
+			return member.getNickname();
+		}
+		return member.getUser().getName();
+	}
+
+	private boolean notice;
+	public String getAdminId() {
+		String adminId = this.getConfig().getString("Admin-ID");
+		if (adminId.equals("") || adminId == null) {
+			this.getConfig().set("Admin-ID", "999");
+			if (!this.notice) {
+				System.out.println("Admin-ID が設定されていません。Config ファイルから Admin-ID を設定してください。");
+				this.notice = true;
+			}
+			adminId = "999";
+		}
+		return adminId;
+	}
+
+	public synchronized GuildMusicManager getGuildAudioPlayer(Guild guild) {
+		long guildId = Long.parseLong(guild.getId());
+		GuildMusicManager musicManager = musicManagers.get(guildId);
+
+		if (musicManager == null) {
+			musicManager = new GuildMusicManager(playerManager);
+			musicManagers.put(guildId, musicManager);
+		}
+
+		guild.getAudioManager().setSendingHandler(musicManager.getSendHandler());
+
+		return musicManager;
+	}
+
+	public void play(Guild guild, GuildMusicManager musicManager, AudioTrack track) {
+		musicManager.player.setVolume(20);
+		musicManager.scheduler.queue(track);
+	}
+
+	public void skipTrack(TextChannel channel) {
+		GuildMusicManager musicManager = getGuildAudioPlayer(channel.getGuild());
+		musicManager.scheduler.nextTrack();
+
+		channel.sendMessage("Skipped to next track.").queue();
+	}
+
+	public int durationToTime(String duration) {
+		int i = 0;
+
+		try {
+			if (duration.contains(":")) {
+				int min = Integer.valueOf(duration.split(":")[0]);
+				int sec = Integer.valueOf(duration.split(":")[1]);
+
+				i += min * 60;
+				i += sec;
+			} else {
+				i += Integer.valueOf(duration);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return i;
+	}
+
 
 }
