@@ -1,11 +1,13 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
+import java.awt.Color;
 import java.util.concurrent.BlockingQueue;
 
 import org.joor.Reflect;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
@@ -50,6 +52,8 @@ public class YouTubePlaylistCommand implements BaseCommand {
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+
 		MessageChannel channel = event.getChannel();
 
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(event.getGuild());
@@ -60,9 +64,13 @@ public class YouTubePlaylistCommand implements BaseCommand {
 			return;
 		}
 
-		int i = 1;
 		String message = "";
 
+		if (instance.getNowPlaying() != null) {
+			embedBuilder.setAuthor("🎵 再生中の音楽: " + instance.getNowPlaying());
+		}
+
+		int i = 1;
 		for (AudioTrack audioTrack : queue) {
 			String title = "";
 			for (String key : instance.getConfig().getSection("YouTube").getKeys()) {
@@ -71,17 +79,21 @@ public class YouTubePlaylistCommand implements BaseCommand {
 					title = instance.getConfig().getString("YouTube." + key + ".Title");
 				}
 			}
-			message += i + ": " + title + "\n";
+			message += "**" + i + ":** __" + title + "__\n";
+			i++;
 		}
 
 		if (message.length() == 0) {
-			channel.sendMessage("再生街の曲はありません。").complete();
+			channel.sendMessage("再生待ちの曲はありません。").complete();
 			return;
 		}
 		if (message.length() >= 1800) {
 			message = message.substring(0, 1800);
 		}
-		channel.sendMessage(message).complete();
+		embedBuilder.setDescription(message);
+		embedBuilder.setColor(Color.CYAN);
+		embedBuilder.setFooter("追加: !play, スキップ: !skip");
+		channel.sendMessage(embedBuilder.build()).complete();
 	}
 
 }

@@ -124,6 +124,16 @@ public class YouTubePlayCommand implements BaseCommand {
 								}
 							}
 						});
+						ThreadPool.run(() -> {
+							instance.setNowPlaying(title);
+							try {
+								TimeUnit.MINUTES.sleep(4);
+							} catch (Exception e) {
+							}
+							if (instance.getNowPlaying().equals(title)) {
+								instance.setNowPlaying(null);
+							}
+						});
 
 						instance.play(guild, musicManager, track);
 					}

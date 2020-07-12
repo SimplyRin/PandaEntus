@@ -97,6 +97,8 @@ public class Main {
 	private Map<Long, GuildMusicManager> musicManagers;
 
 	@Setter
+	private String nowPlaying;
+	@Setter
 	private AudioPlaylist audioPlaylist;
 
 	public void run(String[] args) {
