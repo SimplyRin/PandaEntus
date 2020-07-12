@@ -1,6 +1,7 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.admin;
 
 import net.dv8tion.jda.api.entities.Emote;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.utils.BaseCommand;
@@ -43,9 +44,17 @@ public class EmojisCommand implements BaseCommand {
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
-		for (Emote emote : event.getGuild().getEmotes()) {
-			System.out.println(emote.getName() + ":" + emote.getImageUrl());
+		User user = event.getAuthor();
+
+		if (!user.getId().equals(instance.getAdminId())) {
+			return;
 		}
+
+		String message = "";
+		for (Emote emote : event.getGuild().getEmotes()) {
+			message += emote.getName() + " -> " + emote.getId() + ", " + emote.getImageUrl() + "\n";
+		}
+		event.getChannel().sendMessage(message).complete();
 	}
 
 }
