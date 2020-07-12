@@ -130,6 +130,8 @@ public class YouTubePlayCommand implements BaseCommand {
 
 					@Override
 					public void playlistLoaded(AudioPlaylist playlist) {
+						instance.setAudioPlaylist(playlist);
+						System.out.println("プレイリストが読み込まれました。");
 						AudioTrack firstTrack = playlist.getSelectedTrack();
 
 						if (firstTrack == null) {

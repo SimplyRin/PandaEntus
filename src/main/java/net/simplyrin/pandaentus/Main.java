@@ -24,10 +24,12 @@ import com.google.common.reflect.ClassPath;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -93,6 +95,9 @@ public class Main {
 
 	private AudioPlayerManager playerManager;
 	private Map<Long, GuildMusicManager> musicManagers;
+
+	@Setter
+	private AudioPlaylist audioPlaylist;
 
 	public void run(String[] args) {
 		RinStream rinStream = new RinStream();
@@ -190,7 +195,7 @@ public class Main {
 
 		this.addShutdownHook(() -> {
 			jda.shutdown();
-			Config.saveConfig(Main.this.config, "config.yml");
+			Config.saveConfig(this.config, "config.yml");
 			poolItems.save();
 			System.out.println("Config ファイルを保存しました。");
 
@@ -479,8 +484,11 @@ public class Main {
 			boolean ok = false;
 			@Override
 			public void line(String response) {
+				if (response.startsWith("ERROR:")) {
+					System.out.println("An error occured: " + response);
+					return;
+				}
 				if (response.contains(":")) {
-					System.out.println("Duration: " + response);
 					config.set("YouTube." + videoId + ".Duration", response);
 				}
 				int ll = response.split(":").length;
@@ -495,7 +503,7 @@ public class Main {
 			@Override
 			public void processEnded() {
 				if (!ok) {
-					System.out.println("Not Ready.");
+					System.out.println("Download failed.");
 					return;
 				}
 
@@ -512,7 +520,6 @@ public class Main {
 
 					@Override
 					public void processEnded() {
-						System.out.println("processEnded()");
 						try {
 							Files.move(this.file, mp3);
 						} catch (IOException e) {
@@ -520,12 +527,10 @@ public class Main {
 						}
 
 						config.set("YouTube." + videoId + ".Path", mp3.getAbsolutePath());
-						System.out.println("P1");
 					}
 				}, false);
 			}
 		}, false);
-		System.out.println("Returning value.");
 		return mp3;
 	}
 
@@ -564,11 +569,11 @@ public class Main {
 
 	public synchronized GuildMusicManager getGuildAudioPlayer(Guild guild) {
 		long guildId = Long.parseLong(guild.getId());
-		GuildMusicManager musicManager = musicManagers.get(guildId);
+		GuildMusicManager musicManager = this.musicManagers.get(guildId);
 
 		if (musicManager == null) {
-			musicManager = new GuildMusicManager(playerManager);
-			musicManagers.put(guildId, musicManager);
+			musicManager = new GuildMusicManager(this.playerManager);
+			this.musicManagers.put(guildId, musicManager);
 		}
 
 		guild.getAudioManager().setSendingHandler(musicManager.getSendHandler());
