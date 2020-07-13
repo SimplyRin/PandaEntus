@@ -70,24 +70,27 @@ public class CommandExecutor extends ListenerAdapter {
 
 		if (args.length > 0) {
 			for (BaseCommand baseCommand : this.map.values()) {
-
-				// コマンド実行に必要なレベルが管理者の場合
-				if (baseCommand.getPermission().equals(Permission.Administrator)) {
-
-					// Admin じゃなかった場合処理を止める
-					if (!user.getId().equals(this.instance.getAdminId())) {
-						return;
-					}
-				}
-
 				switch (baseCommand.getType()) {
 				case EqualsIgnoreCase:
 					if (args[0].equalsIgnoreCase(baseCommand.getCommand())) {
+						System.out.println("Permission: " + baseCommand.getPermission());
+						if (baseCommand.getPermission().equals(Permission.Administrator)) {
+							if (!user.getId().equals(this.instance.getAdminId())) {
+								return;
+							}
+						}
+
 						baseCommand.execute(this.instance, event, args);
 					}
 					break;
 				case StartsWith:
 					if (args[0].toLowerCase().startsWith(baseCommand.getCommand().toLowerCase())) {
+						if (baseCommand.getPermission().equals(Permission.Administrator)) {
+							if (!user.getId().equals(this.instance.getAdminId())) {
+								return;
+							}
+						}
+
 						baseCommand.execute(this.instance, event, args);
 					}
 					break;
