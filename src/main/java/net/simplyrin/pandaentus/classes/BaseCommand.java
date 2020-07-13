@@ -1,4 +1,4 @@
-package net.simplyrin.pandaentus.utils;
+package net.simplyrin.pandaentus.classes;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
@@ -30,6 +30,7 @@ public interface BaseCommand {
 
 	public String getCommand();
 	public CommandType getType();
+	public Permission getPermission();
 	public void execute(Main instance, MessageReceivedEvent event, String[] args);
 
 }

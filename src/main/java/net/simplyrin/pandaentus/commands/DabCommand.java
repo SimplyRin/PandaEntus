@@ -4,8 +4,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.utils.BaseCommand;
-import net.simplyrin.pandaentus.utils.CommandType;
+import net.simplyrin.pandaentus.classes.BaseCommand;
+import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.Permission;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
@@ -44,6 +45,11 @@ public class DabCommand implements BaseCommand {
 	}
 
 	@Override
+	public Permission getPermission() {
+		return Permission.Everyone;
+	}
+
+	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
 		ThreadPool.run(() -> {
 			MessageChannel channel = event.getChannel();
@@ -51,7 +57,7 @@ public class DabCommand implements BaseCommand {
 			String asi = "\n   |\n  /\\";
 
 			int type = 0;
-			for (int i = 0; i <= 10; i++) {
+			for (int i = 0; i <= 5; i++) {
 				if (message == null) {
 					message = channel.sendMessage("<o/" + asi).complete();
 				} else {

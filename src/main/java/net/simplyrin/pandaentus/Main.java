@@ -42,10 +42,10 @@ import net.dv8tion.jda.api.entities.User;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
+import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.listeners.CommandExecutor;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
-import net.simplyrin.pandaentus.utils.BaseCommand;
 import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -95,6 +95,8 @@ public class Main {
 
 	private AudioPlayerManager playerManager;
 	private Map<Long, GuildMusicManager> musicManagers;
+
+	private Date startupDate = new Date();
 
 	@Setter
 	private String nowPlaying;
@@ -158,12 +160,11 @@ public class Main {
 		jdaBuilder.setToken(token);
 		jdaBuilder.addEventListeners(this.commandRegister);
 		jdaBuilder.addEventListeners(new Listener(this));
-		// jdaBuilder.addEventListeners(new MessageListener(this));
 		jdaBuilder.addEventListeners(new ReactionListener(this));
 
 		// 自動登録
-		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		try {
+			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			for (final ClassPath.ClassInfo classInfo : ClassPath.from(classLoader).getTopLevelClasses()) {
 				if (classInfo.getName().startsWith("net.simplyrin.pandaentus.command")) {
 					BaseCommand baseCommand = (BaseCommand) Class.forName(classInfo.getName()).newInstance();
@@ -193,7 +194,6 @@ public class Main {
 		AudioSourceManagers.registerLocalSource(this.playerManager);
 
 		this.jda.getPresence().setActivity(Activity.playing("Try !help"));
-		// this.jda.getPresence().setActivity(Activity.playing("Source: github.com/SimplyRin/PandaEntus"));
 
 		this.addShutdownHook(() -> {
 			jda.shutdown();

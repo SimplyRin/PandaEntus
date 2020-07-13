@@ -14,8 +14,9 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.utils.BaseCommand;
-import net.simplyrin.pandaentus.utils.CommandType;
+import net.simplyrin.pandaentus.classes.BaseCommand;
+import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.Permission;
 import net.simplyrin.pandaentus.utils.TimeManager;
 
 /**
@@ -51,6 +52,11 @@ public class UptimeCommand implements BaseCommand {
 	@Override
 	public CommandType getType() {
 		return CommandType.EqualsIgnoreCase;
+	}
+
+	@Override
+	public Permission getPermission() {
+		return Permission.Everyone;
 	}
 
 	@Override

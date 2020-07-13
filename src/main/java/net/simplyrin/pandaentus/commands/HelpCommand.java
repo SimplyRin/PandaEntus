@@ -3,8 +3,9 @@ package net.simplyrin.pandaentus.commands;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.utils.BaseCommand;
-import net.simplyrin.pandaentus.utils.CommandType;
+import net.simplyrin.pandaentus.classes.BaseCommand;
+import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.Permission;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -42,10 +43,14 @@ public class HelpCommand implements BaseCommand {
 	}
 
 	@Override
+	public Permission getPermission() {
+		return Permission.Everyone;
+	}
+
+	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
-		channel.sendMessage("この Bot で利用可能なコマンドは、以下のページをご確認ください。\n"
-				+ "GitHub: https://github.com/SimplyRin/PandaEntus/blob/master/README.md#Command").complete();
+		channel.sendMessage("この Bot で利用可能なコマンドは、以下のページをご確認ください。\nGitHub: https://git.io/JJOr9").complete();
 		return;
 	}
 

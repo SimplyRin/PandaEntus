@@ -1,4 +1,4 @@
-package net.simplyrin.pandaentus.utils;
+package net.simplyrin.pandaentus.classes;
 
 /**
  * Created by SimplyRin on 2020/07/09.

@@ -1,14 +1,7 @@
-package net.simplyrin.pandaentus.commands.admin;
-
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.classes.BaseCommand;
-import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.classes.Permission;
+package net.simplyrin.pandaentus.classes;
 
 /**
- * Created by SimplyRin on 2020/07/09.
+ * Created by SimplyRin on 2020/07/13.
  *
  * Copyright (c) 2020 SimplyRin
  *
@@ -30,29 +23,8 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class ShutdownCommand implements BaseCommand {
+public enum Permission {
 
-	@Override
-	public String getCommand() {
-		return "!shutdown";
-	}
-
-	@Override
-	public CommandType getType() {
-		return CommandType.EqualsIgnoreCase;
-	}
-
-	@Override
-	public Permission getPermission() {
-		return Permission.Administrator;
-	}
-
-	@Override
-	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
-
-		channel.sendMessage(":wave:").complete();
-		System.exit(0);
-	}
+	Everyone, Administrator;
 
 }

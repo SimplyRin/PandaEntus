@@ -9,8 +9,9 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.utils.BaseCommand;
-import net.simplyrin.pandaentus.utils.CommandType;
+import net.simplyrin.pandaentus.classes.BaseCommand;
+import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.Permission;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -45,6 +46,11 @@ public class ProfileCommand implements BaseCommand {
 	@Override
 	public CommandType getType() {
 		return CommandType.EqualsIgnoreCase;
+	}
+
+	@Override
+	public Permission getPermission() {
+		return Permission.Everyone;
 	}
 
 	@Override

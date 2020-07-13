@@ -3,10 +3,12 @@ package net.simplyrin.pandaentus.listeners;
 import java.util.HashMap;
 
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.utils.BaseCommand;
+import net.simplyrin.pandaentus.classes.BaseCommand;
+import net.simplyrin.pandaentus.classes.Permission;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -45,16 +47,21 @@ public class CommandExecutor extends ListenerAdapter {
 			throw new RuntimeException(baseCommand.getClass().getName() + "#getCommand() is null!");
 		}
 		this.map.put(command, baseCommand);
-		System.out.println("Command: " + command + " is registered.");
+		System.out.println("[Command:Register] " + command);
 	}
 
 	public void unregisterCommand(String command) {
 		this.map.remove(command);
+		System.out.println("[Command:Un-Register] " + command);
 	}
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
 		if (event.isFromType(ChannelType.PRIVATE)) {
+			return;
+		}
+		User user = event.getAuthor();
+		if (user.isFake() || user.isBot()) {
 			return;
 		}
 
@@ -63,6 +70,16 @@ public class CommandExecutor extends ListenerAdapter {
 
 		if (args.length > 0) {
 			for (BaseCommand baseCommand : this.map.values()) {
+
+				// コマンド実行に必要なレベルが管理者の場合
+				if (baseCommand.getPermission().equals(Permission.Administrator)) {
+
+					// Admin じゃなかった場合処理を止める
+					if (!user.getId().equals(this.instance.getAdminId())) {
+						return;
+					}
+				}
+
 				switch (baseCommand.getType()) {
 				case EqualsIgnoreCase:
 					if (args[0].equalsIgnoreCase(baseCommand.getCommand())) {
@@ -70,7 +87,6 @@ public class CommandExecutor extends ListenerAdapter {
 					}
 					break;
 				case StartsWith:
-
 					if (args[0].toLowerCase().startsWith(baseCommand.getCommand().toLowerCase())) {
 						baseCommand.execute(this.instance, event, args);
 					}

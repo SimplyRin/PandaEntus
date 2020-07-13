@@ -4,11 +4,11 @@ import java.awt.Color;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
-import net.simplyrin.pandaentus.utils.BaseCommand;
-import net.simplyrin.pandaentus.utils.CommandType;
+import net.simplyrin.pandaentus.classes.BaseCommand;
+import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.Permission;
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
 
@@ -48,13 +48,12 @@ public class DiskCommand implements BaseCommand {
 	}
 
 	@Override
+	public Permission getPermission() {
+		return Permission.Administrator;
+	}
+
+	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
-		User user = event.getAuthor();
-
-		if (!user.getId().equals(instance.getAdminId())) {
-			return;
-		}
-
 		MessageChannel channel = event.getChannel();
 
 		ProcessManager.runCommand(new String[] { "df", "-h", "/" }, new Callback() {
