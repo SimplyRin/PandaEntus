@@ -1,18 +1,17 @@
 package net.simplyrin.pandaentus.commands;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.Permission;
-import net.simplyrin.pandaentus.utils.AkinatorManager;
-import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
- * Created by SimplyRin on 2020/07/09.
+ * Created by SimplyRin on 2020/07/17.
  *
+
  * Copyright (c) 2020 SimplyRin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -33,11 +32,11 @@ import net.simplyrin.pandaentus.utils.ThreadPool;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class AkinatorCommand implements BaseCommand {
+public class IconCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "akinator";
+		return "!icon";
 	}
 
 	@Override
@@ -54,17 +53,23 @@ public class AkinatorCommand implements BaseCommand {
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 
-		channel.sendMessage("**~~アｋ~~...バカネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**").complete();
-		channel.sendTyping().complete();
-		ThreadPool.run(() -> {
-			instance.getAkiMap().put(channel.getId(), new AkinatorManager(event.getGuild(), channel.getId()));
-			AkinatorManager am = instance.getAkiMap().get(channel.getId());
+		if (args.length > 1) {
+			String id = args[1];
+			id = id.replace("@", "");
+			id = id.replace("<", "");
+			id = id.replace(">", "");
+			id = id.replace("!", "");
 
-			EmbedBuilder embedBuilder = new EmbedBuilder();
-			am.setEmbed(embedBuilder);
-			String latestId = channel.sendMessage(embedBuilder.build()).complete().getId();
-			am.setLatestMessageId(latestId);
-		});
+			Member member = event.getGuild().getMemberById(id);
+			if (member != null) {
+				channel.sendMessage(member.getUser().getAvatarUrl()).complete();
+			} else {
+				channel.sendMessage("ユーザーが見つかりませんでした。").complete();
+			}
+			return;
+		}
+
+		channel.sendMessage("Usage: !icon <userId|mension>").complete();
 	}
 
 }

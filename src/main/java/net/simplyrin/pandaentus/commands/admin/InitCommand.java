@@ -65,7 +65,7 @@ public class InitCommand implements BaseCommand {
 		}
 
 		channel.sendMessage("!init confirm と入力すると、Bot で必要なカテゴリ、チャンネルを自動的に作成します。\n"
-				+ "作成されるチャンネルは以下のとおりです。\nカテゴリ: `Text Channels`, `Voice Channels`"
+				+ "作成されるチャンネルは以下の通りです。\nカテゴリ: `Text Channels`, `Voice Channels`"
 				+ "\nテキストチャンネル: `#general`"
 				+ "\nボイスチャンネル: `General-1`").complete();
 	}

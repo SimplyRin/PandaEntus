@@ -85,6 +85,7 @@ public class YouTubePlayCommand implements BaseCommand {
 
 			embedBuilder.setColor(Color.RED);
 			embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
+			channel.sendTyping().complete();
 			Message message = channel.sendMessage(embedBuilder.build()).complete();
 
 			ThreadPool.run(() -> {

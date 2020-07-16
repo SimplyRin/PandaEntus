@@ -73,11 +73,8 @@ public class CommandExecutor extends ListenerAdapter {
 				switch (baseCommand.getType()) {
 				case EqualsIgnoreCase:
 					if (args[0].equalsIgnoreCase(baseCommand.getCommand())) {
-						System.out.println("Permission: " + baseCommand.getPermission());
-						if (baseCommand.getPermission().equals(Permission.Administrator)) {
-							if (!user.getId().equals(this.instance.getAdminId())) {
-								return;
-							}
+						if (baseCommand.getPermission().equals(Permission.Administrator) && !user.getId().equals(this.instance.getAdminId())) {
+							return;
 						}
 
 						baseCommand.execute(this.instance, event, args);
@@ -85,10 +82,8 @@ public class CommandExecutor extends ListenerAdapter {
 					break;
 				case StartsWith:
 					if (args[0].toLowerCase().startsWith(baseCommand.getCommand().toLowerCase())) {
-						if (baseCommand.getPermission().equals(Permission.Administrator)) {
-							if (!user.getId().equals(this.instance.getAdminId())) {
-								return;
-							}
+						if (baseCommand.getPermission().equals(Permission.Administrator) && !user.getId().equals(this.instance.getAdminId())) {
+							return;
 						}
 
 						baseCommand.execute(this.instance, event, args);

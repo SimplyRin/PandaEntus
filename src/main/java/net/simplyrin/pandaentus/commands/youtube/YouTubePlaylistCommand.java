@@ -66,7 +66,8 @@ public class YouTubePlaylistCommand implements BaseCommand {
 		BlockingQueue<AudioTrack> queue = Reflect.on(musicManager.scheduler).field("queue").get();
 
 		if (queue == null || queue.isEmpty()) {
-			channel.sendMessage("プレイリストが正しく読み込まれていません。").complete();
+			channel.sendMessage("次に再生が予定されている曲はありません。\n"
+					+ "!play を使用することで、プレイリストに追加することができます。").complete();
 			return;
 		}
 

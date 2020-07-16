@@ -46,6 +46,7 @@ import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.listeners.CommandExecutor;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
+import net.simplyrin.pandaentus.utils.AkinatorManager;
 import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -97,6 +98,7 @@ public class Main {
 	private Map<Long, GuildMusicManager> musicManagers;
 
 	private Date startupDate = new Date();
+	private Map<String, AkinatorManager> akiMap = new HashMap<>();
 
 	@Setter
 	private String nowPlaying;

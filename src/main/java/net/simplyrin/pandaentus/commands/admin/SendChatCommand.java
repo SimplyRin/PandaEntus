@@ -57,14 +57,13 @@ public class SendChatCommand implements BaseCommand {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		if (args.length > 3) {
-			Guild g = instance.getJda().getGuildById(args[1]);
-			MessageChannel mc = g.getTextChannelById(args[2]);
+			Guild guild = instance.getJda().getGuildById(args[1]);
 
 			String name = "";
 			for (int i = 3; i < args.length; i++) {
 				name = name + args[i] + " ";
 			}
-			mc.sendMessage(name.trim()).complete();
+			guild.getTextChannelById(args[2]).sendMessage(name.trim()).complete();
 			return;
 		}
 
