@@ -32,8 +32,8 @@ public class TrackScheduler extends AudioEventAdapter {
 		// Calling startTrack with the noInterrupt set to true will start the track only if nothing is currently playing. If
 		// something is playing, it returns false and does nothing. In that case the player was already playing so this
 		// track goes to the queue instead.
-		if (!player.startTrack(track, true)) {
-			queue.offer(track);
+		if (!this.player.startTrack(track, true)) {
+			this.queue.offer(track);
 		}
 	}
 
@@ -43,14 +43,14 @@ public class TrackScheduler extends AudioEventAdapter {
 	public void nextTrack() {
 		// Start the next track, regardless of if something is already playing or not. In case queue was empty, we are
 		// giving null to startTrack, which is a valid argument and will simply stop the player.
-		player.startTrack(queue.poll(), false);
+		this.player.startTrack(this.queue.poll(), false);
 	}
 
 	@Override
 	public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
 		// Only start the next track if the end reason is suitable for it (FINISHED or LOAD_FAILED)
 		if (endReason.mayStartNext) {
-			nextTrack();
+			this.nextTrack();
 		}
 	}
 }

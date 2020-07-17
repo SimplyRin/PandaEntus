@@ -21,15 +21,15 @@ public class GuildMusicManager {
 	 * @param manager Audio player manager to use for creating the player.
 	 */
 	public GuildMusicManager(AudioPlayerManager manager) {
-		player = manager.createPlayer();
-		scheduler = new TrackScheduler(player);
-		player.addListener(scheduler);
+		this.player = manager.createPlayer();
+		this.scheduler = new TrackScheduler(this.player);
+		this.player.addListener(this.scheduler);
 	}
 
 	/**
 	 * @return Wrapper around AudioPlayer to use it as an AudioSendHandler.
 	 */
 	public AudioPlayerSendHandler getSendHandler() {
-		return new AudioPlayerSendHandler(player);
+		return new AudioPlayerSendHandler(this.player);
 	}
 }

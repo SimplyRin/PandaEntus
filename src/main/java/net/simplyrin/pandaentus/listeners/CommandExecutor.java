@@ -44,7 +44,7 @@ public class CommandExecutor extends ListenerAdapter {
 
 	public void registerCommand(String command, BaseCommand baseCommand) {
 		if (command == null) {
-			throw new RuntimeException(baseCommand.getClass().getName() + "#getCommand() is null!");
+			throw new NullPointerException(baseCommand.getClass().getName() + "#getCommand() is null!");
 		}
 		this.map.put(command, baseCommand);
 		System.out.println("[Command:Register] " + command);

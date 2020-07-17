@@ -57,8 +57,6 @@ public class FreeCommand implements BaseCommand {
 		MessageChannel channel = event.getChannel();
 
 		ProcessManager.runCommand(new String[] { "free", "-h" }, new Callback() {
-			int i = 0;
-
 			String memTotal, memUsed, memFree, swapTotal, swapUsed, swapFree;
 
 			@Override
@@ -75,8 +73,6 @@ public class FreeCommand implements BaseCommand {
 					this.memTotal = args[1];
 					this.memUsed = args[2];
 					this.memFree = args[3];
-
-					this.i = 2;
 				}
 
 				else if (line.startsWith("Swap")) {

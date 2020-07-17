@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -494,6 +495,12 @@ public class Main {
 				}
 				if (response.contains(":")) {
 					config.set("YouTube." + videoId + ".Duration", response);
+				} else {
+					try {
+						Integer.parseInt(response);
+						ok = true;
+					} catch (Exception e) {
+					}
 				}
 				int ll = response.split(":").length;
 				if (ll == 2) {
@@ -586,7 +593,8 @@ public class Main {
 	}
 
 	public void play(Guild guild, GuildMusicManager musicManager, AudioTrack track) {
-		musicManager.player.setVolume(20);
+		int volume = this.config.getInt("Guild." + guild.getId() + ".Voice-Volume", 20);
+		musicManager.player.setVolume(volume);
 		musicManager.scheduler.queue(track);
 	}
 
@@ -615,6 +623,32 @@ public class Main {
 		}
 
 		return i;
+	}
+
+	public String formatSize(double size) {
+		String hrSize = null;
+
+		double b = size;
+		double k = size / 1024.0;
+		double m = k / 1024.0;
+		double g = m / 1024.0;
+		double t = g / 1024.0;
+
+		DecimalFormat decimalFormat = new DecimalFormat("0.00");
+
+		if (t > 1) {
+			hrSize = decimalFormat.format(t).concat(" TB");
+		} else if (g > 1) {
+			hrSize = decimalFormat.format(g).concat(" GB");
+		} else if (m > 1) {
+			hrSize = decimalFormat.format(m).concat(" MB");
+		} else if (k > 1) {
+			hrSize = decimalFormat.format(k).concat(" KB");
+		} else {
+			hrSize = decimalFormat.format(b).concat(" Bytes");
+		}
+
+		return hrSize;
 	}
 
 

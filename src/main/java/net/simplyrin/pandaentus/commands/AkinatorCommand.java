@@ -37,7 +37,7 @@ public class AkinatorCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "akinator";
+		return "!akinator";
 	}
 
 	@Override

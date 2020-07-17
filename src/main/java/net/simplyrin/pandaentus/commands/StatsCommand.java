@@ -1,6 +1,5 @@
 package net.simplyrin.pandaentus.commands;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -73,9 +72,9 @@ public class StatsCommand implements BaseCommand {
 		message += "利用可能コア数: " + runtime.availableProcessors() + "\n\n";
 
 		message += "メモリ空き状態:\n";
-		message += "  空き状態: " + this.formatSize(runtime.freeMemory()) + "\n";
-		message += "  使用容量: " + this.formatSize(runtime.totalMemory()) + "\n";
-		message += "  最大容量: " + (runtime.maxMemory() == Long.MAX_VALUE ? "無制限" : this.formatSize(runtime.maxMemory())) + "\n\n";
+		message += "  空き状態: " + instance.formatSize(runtime.freeMemory()) + "\n";
+		message += "  使用容量: " + instance.formatSize(runtime.totalMemory()) + "\n";
+		message += "  最大容量: " + (runtime.maxMemory() == Long.MAX_VALUE ? "無制限" : instance.formatSize(runtime.maxMemory())) + "\n\n";
 
 		message += "サーバー情報:\n";
 		message += "  サーバー数: " + jda.getGuilds().size() + "\n";
@@ -90,32 +89,6 @@ public class StatsCommand implements BaseCommand {
 		message += "  LavaPlayer: " + PlayerLibrary.VERSION;
 
 		channel.sendMessage(message + "```").complete();
-	}
-
-	public String formatSize(double size) {
-		String hrSize = null;
-
-		double b = size;
-		double k = size / 1024.0;
-		double m = k / 1024.0;
-		double g = m / 1024.0;
-		double t = g / 1024.0;
-
-		DecimalFormat decimalFormat = new DecimalFormat("0.00");
-
-		if (t > 1) {
-			hrSize = decimalFormat.format(t).concat(" TB");
-		} else if (g > 1) {
-			hrSize = decimalFormat.format(g).concat(" GB");
-		} else if (m > 1) {
-			hrSize = decimalFormat.format(m).concat(" MB");
-		} else if (k > 1) {
-			hrSize = decimalFormat.format(k).concat(" KB");
-		} else {
-			hrSize = decimalFormat.format(b).concat(" Bytes");
-		}
-
-		return hrSize;
 	}
 
 }
