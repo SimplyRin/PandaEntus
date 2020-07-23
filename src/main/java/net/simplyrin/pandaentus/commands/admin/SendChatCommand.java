@@ -3,8 +3,7 @@ package net.simplyrin.pandaentus.commands.admin;
 import java.awt.Color;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -53,23 +52,26 @@ public class SendChatCommand implements BaseCommand {
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		if (args.length > 3) {
-			Guild guild = instance.getJda().getGuildById(args[1]);
-
+		if (args.length > 2) {
+			TextChannel channel = null;
+			for (TextChannel tc : instance.getJda().getTextChannels()) {
+				if (tc.getId().equals(args[1])) {
+					channel = tc;
+				}
+			}
 			String name = "";
-			for (int i = 3; i < args.length; i++) {
+			for (int i = 2; i < args.length; i++) {
 				name = name + args[i] + " ";
 			}
-			guild.getTextChannelById(args[2]).sendMessage(name.trim()).complete();
+			channel.sendMessage(name.trim()).complete();
 			return;
 		}
 
 		embedBuilder.setColor(Color.RED);
-		embedBuilder.setDescription("Usage: !sendchat <guild> <channel> <message>");
-		channel.sendMessage(embedBuilder.build()).complete();
+		embedBuilder.setDescription("Usage: !sendchat <channelId> <message>");
+		event.getChannel().sendMessage(embedBuilder.build()).complete();
 		return;
 	}
 

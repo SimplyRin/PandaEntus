@@ -20,6 +20,7 @@ import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.DownloadResult;
 import net.simplyrin.pandaentus.classes.Permission;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
@@ -89,7 +90,13 @@ public class YouTubePlayCommand implements BaseCommand {
 			Message message = channel.sendMessage(embedBuilder.build()).complete();
 
 			ThreadPool.run(() -> {
-				File file = instance.downloadFile(url);
+				DownloadResult result = instance.downloadFile(url);
+				if (!result.isResult()) {
+					embedBuilder.setAuthor("エラーが発生しました。");
+					message.editMessage(embedBuilder.build()).complete();
+					return;
+				}
+				File file = result.getFile();
 				String videoId = instance.getVideoId(url);
 
 				VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
@@ -99,7 +106,6 @@ public class YouTubePlayCommand implements BaseCommand {
 
 				GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 
-				System.out.println("Loading item...");
 				instance.getPlayerManager().loadItemOrdered(musicManager, file.getAbsolutePath(), new AudioLoadResultHandler() {
 					@Override
 					public void trackLoaded(AudioTrack track) {
@@ -126,19 +132,9 @@ public class YouTubePlayCommand implements BaseCommand {
 								VoiceChannel vc = guild.getVoiceChannelById(voiceChannel.getId());
 								if (vc != null) {
 									if (vc.getMembers().size() >= 1) {
-										trackLoaded(instance.getLoopMap().get(guild).makeClone());
+										this.trackLoaded(instance.getLoopMap().get(guild).makeClone());
 									}
 								}
-							}
-						});
-						ThreadPool.run(() -> {
-							instance.setNowPlaying(title);
-							try {
-								TimeUnit.MINUTES.sleep(4);
-							} catch (Exception e) {
-							}
-							if (instance.getNowPlaying().equals(title)) {
-								instance.setNowPlaying(null);
 							}
 						});
 
@@ -148,7 +144,6 @@ public class YouTubePlayCommand implements BaseCommand {
 					@Override
 					public void playlistLoaded(AudioPlaylist playlist) {
 						instance.setAudioPlaylist(playlist);
-						System.out.println("プレイリストが読み込まれました。");
 						AudioTrack firstTrack = playlist.getSelectedTrack();
 
 						if (firstTrack == null) {

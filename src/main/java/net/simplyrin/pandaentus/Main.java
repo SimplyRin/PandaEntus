@@ -44,6 +44,7 @@ import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
+import net.simplyrin.pandaentus.classes.DownloadResult;
 import net.simplyrin.pandaentus.listeners.CommandExecutor;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
@@ -101,8 +102,6 @@ public class Main {
 	private Date startupDate = new Date();
 	private Map<String, AkinatorManager> akiMap = new HashMap<>();
 
-	@Setter
-	private String nowPlaying;
 	@Setter
 	private AudioPlaylist audioPlaylist;
 
@@ -463,16 +462,19 @@ public class Main {
 		}
 	}
 
-	public File downloadFile(String url) {
+	public DownloadResult downloadFile(String url) {
+		DownloadResult result = new DownloadResult();
+
 		final File file = new File("ytdl");
 		file.mkdirs();
 
 		final String videoId = this.getVideoId(url);
-
 		final File mp3 = new File(file, videoId + ".mp3");
 		if (mp3.exists()) {
+			result.setResult(true);
+			result.setFile(mp3);
 			System.out.println("Cache found, " + mp3.getName());
-			return mp3;
+			return result;
 		}
 
 		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-title", videoId }, new Callback() {
@@ -489,6 +491,8 @@ public class Main {
 			boolean ok = false;
 			@Override
 			public void line(String response) {
+				response = response.trim();
+
 				if (response.startsWith("ERROR:")) {
 					System.out.println("An error occured: " + response);
 					return;
@@ -497,23 +501,24 @@ public class Main {
 					config.set("YouTube." + videoId + ".Duration", response);
 				} else {
 					try {
-						Integer.parseInt(response);
-						ok = true;
-					} catch (Exception e) {
+						Integer.valueOf(response);
+						config.set("YouTube." + videoId + ".Duration", response);
+						this.ok = true;
+					} catch (NumberFormatException e) {
 					}
 				}
 				int ll = response.split(":").length;
 				if (ll == 2) {
 					int length = Integer.valueOf(response.split(":")[0]);
 					if (length <= 5) {
-						ok = true;
+						this.ok = true;
 					}
 				}
 			}
 
 			@Override
 			public void processEnded() {
-				if (!ok) {
+				if (!this.ok) {
 					System.out.println("Download failed.");
 					return;
 				}
@@ -542,7 +547,10 @@ public class Main {
 				}, false);
 			}
 		}, false);
-		return mp3;
+
+		result.setResult(true);
+		result.setFile(file);
+		return result;
 	}
 
 	public String getVideoId(String url) {
@@ -602,7 +610,7 @@ public class Main {
 		GuildMusicManager musicManager = getGuildAudioPlayer(channel.getGuild());
 		musicManager.scheduler.nextTrack();
 
-		channel.sendMessage("Skipped to next track.").queue();
+		channel.sendMessage("次の曲にスキップします。").queue();
 	}
 
 	public int durationToTime(String duration) {
@@ -619,7 +627,6 @@ public class Main {
 				i += Integer.valueOf(duration);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
 
 		return i;
