@@ -66,6 +66,8 @@ public class ReactionListener extends ListenerAdapter {
 
 		this.instance.getMessages().remove(message);
 
+		final MessageChannel channel = message.getChannel();
+
 		String url = message.getContentRaw();
 
 		String tempVideoId = url.replace("https://www.youtube.com/watch?v=", "");
@@ -81,7 +83,6 @@ public class ReactionListener extends ListenerAdapter {
 		file.mkdirs();
 
 		final File mp3 = new File(file, videoId + ".mp3");
-		final MessageChannel channel = message.getChannel();
 
 		final User user = event.getUser();
 

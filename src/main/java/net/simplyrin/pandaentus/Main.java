@@ -31,7 +31,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -105,6 +104,11 @@ public class Main {
 	@Setter
 	private AudioPlaylist audioPlaylist;
 
+	private List<String> amongUsGuildList;
+
+	@Getter
+	private Listener eventListener;
+
 	public void run(String[] args) {
 		RinStream rinStream = new RinStream();
 		rinStream.enableError();
@@ -149,19 +153,20 @@ public class Main {
 		this.poolItems = new PoolItems(this);
 		this.timeUtils = new TimeUtils();
 		this.voiceTextApiKey = this.config.getString("VoiceTextApiKey");
+		this.amongUsGuildList = new ArrayList<>();
 
 		this.commandRegister = new CommandExecutor(this);
 
-		JDABuilder jdaBuilder = new JDABuilder(AccountType.BOT);
 		String token = this.config.getString("Token");
 		if (token.equals("BOT_TOKEN_HERE")) {
 			System.out.println("Discord Bot Token を config.yml に入力してください！");
 			System.exit(0);
 			return;
 		}
+		JDABuilder jdaBuilder = JDABuilder.createDefault(token);
 		jdaBuilder.setToken(token);
 		jdaBuilder.addEventListeners(this.commandRegister);
-		jdaBuilder.addEventListeners(new Listener(this));
+		jdaBuilder.addEventListeners(this.eventListener = new Listener(this));
 		jdaBuilder.addEventListeners(new ReactionListener(this));
 
 		// 自動登録
@@ -182,6 +187,11 @@ public class Main {
 		this.jda = null;
 		try {
 			this.jda = jdaBuilder.build();
+
+			System.out.println(this.jda.getSelfUser().getName());
+			for (Guild guild : this.jda.getGuilds()) {
+				System.out.println(guild.getName() + "@" + guild.getId());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

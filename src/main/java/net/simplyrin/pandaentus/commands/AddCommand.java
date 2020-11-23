@@ -1,11 +1,6 @@
 package net.simplyrin.pandaentus.commands;
 
-import java.awt.Color;
-
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.pandaentus.Main;
@@ -14,7 +9,7 @@ import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.Permission;
 
 /**
- * Created by SimplyRin on 2020/07/09.
+ * Created by SimplyRin on 2020/10/20.
  *
  * Copyright (c) 2020 SimplyRin
  *
@@ -36,11 +31,11 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class VanishCommand implements BaseCommand {
+public class AddCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!vanish";
+		return "!add";
 	}
 
 	@Override
@@ -50,41 +45,25 @@ public class VanishCommand implements BaseCommand {
 
 	@Override
 	public Permission getPermission() {
-		return Permission.Everyone;
+		return Permission.Administrator;
 	}
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-
 		MessageChannel channel = event.getChannel();
-		User user = event.getAuthor();
-		if (args.length > 1 && user.getId().equals(instance.getAdminId())) {
-			String id = args[1];
-			id = id.replace("<", "");
-			id = id.replace(">", "");
-			id = id.replace("!", "");
-			id = id.replace("@", "");
 
-			Member member = event.getGuild().getMemberById(id);
-			if (member != null) {
-				user = member.getUser();
-			}
+		if (args.length > 3) {
+			Configuration config = instance.getConfig();
+
+			config.set("LocalMessage." + channel.getId() + ".Message", args[1]);
+			config.set("LocalMessage." + channel.getId() + ".Value.1", args[2]);
+			config.set("LocalMessage." + channel.getId() + ".Value.2", args[3]);
+
+			channel.sendMessage("設定しました。").complete();
+			return;
 		}
 
-		Configuration config = instance.getConfig();
-
-		String path = "User." + user.getId() + "." + event.getGuild().getId() + ".Vanish";
-
-		boolean bool = config.getBoolean(path);
-		bool = !bool;
-
-		instance.getConfig().set(path, bool);
-
-		embedBuilder.setColor(Color.GRAY);
-		embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
-
-		channel.sendMessage(embedBuilder.build()).complete();
+		channel.sendMessage("使用方法: !add <メッセージ> <内容1> <内容2>").complete();
 		return;
 	}
 

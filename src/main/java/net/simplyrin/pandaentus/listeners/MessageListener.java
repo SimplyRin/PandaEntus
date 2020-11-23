@@ -69,8 +69,15 @@ public class MessageListener extends ListenerAdapter {
 
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
+		// config.set("LocalMessage." + channel.getId() + ".Message", args[1]);
+
+		if (this.instance.getConfig().getString("LocalMessage." + channel.getId() + ".Message", null) != null) {
+			channel.sendMessage(this.instance.getConfig().getString("LocalMessage." + channel.getId() + ".Value.1")).complete();
+
+			channel.sendMessage(this.instance.getConfig().getString("LocalMessage." + channel.getId() + ".Value.2")).complete();
+		}
+
 		if (args.length > 0) {
-			// 管理者向けコマンド
 			String adminId = this.instance.getConfig().getString("Admin-ID");
 			if (adminId.equals("") || adminId == null) {
 				this.instance.getConfig().set("Admin-ID", "999");
@@ -80,101 +87,6 @@ public class MessageListener extends ListenerAdapter {
 				}
 				adminId = "999";
 			}
-
-			if (user.getId().equals(adminId)) {
-				/* if (args[0].equalsIgnoreCase("!shutdown")) {
-					Moved to ShutdownCommand.java
-				} */
-
-				/* if (args[0].equalsIgnoreCase("!init")) {
-					Moved to InitCommand.java
-				} */
-
-				/* if (args[0].equalsIgnoreCase("!add-vc")) {
-					Moved to AddVoiceChannelCommand.java
-				} */
-
-				/* if (args[0].equalsIgnoreCase("!setgame")) {
-					Moved to SetGameCommand.java
-				} */
-
-				/* if (args[0].equalsIgnoreCase("!sendchat")) {
-					Moved to SendChatCommand.java
-				} */
-
-				/* if (args[0].equalsIgnoreCase("!disk")) {
-					Moved to DiskCommand.java
-				} */
-			}
-
-			// General
-			/* if (args[0].equalsIgnoreCase("!uptime")) {
-				Moved to UptimeCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!pool")) {
-				Moved to PoolCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!text-gen") || args[0].equalsIgnoreCase("!text-generate")) {
-				Moved to TextGenCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!profile")) {
-				Moved to ProfileCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!server")) {
-				Moved to ServerCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!version")) {
-				Moved to VersionCommand.java
-			} */
-
-			/* if (args[0].startsWith("=")) {
-				Moved to CalcCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!ojichat")) {
-				Moved to OjichatCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!vanish")) {
-				Moved to VanishCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!akinator")) {
-				Moved to AkinatorCommand.java
-			} */
-
-			/* if (args[0].startsWith("https://www.youtube.com/watch?v=") || args[0].startsWith("https://youtu.be/")) {
-				Moved to YouTubeCommand.java, YouTubeWatchCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!emojis")) {
-				Moved to EmojisCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!loop")) {
-				Moved to LoopCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!play")) {
-				Moved to YouTubePlayCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!skip")) {
-				Moved to YouTubeSkipCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!dab")) {
-				Moved to DabCommand.java
-			} */
-
-			/* if (args[0].equalsIgnoreCase("!kv")) {
-				Moved to KvCommand.java
-			} */
 		}
 	}
 

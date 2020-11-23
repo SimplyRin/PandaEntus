@@ -1,20 +1,24 @@
 package net.simplyrin.pandaentus.commands;
 
-import java.awt.Color;
+import java.io.File;
+import java.util.concurrent.TimeUnit;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.md_5.bungee.config.Configuration;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.Permission;
+import net.simplyrin.pandaentus.utils.ThreadPool;
+import net.simplyrin.processmanager.Callback;
+import net.simplyrin.processmanager.ProcessManager;
 
 /**
- * Created by SimplyRin on 2020/07/09.
+ * Created by SimplyRin on 2020/11/23.
  *
  * Copyright (c) 2020 SimplyRin
  *
@@ -36,16 +40,16 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class VanishCommand implements BaseCommand {
+public class TikTokCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!vanish";
+		return "https://vt.tiktok.com/";
 	}
 
 	@Override
 	public CommandType getType() {
-		return CommandType.EqualsIgnoreCase;
+		return CommandType.StartsWith;
 	}
 
 	@Override
@@ -55,37 +59,33 @@ public class VanishCommand implements BaseCommand {
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
-		EmbedBuilder embedBuilder = new EmbedBuilder();
+		File file = new File(new File("tiktok"), "api.php");
+		ProcessManager.runCommand(new String[] { "/usr/bin/php", file.getAbsolutePath(), event.getMessage().getContentRaw() }, new Callback() {
+			@Override
+			public void line(String response) {
+				System.out.println(response);
 
-		MessageChannel channel = event.getChannel();
-		User user = event.getAuthor();
-		if (args.length > 1 && user.getId().equals(instance.getAdminId())) {
-			String id = args[1];
-			id = id.replace("<", "");
-			id = id.replace(">", "");
-			id = id.replace("!", "");
-			id = id.replace("@", "");
+				MessageChannel channel = event.getChannel();
 
-			Member member = event.getGuild().getMemberById(id);
-			if (member != null) {
-				user = member.getUser();
+				JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
+				Message message = channel.sendMessage(jsonObject.get("url").getAsString()).complete();
+
+				String path = jsonObject.get("path").getAsString();
+				File file = new File(path);
+				file.deleteOnExit();
+
+				ThreadPool.run(() -> {
+					try {
+						TimeUnit.DAYS.sleep(1);
+					} catch (Exception e) {
+					}
+
+					System.out.println("Delete: " + path);
+					file.delete();
+					message.delete().complete();
+				});
 			}
-		}
-
-		Configuration config = instance.getConfig();
-
-		String path = "User." + user.getId() + "." + event.getGuild().getId() + ".Vanish";
-
-		boolean bool = config.getBoolean(path);
-		bool = !bool;
-
-		instance.getConfig().set(path, bool);
-
-		embedBuilder.setColor(Color.GRAY);
-		embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
-
-		channel.sendMessage(embedBuilder.build()).complete();
-		return;
+		}, true);
 	}
 
 }
