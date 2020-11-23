@@ -39,6 +39,9 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
@@ -164,7 +167,14 @@ public class Main {
 			return;
 		}
 		try {
-			this.jda = JDABuilder.createDefault(token).build().awaitReady();
+			List<GatewayIntent> list = new ArrayList<>();
+			for (GatewayIntent intent : GatewayIntent.values()) {
+				list.add(intent);
+			}
+			JDABuilder jdaBuilder = JDABuilder.createDefault(token, list);
+			jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
+			jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
+			this.jda = jdaBuilder.build().awaitReady();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

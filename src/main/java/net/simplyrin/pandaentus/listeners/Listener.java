@@ -48,7 +48,7 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
-		if (event.getMember().getUser().isBot() || event.getMember().getUser().isFake()) {
+		if (event.getMember().getUser().isBot()) {
 			return;
 		}
 
@@ -88,7 +88,7 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceMove(GuildVoiceMoveEvent event) {
-		if (event.getMember().getUser().isBot() || event.getMember().getUser().isFake()) {
+		if (event.getMember().getUser().isBot()) {
 			return;
 		}
 		Member member = event.getMember();
@@ -130,7 +130,7 @@ public class Listener extends ListenerAdapter {
 		int membersSize = 0;
 		for (VoiceChannel voiceChannel : voiceChannels) {
 			for (Member vcMember : voiceChannel.getMembers()) {
-				if (vcMember.getUser().isBot() || vcMember.getUser().isFake()) {
+				if (vcMember.getUser().isBot()) {
 					continue;
 				}
 				membersSize++;
@@ -159,7 +159,7 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
-		if (event.getMember().getUser().isBot() || event.getMember().getUser().isFake()) {
+		if (event.getMember().getUser().isBot()) {
 			return;
 		}
 		Guild guild = event.getGuild();
@@ -198,7 +198,7 @@ public class Listener extends ListenerAdapter {
 		int membersSize = 0;
 		for (VoiceChannel voiceChannel : voiceChannels) {
 			for (Member vcMember : voiceChannel.getMembers()) {
-				if ((!vcMember.getUser().isBot()) && (!vcMember.getUser().isFake())) {
+				if (!vcMember.getUser().isBot()) {
 					membersSize++;
 				}
 			}
@@ -234,20 +234,27 @@ public class Listener extends ListenerAdapter {
 					List<CallTime> list = new ArrayList<>();
 
 					for (CallTime callTime : this.instance.getTimeUtils().getList(guild.getId())) {
-						String path = "User." + callTime.getName() + "." + guild.getId() + ".Vanish";
-						if (this.instance.getConfig().getBoolean(path)) {
-							continue;
-						}
-
 						try {
 							String tt = callTime.getTime();
+							// System.out.println(callTime.getName() + " -> " + tt);
 							if (!tt.equals("0秒")) {
 								embedBuilder.setDescription("ユーザーごとの通話時間:");
-								embedBuilder.addField(this.getNickname(guild.getMemberById(callTime.getName())), callTime.getTime(), true);
+
+								Member targetMember = null;
+								for (Member forMember : guild.getMembers()) {
+									System.out.println(forMember.getEffectiveName());
+									if (callTime.getName().equalsIgnoreCase(forMember.getId())) {
+										targetMember = forMember;
+									}
+								}
+								if (targetMember != null) {
+									embedBuilder.addField(targetMember.getEffectiveName(), callTime.getTime(), true);
+								}
 							}
 
 							System.out.println(callTime.getName() + " -> " + callTime.getTime());
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
 						list.add(callTime);
 
