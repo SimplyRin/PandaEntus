@@ -163,11 +163,14 @@ public class Main {
 			System.exit(0);
 			return;
 		}
-		JDABuilder jdaBuilder = JDABuilder.createDefault(token);
-		jdaBuilder.setToken(token);
-		jdaBuilder.addEventListeners(this.commandRegister);
-		jdaBuilder.addEventListeners(this.eventListener = new Listener(this));
-		jdaBuilder.addEventListeners(new ReactionListener(this));
+		try {
+			this.jda = JDABuilder.createDefault(token).build().awaitReady();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		this.jda.addEventListener(this.commandRegister);
+		this.jda.addEventListener(this.eventListener = new Listener(this));
+		this.jda.addEventListener(new ReactionListener(this));
 
 		// 自動登録
 		try {
@@ -184,10 +187,7 @@ public class Main {
 			return;
 		}
 
-		this.jda = null;
 		try {
-			this.jda = jdaBuilder.build();
-
 			System.out.println(this.jda.getSelfUser().getName());
 			for (Guild guild : this.jda.getGuilds()) {
 				System.out.println(guild.getName() + "@" + guild.getId());
