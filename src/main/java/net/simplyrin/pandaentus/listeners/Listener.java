@@ -236,19 +236,15 @@ public class Listener extends ListenerAdapter {
 					for (CallTime callTime : this.instance.getTimeUtils().getList(guild.getId())) {
 						try {
 							String tt = callTime.getTime();
-							// System.out.println(callTime.getName() + " -> " + tt);
 							if (!tt.equals("0秒")) {
-								embedBuilder.setDescription("ユーザーごとの通話時間:");
-
-								Member targetMember = null;
-								for (Member forMember : guild.getMembers()) {
-									System.out.println(forMember.getEffectiveName());
-									if (callTime.getName().equalsIgnoreCase(forMember.getId())) {
-										targetMember = forMember;
-									}
-								}
+								Member targetMember = guild.getMemberById(callTime.getName());
 								if (targetMember != null) {
-									embedBuilder.addField(targetMember.getEffectiveName(), callTime.getTime(), true);
+									String path = "User." + targetMember.getId() + "." + guild.getId() + ".Vanish";
+									boolean isVanish = this.instance.getConfig().getBoolean(path, false);
+									if (!isVanish) {
+										embedBuilder.setDescription("ユーザーごとの通話時間:");
+										embedBuilder.addField(targetMember.getEffectiveName(), callTime.getTime(), true);
+									}
 								}
 							}
 
