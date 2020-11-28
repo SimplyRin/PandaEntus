@@ -248,7 +248,6 @@ public class Listener extends ListenerAdapter {
 								}
 							}
 
-							System.out.println(callTime.getName() + " -> " + callTime.getTime());
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

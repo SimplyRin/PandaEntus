@@ -94,7 +94,7 @@ public class InstaReelCommand implements BaseCommand {
 			e.printStackTrace();
 		}
 
-		if (result.contains("property=\"og:video\" content=\"")) {
+		if (result != null && result.contains("property=\"og:video\" content=\"")) {
 			String videoUrl = result.split(Pattern.quote("property=\"og:video\" content=\""))[1].split(Pattern.quote("/>"))[0];
 			videoUrl = videoUrl.replace("\"", "");
 			videoUrl = videoUrl.trim();

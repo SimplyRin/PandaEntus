@@ -114,6 +114,7 @@ public class Main {
 
 	public void run(String[] args) {
 		RinStream rinStream = new RinStream();
+		rinStream.setPrefix("yyyy/MM/dd (E) HH:mm:ss");
 		rinStream.enableError();
 		rinStream.setSaveLog(true);
 
