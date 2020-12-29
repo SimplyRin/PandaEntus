@@ -63,12 +63,20 @@ public class TikTokCommand implements BaseCommand {
 		ProcessManager.runCommand(new String[] { "/usr/bin/php", file.getAbsolutePath(), event.getMessage().getContentRaw() }, new Callback() {
 			@Override
 			public void line(String response) {
-				System.out.println(response);
+				System.out.println("TikTokCommand.java: " + response);
 
 				MessageChannel channel = event.getChannel();
 
+				boolean mention = false;
+				if (event.getGuild().getTextChannelsByName("tiktok", true) != null) {
+					mention = true;
+					channel = (MessageChannel) event.getGuild().getTextChannelsByName("tiktok", true).get(0);
+				}
+
+				System.out.println("TikTokCommand.java: TikTok URL sending to #" + channel.getName());
+
 				JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
-				Message message = channel.sendMessage(jsonObject.get("url").getAsString()).complete();
+				Message message = channel.sendMessage((mention ? event.getAuthor().getAsMention() + " " : "") + jsonObject.get("url").getAsString()).complete();
 
 				String path = jsonObject.get("path").getAsString();
 				File file = new File(path);
