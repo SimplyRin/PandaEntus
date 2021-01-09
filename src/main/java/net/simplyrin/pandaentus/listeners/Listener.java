@@ -265,6 +265,10 @@ public class Listener extends ListenerAdapter {
 					return;
 				}
 
+				TextChannel general = guild.getTextChannelsByName("general", true).get(0);
+				if (general != null) {
+					textChannel = general;
+				}
 				textChannel.sendMessage(embedBuilder.build()).complete();
 			} catch (Exception e) {
 				GuildChannel guildChannel = (GuildChannel) category.getChannels().get(1);
