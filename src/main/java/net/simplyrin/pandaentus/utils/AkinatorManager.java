@@ -200,6 +200,7 @@ public class AkinatorManager extends ListenerAdapter {
 					if (!guess.getDescription().equals("---")) {
 						embedBuilder.setAuthor("あなたが想像しているのは...");
 						embedBuilder.setDescription(guess.getName());
+						embedBuilder.setImage(guess.getImage().toExternalForm());
 						embedBuilder.addField("正解！", "1", true);
 						embedBuilder.addField("違うので続ける...", "2", true);
 
