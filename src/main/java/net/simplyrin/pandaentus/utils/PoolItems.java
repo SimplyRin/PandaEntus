@@ -3,8 +3,8 @@ package net.simplyrin.pandaentus.utils;
 import java.io.File;
 import java.io.IOException;
 
-import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
+import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.Main;
 
 /**

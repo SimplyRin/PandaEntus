@@ -1,8 +1,6 @@
 package net.simplyrin.pandaentus.utils;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import com.markozajc.akiwrapper.Akiwrapper;
 import com.markozajc.akiwrapper.Akiwrapper.Answer;
@@ -10,6 +8,7 @@ import com.markozajc.akiwrapper.AkiwrapperBuilder;
 import com.markozajc.akiwrapper.core.entities.Guess;
 import com.markozajc.akiwrapper.core.entities.Question;
 import com.markozajc.akiwrapper.core.entities.Server.Language;
+import com.markozajc.akiwrapper.core.exceptions.ServerNotFoundException;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -59,11 +58,15 @@ public class AkinatorManager extends ListenerAdapter {
 	public AkinatorManager(Guild guild, String channelId) {
 		this.guild = guild;
 		this.channelId = channelId;
-		this.akiWrapper = new AkiwrapperBuilder()
-				.setLocalization(Language.JAPANESE)
-				.setFilterProfanity(false)
-				.setName(UUID.randomUUID().toString().split("-")[0])
-				.build();
+
+		try {
+			this.akiWrapper = new AkiwrapperBuilder()
+					.setFilterProfanity(false)
+					.setLanguage(Language.JAPANESE)
+					.build();
+		} catch (ServerNotFoundException e) {
+			e.printStackTrace();
+		}
 
 		guild.getJDA().addEventListener(this);
 	}
@@ -125,11 +128,7 @@ public class AkinatorManager extends ListenerAdapter {
 		case "７":
 			textChannel.sendTyping().complete();
 
-			try {
-				this.akiWrapper.undoAnswer();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			this.akiWrapper.undoAnswer();
 
 			textChannel.sendMessage(this.setEmbed(null).build()).complete();
 			return null;
@@ -187,42 +186,34 @@ public class AkinatorManager extends ListenerAdapter {
 
 		ThreadPool.run(() -> {
 			Answer answer = this.parseAnswer(message);
-			try {
-				if (answer != null) {
-					channel.sendTyping().complete();
+			if (answer != null) {
+				channel.sendTyping().complete();
 
-					EmbedBuilder embedBuilder = new EmbedBuilder();
+				EmbedBuilder embedBuilder = new EmbedBuilder();
 
-					try {
-						List<Guess> guesses = this.akiWrapper.getGuessesAboveProbability(0.85);
-						for (Guess guess : guesses) {
-							if (!guess.getDescription().equals("---")) {
-								embedBuilder.setAuthor("あなたが想像しているのは...");
-								embedBuilder.setDescription(guess.getDescription());
-								embedBuilder.addField("正解！", "1", true);
-								embedBuilder.addField("違うので続ける...", "2", true);
+				List<Guess> guesses = this.akiWrapper.getGuessesAboveProbability(0.85);
+				for (Guess guess : guesses) {
+					if (!guess.getDescription().equals("---")) {
+						embedBuilder.setAuthor("あなたが想像しているのは...");
+						embedBuilder.setDescription(guess.getDescription());
+						embedBuilder.addField("正解！", "1", true);
+						embedBuilder.addField("違うので続ける...", "2", true);
 
-								this.checkEnd = true;
-								channel.sendMessage(embedBuilder.build()).complete();
-							}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
+						this.checkEnd = true;
+						channel.sendMessage(embedBuilder.build()).complete();
 					}
-
-					for (Guess guess : this.akiWrapper.getGuesses()) {
-						if (!guess.getDescription().equals("---")) {
-							System.out.println(guess.getDescription());
-						}
-					}
-
-					this.akiWrapper.answerCurrentQuestion(answer);
-
-					this.setEmbed(embedBuilder);
-					channel.sendMessage(embedBuilder.build()).complete();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
+
+				for (Guess guess : this.akiWrapper.getGuesses()) {
+					if (!guess.getDescription().equals("---")) {
+						System.out.println(guess.getDescription());
+					}
+				}
+
+				this.akiWrapper.answerCurrentQuestion(answer);
+
+				this.setEmbed(embedBuilder);
+				channel.sendMessage(embedBuilder.build()).complete();
 			}
 		});
 	}

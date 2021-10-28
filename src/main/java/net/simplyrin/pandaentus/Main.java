@@ -42,8 +42,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import net.md_5.bungee.config.Configuration;
 import net.simplyrin.config.Config;
+import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.DownloadResult;
@@ -117,6 +117,8 @@ public class Main {
 		rinStream.setPrefix("yyyy/MM/dd (E) HH:mm:ss");
 		rinStream.enableError();
 		rinStream.setSaveLog(true);
+		rinStream.setEnableColor(true);
+		rinStream.setEnableTranslateColor(true);
 
 		if (args.length > 0 && args[0].equalsIgnoreCase("-tail")) {
 			rinStream.tail();

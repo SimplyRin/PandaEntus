@@ -2,7 +2,7 @@ package net.simplyrin.pandaentus.commands;
 
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.md_5.bungee.config.Configuration;
+import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;

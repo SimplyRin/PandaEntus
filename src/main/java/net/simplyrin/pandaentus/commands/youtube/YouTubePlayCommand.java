@@ -1,7 +1,6 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
 import java.awt.Color;
-import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
@@ -20,7 +19,6 @@ import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.classes.DownloadResult;
 import net.simplyrin.pandaentus.classes.Permission;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
@@ -74,12 +72,7 @@ public class YouTubePlayCommand implements BaseCommand {
 		if (args.length > 1) {
 			String url = args[1];
 
-			if (!(url.contains("youtube.com") || url.contains("youtu.be"))) {
-				channel.sendMessage("YouTube のみ対応しています。").complete();
-				return;
-			}
-
-			if (url.contains("playlist")) {
+			if (url.contains("playlist") || url.contains("list")) {
 				channel.sendMessage("現在プレイリストには対応していません。").complete();
 				return;
 			}
@@ -90,13 +83,6 @@ public class YouTubePlayCommand implements BaseCommand {
 			Message message = channel.sendMessage(embedBuilder.build()).complete();
 
 			ThreadPool.run(() -> {
-				DownloadResult result = instance.downloadFile(url);
-				if (!result.isResult()) {
-					embedBuilder.setAuthor("エラーが発生しました。");
-					message.editMessage(embedBuilder.build()).complete();
-					return;
-				}
-				File file = result.getFile();
 				String videoId = instance.getVideoId(url);
 
 				VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
@@ -106,11 +92,11 @@ public class YouTubePlayCommand implements BaseCommand {
 
 				GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 
-				instance.getPlayerManager().loadItemOrdered(musicManager, file.getAbsolutePath(), new AudioLoadResultHandler() {
+				instance.getPlayerManager().loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
 					@Override
 					public void trackLoaded(AudioTrack track) {
 						String title = instance.getConfig().getString("YouTube." + videoId + ".Title");
-						embedBuilder.setAuthor("次に " + title + " を再生します");
+						embedBuilder.setAuthor("次に " + url + " を再生します");
 						message.editMessage(embedBuilder.build()).complete();
 						instance.getPreviousTrack().put(guild, track);
 
