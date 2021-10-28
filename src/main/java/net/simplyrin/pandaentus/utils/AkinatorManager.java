@@ -85,18 +85,22 @@ public class AkinatorManager extends ListenerAdapter {
 				this.akiWrapper = null;
 				this.guild.getJDA().removeEventListener(this);
 				return null;
+			case "2":
+			case "２":
+				this.checkEnd = false;
 			}
 
+			
 			textChannel.sendTyping().complete();
 
 			EmbedBuilder embedBuilder = new EmbedBuilder();
 			this.setEmbed(embedBuilder);
 
-			textChannel.sendMessage(embedBuilder.build()).complete();
+			// textChannel.sendMessage(embedBuilder.build()).complete();
 
-			this.checkEnd = false;
 			return null;
 		}
+
 
 		switch (value.toLowerCase()) {
 		case "はい":
@@ -195,7 +199,7 @@ public class AkinatorManager extends ListenerAdapter {
 				for (Guess guess : guesses) {
 					if (!guess.getDescription().equals("---")) {
 						embedBuilder.setAuthor("あなたが想像しているのは...");
-						embedBuilder.setDescription(guess.getDescription());
+						embedBuilder.setDescription(guess.getName());
 						embedBuilder.addField("正解！", "1", true);
 						embedBuilder.addField("違うので続ける...", "2", true);
 
@@ -210,10 +214,12 @@ public class AkinatorManager extends ListenerAdapter {
 					}
 				}
 
-				this.akiWrapper.answerCurrentQuestion(answer);
+				if (!this.checkEnd) {
+					this.akiWrapper.answerCurrentQuestion(answer);
 
-				this.setEmbed(embedBuilder);
-				channel.sendMessage(embedBuilder.build()).complete();
+					this.setEmbed(embedBuilder);
+					channel.sendMessage(embedBuilder.build()).complete();
+				}
 			}
 		});
 	}
