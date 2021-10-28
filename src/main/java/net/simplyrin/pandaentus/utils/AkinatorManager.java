@@ -209,7 +209,7 @@ public class AkinatorManager extends ListenerAdapter {
 				}
 
 				for (Guess guess : this.akiWrapper.getGuesses()) {
-					if (!guess.getDescription().equals("---")) {
+					if (guess.getDescription() != null && !guess.getDescription().equals("---")) {
 						System.out.println(guess.getDescription());
 					}
 				}
