@@ -171,7 +171,7 @@ public class AkinatorManager extends ListenerAdapter {
 			return;
 		}
 
-		if (event.getAuthor().isBot() || event.getAuthor().isFake()) {
+		if (event.getAuthor().isBot()) {
 			return;
 		}
 

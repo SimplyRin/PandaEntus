@@ -63,7 +63,7 @@ public class CommandExecutor extends ListenerAdapter {
 		}
 		Member member = event.getMember();
 		User user = event.getAuthor();
-		if (user.isFake() || user.isBot()) {
+		if (user.isBot()) {
 			return;
 		}
 
@@ -79,7 +79,7 @@ public class CommandExecutor extends ListenerAdapter {
 							return;
 						}
 						
-						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
+						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && !member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
 							return;
 						}
 
@@ -89,11 +89,11 @@ public class CommandExecutor extends ListenerAdapter {
 					break;
 				case StartsWith:
 					if (args[0].toLowerCase().startsWith(baseCommand.getCommand().toLowerCase())) {
-						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && !this.instance.isBotOwner(user)) {
+						if (baseCommand.getPermission().equals(Permission.BotOwner) && !this.instance.isBotOwner(user)) {
 							return;
 						}
 						
-						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
+						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && !member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
 							return;
 						}
 

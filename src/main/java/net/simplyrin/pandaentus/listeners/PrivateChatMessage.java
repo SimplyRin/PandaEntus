@@ -40,7 +40,7 @@ public class PrivateChatMessage {
 
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		if (user.isBot() || user.isFake()) {
+		if (user.isBot()) {
 			return;
 		}
 

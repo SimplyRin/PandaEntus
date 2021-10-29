@@ -75,7 +75,7 @@ public class TikTokCommand implements BaseCommand {
 
 				System.out.println("TikTokCommand.java: TikTok URL sending to #" + channel.getName());
 
-				JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
+				JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
 				Message message = channel.sendMessage((mention ? event.getAuthor().getAsMention() + " " : "") + jsonObject.get("url").getAsString()).complete();
 
 				String path = jsonObject.get("path").getAsString();

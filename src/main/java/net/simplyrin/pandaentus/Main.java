@@ -185,7 +185,7 @@ public class Main {
 			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			for (final ClassPath.ClassInfo classInfo : ClassPath.from(classLoader).getTopLevelClasses()) {
 				if (classInfo.getName().startsWith("net.simplyrin.pandaentus.command")) {
-					BaseCommand baseCommand = (BaseCommand) Class.forName(classInfo.getName()).newInstance();
+					BaseCommand baseCommand = (BaseCommand) Class.forName(classInfo.getName()).getDeclaredConstructor().newInstance();
 					this.commandRegister.registerCommand(baseCommand.getCommand(), baseCommand);
 				}
 			}

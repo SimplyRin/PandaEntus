@@ -62,6 +62,7 @@ public class TimeManager {
 		maps.put(this.userId, null);
 	}
 
+	@SuppressWarnings("deprecation")
 	public String getJoinedTime() {
 		return this.date.getHours() + "時" + this.date.getMinutes() + "分";
 	}

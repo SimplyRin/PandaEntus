@@ -47,7 +47,7 @@ public class ReactionListener extends ListenerAdapter {
 
 	@Override
 	public void onMessageReactionAdd(MessageReactionAddEvent event) {
-		if (event.getUser().isBot() || event.getUser().isFake()) {
+		if (event.getUser().isBot()) {
 			return;
 		}
 
@@ -67,14 +67,24 @@ public class ReactionListener extends ListenerAdapter {
 
 		String url = message.getContentRaw();
 
-		String tempVideoId = url.replace("https://www.youtube.com/watch?v=", "");
-		if (tempVideoId.contains("&")) {
+		String tempVideoId = url;
+		
+		if (tempVideoId.contains("v=")) {
+			tempVideoId = tempVideoId.split("v=")[1];
 			tempVideoId = tempVideoId.split("&")[0];
 		}
+		
+		tempVideoId = tempVideoId.replace("https://www.youtube.com/watch?v=", "");
 		tempVideoId = tempVideoId.replace("https://youtu.be/", "");
 		tempVideoId = tempVideoId.replace("http://youtu.be/", "");
 		tempVideoId = tempVideoId.replace("http://www.youtube.com/watch?v=", "");
+		
+		tempVideoId = tempVideoId.split("&")[0];
+		tempVideoId = tempVideoId.split("[?]")[0];
+		
 		final String videoId = tempVideoId;
+		
+		System.out.println("Original: " + url + ", Repalced: " + videoId);
 
 		final File file = new File("ytdl");
 		file.mkdirs();
@@ -177,7 +187,7 @@ public class ReactionListener extends ListenerAdapter {
 							
 							embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
 							embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
-							Message message = channel.sendFile(mp3).embed(embedBuilder.build()).complete();
+							channel.sendFile(mp3).embed(embedBuilder.build()).complete();
 							phase.delete().complete();
 
 						}
