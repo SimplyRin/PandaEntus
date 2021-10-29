@@ -2,9 +2,6 @@ package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.IOException;
-
-import com.google.common.io.Files;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -113,8 +110,14 @@ public class ReactionListener extends ListenerAdapter {
 		embedBuilder.setColor(Color.GREEN);
 		embedBuilder.setAuthor(user.getName() + " -> 処理中...", null, loadingUrl);
 		Message phase = channel.sendMessage(embedBuilder.build()).complete();
+		
+		String youtubeDlPath = "youtube-dl";
+		File youtubeDl = new File("youtube-dl");
+		if (youtubeDl.exists()) {
+			youtubeDlPath = youtubeDl.getAbsolutePath();
+		}
 
-		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-title", videoId }, new Callback() {
+		ProcessManager.runCommand(new String[]{ youtubeDlPath, "--get-title", videoId }, new Callback() {
 			@Override
 			public void line(String response) {
 				if (!response.toLowerCase().startsWith("error:")) {
@@ -124,7 +127,7 @@ public class ReactionListener extends ListenerAdapter {
 			}
 		}, true);
 
-		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-duration", videoId }, new Callback() {
+		ProcessManager.runCommand(new String[]{ youtubeDlPath, "--get-duration", videoId }, new Callback() {
 			@Override
 			public void line(String response) {
 				if (response.contains(":")) {
@@ -149,29 +152,21 @@ public class ReactionListener extends ListenerAdapter {
 
 				embedBuilder.setAuthor(user.getName() + " -> ダウンロードしています...", null, downloadingUrl);
 				phase.editMessage(embedBuilder.build()).complete();
-				ProcessManager.runCommand(new String[] { "youtube-dl", "--audio-format", "mp3", "-x", videoId }, new Callback() {
-					private File file;
+				ProcessManager.runCommand(new String[] { "youtube-dl", "--audio-format", "mp3", "--output", "./ytdl/" + videoId + ".%(ext)s", "-x", videoId }, new Callback() {
 					@Override
 					public void line(String response) {
 						if (response.startsWith("[ffmpeg] Destination:")) {
 							String title = response.replace("[ffmpeg] Destination:", "").replace("\"", "").trim();
 							System.out.println("Filename: " + title);
-							this.file = new File(title);
 						}
-						if (this.file != null) {
-							embedBuilder.setAuthor(user.getName() + " -> ダウンロード完了。ファイルを変換しています...", null, loadingUrl);
+						if (mp3 != null) {
+							embedBuilder.setAuthor(user.getName() + " -> ダウンロード完了。送信準備をしています...。", null, loadingUrl);
 							phase.editMessage(embedBuilder.build()).complete();
 						}
 					}
 
 					@Override
 					public void processEnded() {
-						try {
-							Files.move(this.file, mp3);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-
 						instance.getConfig().set("YouTube." + videoId + ".Path", mp3.getAbsolutePath());
 						embedBuilder.setAuthor(user.getName() + " -> 送信しています...", null, uploadingUrl);
 						phase.editMessage(embedBuilder.build()).complete();
@@ -184,12 +179,6 @@ public class ReactionListener extends ListenerAdapter {
 							Message message = channel.sendFile(mp3).embed(embedBuilder.build()).complete();
 							phase.delete().complete();
 
-							try {
-								Thread.sleep(1000 * 60 * 60 * 48);
-							} catch (Exception e) {
-							}
-
-							message.delete().complete();
 						}
 					}
 				}, true);

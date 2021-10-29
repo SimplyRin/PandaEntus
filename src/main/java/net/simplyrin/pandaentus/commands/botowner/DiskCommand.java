@@ -1,13 +1,10 @@
-package net.simplyrin.pandaentus.commands.admin;
+package net.simplyrin.pandaentus.commands.botowner;
 
 import java.awt.Color;
-import java.util.List;
+import java.io.File;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -37,11 +34,11 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class AddVoiceChannelCommand implements BaseCommand {
+public class DiskCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!add-vc";
+		return "!disk";
 	}
 
 	@Override
@@ -51,55 +48,35 @@ public class AddVoiceChannelCommand implements BaseCommand {
 
 	@Override
 	public Permission getPermission() {
-		return Permission.Administrator;
+		return Permission.BotOwner;
 	}
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-
 		MessageChannel channel = event.getChannel();
-		Guild guild = event.getGuild();
-		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 
-		if (args.length > 1) {
-			int i;
-			try {
-				i = Integer.valueOf(args[1]).intValue();
-			} catch (Exception e) {
-				embedBuilder.setColor(Color.RED);
-				embedBuilder.setDescription("Invalid usage!");
-				channel.sendMessage(embedBuilder.build()).complete();
-				return;
-			}
+		File file = new File(".");
+    	long totalSpace = file.getTotalSpace();
+    	long usableSpace = file.getUsableSpace();
+    	long usedSpace = totalSpace - usableSpace;
 
-			List<VoiceChannel> voiceChannels = category.getVoiceChannels();
-			int size = voiceChannels.size() + 1;
-
-			int count = 0;
-			while (true) {
-				if (i == count) {
-					break;
-				}
-
-				try {
-					category.createVoiceChannel("General-" + size).setUserlimit(99).complete();
-				} catch (Exception e) {
-				}
-
-				if (size == 50) {
-					break;
-				}
-
-				size++;
-				count++;
-			}
-
-			embedBuilder.setColor(Color.GREEN);
-			embedBuilder.setDescription("Created!");
-			channel.sendMessage(embedBuilder.build()).complete();
-			return;
+    	int percent = (int) (usedSpace * 100 / totalSpace);
+    	Color color = null;
+    	if (percent >= 80) {
+			color = Color.RED;
+		} else if (percent >= 60) {
+			color = Color.YELLOW;
+		} else if (percent >= 0) {
+			color = Color.GREEN;
 		}
+
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+		embedBuilder.setColor(color);
+		embedBuilder.setAuthor("Disk usage (" + percent + "/100%)");
+		embedBuilder.addField("Size", instance.formatSize(totalSpace), true);
+		embedBuilder.addField("Used", instance.formatSize(usedSpace), true);
+		embedBuilder.addField("Free", instance.formatSize(usableSpace), true);
+		channel.sendMessage(embedBuilder.build()).complete();
 	}
 
 }

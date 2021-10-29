@@ -1,18 +1,15 @@
-package net.simplyrin.pandaentus.commands.admin;
+package net.simplyrin.pandaentus.commands.botowner;
 
-import java.awt.Color;
-import java.io.File;
-
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.Permission;
 
 /**
- * Created by SimplyRin on 2020/07/09.
+ * Created by SimplyRin on 2020/10/20.
  *
  * Copyright (c) 2020 SimplyRin
  *
@@ -34,11 +31,11 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class DiskCommand implements BaseCommand {
+public class AddCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!disk";
+		return "!add";
 	}
 
 	@Override
@@ -48,35 +45,26 @@ public class DiskCommand implements BaseCommand {
 
 	@Override
 	public Permission getPermission() {
-		return Permission.Administrator;
+		return Permission.BotOwner;
 	}
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 
-		File file = new File(".");
-    	long totalSpace = file.getTotalSpace();
-    	long usableSpace = file.getUsableSpace();
-    	long usedSpace = totalSpace - usableSpace;
+		if (args.length > 3) {
+			Configuration config = instance.getConfig();
 
-    	int percent = (int) (usedSpace * 100 / totalSpace);
-    	Color color = null;
-    	if (percent >= 80) {
-			color = Color.RED;
-		} else if (percent >= 60) {
-			color = Color.YELLOW;
-		} else if (percent >= 0) {
-			color = Color.GREEN;
+			config.set("LocalMessage." + channel.getId() + ".Message", args[1]);
+			config.set("LocalMessage." + channel.getId() + ".Value.1", args[2]);
+			config.set("LocalMessage." + channel.getId() + ".Value.2", args[3]);
+
+			channel.sendMessage("設定しました。").complete();
+			return;
 		}
 
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-		embedBuilder.setColor(color);
-		embedBuilder.setAuthor("Disk usage (" + percent + "/100%)");
-		embedBuilder.addField("Size", instance.formatSize(totalSpace), true);
-		embedBuilder.addField("Used", instance.formatSize(usedSpace), true);
-		embedBuilder.addField("Free", instance.formatSize(usableSpace), true);
-		channel.sendMessage(embedBuilder.build()).complete();
+		channel.sendMessage("使用方法: !add <メッセージ> <内容1> <内容2>").complete();
+		return;
 	}
 
 }

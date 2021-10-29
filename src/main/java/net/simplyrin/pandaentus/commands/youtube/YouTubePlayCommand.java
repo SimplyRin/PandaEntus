@@ -1,7 +1,6 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
 import java.awt.Color;
-import java.util.concurrent.TimeUnit;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -83,8 +82,6 @@ public class YouTubePlayCommand implements BaseCommand {
 			Message message = channel.sendMessage(embedBuilder.build()).complete();
 
 			ThreadPool.run(() -> {
-				String videoId = instance.getVideoId(url);
-
 				VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 				AudioManager audioManager = guild.getAudioManager();
 				audioManager.openAudioConnection(voiceChannel);
@@ -95,22 +92,20 @@ public class YouTubePlayCommand implements BaseCommand {
 				instance.getPlayerManager().loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
 					@Override
 					public void trackLoaded(AudioTrack track) {
-						String title = instance.getConfig().getString("YouTube." + videoId + ".Title");
-						embedBuilder.setAuthor("次に " + url + " を再生します");
+						embedBuilder.setAuthor(null);
+						embedBuilder.clearFields();
+						embedBuilder.addField("タイトル", track.getInfo().title, true);
+						embedBuilder.addField("アーティスト", track.getInfo().author, true);
 						message.editMessage(embedBuilder.build()).complete();
 						instance.getPreviousTrack().put(guild, track);
 
 						ThreadPool.run(() -> {
-							String duration = instance.getConfig().getString("YouTube." + videoId + ".Duration");
-							int time = instance.durationToTime(duration);
-
-							if (time == 0) {
-								System.out.println(title + " time is zero(0)! return.");
+							if (track.getInfo().isStream) {
 								return;
 							}
-
+							
 							try {
-								TimeUnit.SECONDS.sleep(time);
+								Thread.sleep(track.getDuration() + 2000L);
 							} catch (Exception e) {
 							}
 

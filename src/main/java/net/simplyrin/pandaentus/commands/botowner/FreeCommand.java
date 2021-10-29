@@ -1,15 +1,16 @@
-package net.simplyrin.pandaentus.commands.admin;
+package net.simplyrin.pandaentus.commands.botowner;
 
 import java.awt.Color;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.Permission;
+import net.simplyrin.processmanager.Callback;
+import net.simplyrin.processmanager.ProcessManager;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -34,11 +35,11 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class SetGameCommand implements BaseCommand {
+public class FreeCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!setgame";
+		return "!free";
 	}
 
 	@Override
@@ -48,42 +49,63 @@ public class SetGameCommand implements BaseCommand {
 
 	@Override
 	public Permission getPermission() {
-		return Permission.Administrator;
+		return Permission.BotOwner;
 	}
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
-		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		if (args.length > 1) {
-			String game = "";
-			for (int i = 1; i < args.length; i++) {
-				game = game + args[i] + " ";
+		ProcessManager.runCommand(new String[] { "free", "-h" }, new Callback() {
+			String memTotal, memUsed, memFree, swapTotal, swapUsed, swapFree;
+
+			@Override
+			public void line(String line) {
+				System.out.println(line);
+
+				if (line.startsWith("Mem:")) {
+					String[] args = line.trim().replaceAll(" +", " ").split(" ");
+					int i = 0;
+					for (String arg : args) {
+						System.out.println("args[" + i + "] -> " + arg);
+						i++;
+					}
+					this.memTotal = args[1];
+					this.memUsed = args[2];
+					this.memFree = args[3];
+				}
+
+				else if (line.startsWith("Swap")) {
+					String[] args = line.trim().replaceAll(" +", " ").split(" ");
+					int i = 0;
+					for (String arg : args) {
+						System.out.println("args[" + i + "] -> " + arg);
+						i++;
+					}
+					this.swapTotal = args[1];
+					this.swapUsed = args[2];
+					this.swapFree = args[3];
+				}
 			}
-			game = game.trim();
 
-			if (game.equalsIgnoreCase("reset")) {
-				instance.getJda().getPresence().setActivity(null);
-
-				embedBuilder.setColor(Color.RED);
-				embedBuilder.setDescription("Reset");
+			@Override
+			public void processEnded() {
+				try {
+					Thread.sleep(100);
+				} catch (Exception e) {
+				}
+				EmbedBuilder embedBuilder = new EmbedBuilder();
+				embedBuilder.setColor(Color.YELLOW);
+				embedBuilder.setAuthor("Ram usage");
+				embedBuilder.addField("Total", this.memTotal, true);
+				embedBuilder.addField("Used", this.memUsed, true);
+				embedBuilder.addField("Free", this.memFree, true);
+				embedBuilder.addField("Swap Total", this.swapTotal, true);
+				embedBuilder.addField("Swap Used", this.swapUsed, true);
+				embedBuilder.addField("Swap Free", this.swapFree, true);
 				channel.sendMessage(embedBuilder.build()).complete();
-				return;
 			}
-
-			instance.getJda().getPresence().setActivity(Activity.playing(game));
-
-			embedBuilder.setColor(Color.GREEN);
-			embedBuilder.setDescription("Playing game has been set to '" + game + "'!");
-			channel.sendMessage(embedBuilder.build()).complete();
-			return;
-		}
-
-		embedBuilder.setColor(Color.RED);
-		embedBuilder.setDescription("Usage: !setgame <game>");
-		channel.sendMessage(embedBuilder.build()).complete();
-		return;
+		}, true);
 	}
 
 }

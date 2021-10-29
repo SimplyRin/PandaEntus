@@ -69,7 +69,7 @@ public class YouTubeVolumeCommand implements BaseCommand {
 			}
 		}
 
-		channel.sendMessage("Usage: " + this.getCommand() + " <20-100>").complete();
+		channel.sendMessage("使用方法: " + this.getCommand() + " <20-100>").complete();
 	}
 
 }

@@ -1,9 +1,10 @@
-package net.simplyrin.pandaentus.commands.admin;
+package net.simplyrin.pandaentus.commands.youtube;
 
-import net.dv8tion.jda.api.entities.Category;
+import java.awt.Color;
+
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -33,11 +34,11 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class InitCommand implements BaseCommand {
+public class YouTubeLoopCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!init";
+		return "!loop";
 	}
 
 	@Override
@@ -47,27 +48,28 @@ public class InitCommand implements BaseCommand {
 
 	@Override
 	public Permission getPermission() {
-		return Permission.Administrator;
+		return Permission.Everyone;
 	}
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 
-		if (args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
-			Category textCategory = guild.createCategory("Text Channels").complete();
-			TextChannel textChannel = textCategory.createTextChannel("general-1").complete();
-			Category voiceCategory = guild.createCategory("Voice Channels").complete();
-			voiceCategory.createVoiceChannel("General-1").setUserlimit(99).complete();
-			textChannel.sendMessage("Bot で必要なカテゴリ、チャンネルを自動作成しました。").complete();
-			return;
+		if (instance.getLoopMap().get(guild) != null) {
+			embedBuilder.setColor(Color.RED);
+			embedBuilder.setDescription("ループ再生を無効にしました。");
+			instance.getLoopMap().remove(guild);
+			instance.getPreviousTrack().remove(guild);
+		} else {
+			embedBuilder.setColor(Color.GREEN);
+			embedBuilder.setDescription("ループ再生を有効にしました。");
+			instance.getLoopMap().put(guild, instance.getPreviousTrack().get(guild));
 		}
 
-		channel.sendMessage("!init confirm と入力すると、Bot で必要なカテゴリ、チャンネルを自動的に作成します。\n"
-				+ "作成されるチャンネルは以下の通りです。\nカテゴリ: `Text Channels`, `Voice Channels`"
-				+ "\nテキストチャンネル: `#general`"
-				+ "\nボイスチャンネル: `General-1`").complete();
+		channel.sendMessage(embedBuilder.build()).complete();
 	}
 
 }

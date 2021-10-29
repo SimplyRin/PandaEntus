@@ -1,10 +1,9 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.botowner;
 
 import java.awt.Color;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -34,11 +33,11 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class LoopCommand implements BaseCommand {
+public class SendChatCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!loop";
+		return "!sendchat";
 	}
 
 	@Override
@@ -48,28 +47,32 @@ public class LoopCommand implements BaseCommand {
 
 	@Override
 	public Permission getPermission() {
-		return Permission.Everyone;
+		return Permission.BotOwner;
 	}
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		MessageChannel channel = event.getChannel();
-		Guild guild = event.getGuild();
-
-		if (instance.getLoopMap().get(guild) != null) {
-			embedBuilder.setColor(Color.RED);
-			embedBuilder.setDescription("ループ再生を無効にしました。");
-			instance.getLoopMap().remove(guild);
-			instance.getPreviousTrack().remove(guild);
-		} else {
-			embedBuilder.setColor(Color.GREEN);
-			embedBuilder.setDescription("ループ再生を有効にしました。");
-			instance.getLoopMap().put(guild, instance.getPreviousTrack().get(guild));
+		if (args.length > 2) {
+			TextChannel channel = null;
+			for (TextChannel tc : instance.getJda().getTextChannels()) {
+				if (tc.getId().equals(args[1])) {
+					channel = tc;
+				}
+			}
+			String name = "";
+			for (int i = 2; i < args.length; i++) {
+				name = name + args[i] + " ";
+			}
+			channel.sendMessage(name.trim()).complete();
+			return;
 		}
 
-		channel.sendMessage(embedBuilder.build()).complete();
+		embedBuilder.setColor(Color.RED);
+		embedBuilder.setDescription("Usage: !sendchat <channelId> <message>");
+		event.getChannel().sendMessage(embedBuilder.build()).complete();
+		return;
 	}
 
 }

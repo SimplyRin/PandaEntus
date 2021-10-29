@@ -78,7 +78,7 @@ public class OjichatCommand implements BaseCommand {
 		HttpClient httpClient = new HttpClient("https://ojichat.appspot.com/post");
 		httpClient.setData("name=" + name + "&emoji_level=4&punctuation_level=0");
 
-		httpClient.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36");
+		httpClient.setUserAgent(instance.getBotUserAgent());
 
 		httpClient.addHeader("Accept", "application/json, text/plain, */*");
 		httpClient.addHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");

@@ -59,7 +59,7 @@ public class VanishCommand implements BaseCommand {
 
 		MessageChannel channel = event.getChannel();
 		User user = event.getAuthor();
-		if (args.length > 1 && user.getId().equals(instance.getAdminId())) {
+		if (args.length > 1 && instance.isBotOwner(user)) {
 			String id = args[1];
 			id = id.replace("<", "");
 			id = id.replace(">", "");

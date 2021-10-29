@@ -1,9 +1,6 @@
-package net.simplyrin.pandaentus.commands.admin;
+package net.simplyrin.pandaentus.commands.botowner;
 
-import java.awt.Color;
-
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -33,11 +30,11 @@ import net.simplyrin.pandaentus.classes.Permission;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class SendChatCommand implements BaseCommand {
+public class ShutdownCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!sendchat";
+		return "!shutdown";
 	}
 
 	@Override
@@ -47,32 +44,15 @@ public class SendChatCommand implements BaseCommand {
 
 	@Override
 	public Permission getPermission() {
-		return Permission.Administrator;
+		return Permission.BotOwner;
 	}
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
-		EmbedBuilder embedBuilder = new EmbedBuilder();
+		MessageChannel channel = event.getChannel();
 
-		if (args.length > 2) {
-			TextChannel channel = null;
-			for (TextChannel tc : instance.getJda().getTextChannels()) {
-				if (tc.getId().equals(args[1])) {
-					channel = tc;
-				}
-			}
-			String name = "";
-			for (int i = 2; i < args.length; i++) {
-				name = name + args[i] + " ";
-			}
-			channel.sendMessage(name.trim()).complete();
-			return;
-		}
-
-		embedBuilder.setColor(Color.RED);
-		embedBuilder.setDescription("Usage: !sendchat <channelId> <message>");
-		event.getChannel().sendMessage(embedBuilder.build()).complete();
-		return;
+		channel.sendMessage(":wave:").complete();
+		System.exit(0);
 	}
 
 }

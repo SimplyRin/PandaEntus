@@ -4,10 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,12 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.besaba.revonline.pastebinapi.Pastebin;
-import com.besaba.revonline.pastebinapi.impl.factory.PastebinFactory;
-import com.besaba.revonline.pastebinapi.paste.PasteBuilder;
-import com.besaba.revonline.pastebinapi.paste.PasteExpire;
-import com.besaba.revonline.pastebinapi.paste.PasteVisiblity;
-import com.google.common.io.Files;
 import com.google.common.reflect.ClassPath;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -46,7 +44,6 @@ import net.simplyrin.config.Config;
 import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
-import net.simplyrin.pandaentus.classes.DownloadResult;
 import net.simplyrin.pandaentus.listeners.CommandExecutor;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
@@ -56,8 +53,6 @@ import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
 import net.simplyrin.pandaentus.utils.TimeUtils;
 import net.simplyrin.pandaentus.utils.Version;
-import net.simplyrin.processmanager.Callback;
-import net.simplyrin.processmanager.ProcessManager;
 import net.simplyrin.rinstream.RinStream;
 
 /**
@@ -109,8 +104,8 @@ public class Main {
 
 	private List<String> amongUsGuildList;
 
-	@Getter
 	private Listener eventListener;
+	private String botUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36";
 
 	public void run(String[] args) {
 		RinStream rinStream = new RinStream();
@@ -395,28 +390,28 @@ public class Main {
 		pw.flush();
 		String result = sw.toString();
 
-		final PastebinFactory factory = new PastebinFactory();
-		final Pastebin pastebin = factory.createPastebin(this.config.getString("Pastebin.API-Key"));
-		final PasteBuilder pasteBuilder = factory.createPaste();
-
-		// Title paste
-		pasteBuilder.setTitle("Error message " + UUID.randomUUID().toString().split("-")[0]);
-		pasteBuilder.setRaw(result);
-		pasteBuilder.setMachineFriendlyLanguage("text");
-		pasteBuilder.setVisiblity(PasteVisiblity.Unlisted);
-		pasteBuilder.setExpire(PasteExpire.OneDay);
-
-		String url = pastebin.post(pasteBuilder.build()).get();
-
-		String localMessage;
-		if (result.length() >= 1800) {
-			localMessage = "```" +  result.substring(0, 1000) + "...```";
-		} else {
-			localMessage = "```" + result + "...```";
+		File file = this.stringToTempFile(result);
+		
+		for (String id : this.getBotOwner()) {
+			User user = this.jda.getUserById(id);
+			user.openPrivateChannel().complete().sendFile(file).complete();
 		}
-
-		User user = this.jda.getUserById("224428706209202177");
-		user.openPrivateChannel().complete().sendMessage("An error occured of PandaEntus discord bot!\r\nYou can visit error contents at " + url + localMessage).complete();
+	}
+	
+	public File stringToTempFile(String message) {
+		try {
+			File folder = new File("temp");
+			folder.mkdirs();
+			
+			File file = new File(folder, UUID.randomUUID().toString().split("-")[0] + ".txt");
+			
+			Files.writeString(Path.of(file.toURI()), message, StandardCharsets.UTF_8);
+			return file;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 
 	public static Date timeToDate(Time time) {
@@ -485,97 +480,6 @@ public class Main {
 		}
 	}
 
-	public DownloadResult downloadFile(String url) {
-		DownloadResult result = new DownloadResult();
-
-		final File file = new File("ytdl");
-		file.mkdirs();
-
-		final String videoId = this.getVideoId(url);
-		final File mp3 = new File(file, videoId + ".mp3");
-		if (mp3.exists()) {
-			result.setResult(true);
-			result.setFile(mp3);
-			System.out.println("Cache found, " + mp3.getName());
-			return result;
-		}
-
-		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-title", videoId }, new Callback() {
-			@Override
-			public void line(String response) {
-				if (!response.toLowerCase().startsWith("error:")) {
-					System.out.println("Title: " + response);
-					config.set("YouTube." + videoId + ".Title", response);
-				}
-			}
-		}, true);
-
-		ProcessManager.runCommand(new String[]{ "youtube-dl", "--get-duration", videoId }, new Callback() {
-			boolean ok = false;
-			@Override
-			public void line(String response) {
-				response = response.trim();
-
-				if (response.startsWith("ERROR:")) {
-					System.out.println("An error occured: " + response);
-					return;
-				}
-				if (response.contains(":")) {
-					config.set("YouTube." + videoId + ".Duration", response);
-				} else {
-					try {
-						Integer.valueOf(response);
-						config.set("YouTube." + videoId + ".Duration", response);
-						this.ok = true;
-					} catch (NumberFormatException e) {
-					}
-				}
-				int ll = response.split(":").length;
-				if (ll == 2) {
-					int length = Integer.valueOf(response.split(":")[0]);
-					if (length <= 5) {
-						this.ok = true;
-					}
-				}
-			}
-
-			@Override
-			public void processEnded() {
-				if (!this.ok) {
-					System.out.println("Download failed.");
-					return;
-				}
-
-				ProcessManager.runCommand(new String[] { "youtube-dl", "--audio-format", "mp3", "-x", videoId }, new Callback() {
-					private File file;
-					@Override
-					public void line(String response) {
-						if (response.startsWith("[ffmpeg] Destination:")) {
-							String title = response.replace("[ffmpeg] Destination:", "").replace("\"", "").trim();
-							System.out.println("Filename: " + title);
-							this.file = new File(title);
-						}
-					}
-
-					@Override
-					public void processEnded() {
-						try {
-							Files.move(this.file, mp3);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-
-						config.set("YouTube." + videoId + ".Path", mp3.getAbsolutePath());
-					}
-				}, false);
-			}
-		}, false);
-
-		result.setResult(true);
-		result.setFile(file);
-		return result;
-	}
-
 	public String getVideoId(String url) {
 		String tempVideoId = url.replace("https://www.youtube.com/watch?v=", "");
 		if (tempVideoId.contains("&")) {
@@ -594,19 +498,32 @@ public class Main {
 		}
 		return member.getUser().getName();
 	}
+	
+	public List<String> getBotOwner() {
+		return this.getConfig().getStringList("BotOwnerList");
+	}
 
 	private boolean notice;
-	public String getAdminId() {
-		String adminId = this.getConfig().getString("Admin-ID");
-		if (adminId.equals("") || adminId == null) {
-			this.getConfig().set("Admin-ID", "999");
+	
+	public boolean isBotOwner(User user) {
+		boolean bool = false;
+		
+		List<String> botOwnerList = this.getBotOwner();
+		if (botOwnerList == null || botOwnerList.isEmpty()) {
+			this.getConfig().set("BotOwnerList", Arrays.asList("999", "888"));
 			if (!this.notice) {
 				System.out.println("Admin-ID が設定されていません。Config ファイルから Admin-ID を設定してください。");
 				this.notice = true;
 			}
-			adminId = "999";
+		} else {
+			for (String id : botOwnerList) {
+				if (user.getId().equals(id)) {
+					bool = true;
+				}
+			}
 		}
-		return adminId;
+		
+		return bool;
 	}
 
 	public synchronized GuildMusicManager getGuildAudioPlayer(Guild guild) {

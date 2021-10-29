@@ -1,16 +1,18 @@
-package net.simplyrin.pandaentus.commands.admin;
+package net.simplyrin.pandaentus.commands.serveradmin;
 
 import java.awt.Color;
+import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.Main;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.Permission;
-import net.simplyrin.processmanager.Callback;
-import net.simplyrin.processmanager.ProcessManager;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -35,11 +37,11 @@ import net.simplyrin.processmanager.ProcessManager;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class FreeCommand implements BaseCommand {
+public class AddVoiceChannelCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!free";
+		return "!add-vc";
 	}
 
 	@Override
@@ -49,63 +51,55 @@ public class FreeCommand implements BaseCommand {
 
 	@Override
 	public Permission getPermission() {
-		return Permission.Administrator;
+		return Permission.ServerAdministrator;
 	}
 
 	@Override
 	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+
 		MessageChannel channel = event.getChannel();
+		Guild guild = event.getGuild();
+		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
 
-		ProcessManager.runCommand(new String[] { "free", "-h" }, new Callback() {
-			String memTotal, memUsed, memFree, swapTotal, swapUsed, swapFree;
-
-			@Override
-			public void line(String line) {
-				System.out.println(line);
-
-				if (line.startsWith("Mem:")) {
-					String[] args = line.trim().replaceAll(" +", " ").split(" ");
-					int i = 0;
-					for (String arg : args) {
-						System.out.println("args[" + i + "] -> " + arg);
-						i++;
-					}
-					this.memTotal = args[1];
-					this.memUsed = args[2];
-					this.memFree = args[3];
-				}
-
-				else if (line.startsWith("Swap")) {
-					String[] args = line.trim().replaceAll(" +", " ").split(" ");
-					int i = 0;
-					for (String arg : args) {
-						System.out.println("args[" + i + "] -> " + arg);
-						i++;
-					}
-					this.swapTotal = args[1];
-					this.swapUsed = args[2];
-					this.swapFree = args[3];
-				}
+		if (args.length > 1) {
+			int i;
+			try {
+				i = Integer.valueOf(args[1]).intValue();
+			} catch (Exception e) {
+				embedBuilder.setColor(Color.RED);
+				embedBuilder.setDescription("Invalid usage!");
+				channel.sendMessage(embedBuilder.build()).complete();
+				return;
 			}
 
-			@Override
-			public void processEnded() {
+			List<VoiceChannel> voiceChannels = category.getVoiceChannels();
+			int size = voiceChannels.size() + 1;
+
+			int count = 0;
+			while (true) {
+				if (i == count) {
+					break;
+				}
+
 				try {
-					Thread.sleep(100);
+					category.createVoiceChannel("General-" + size).setUserlimit(99).complete();
 				} catch (Exception e) {
 				}
-				EmbedBuilder embedBuilder = new EmbedBuilder();
-				embedBuilder.setColor(Color.YELLOW);
-				embedBuilder.setAuthor("Ram usage");
-				embedBuilder.addField("Total", this.memTotal, true);
-				embedBuilder.addField("Used", this.memUsed, true);
-				embedBuilder.addField("Free", this.memFree, true);
-				embedBuilder.addField("Swap Total", this.swapTotal, true);
-				embedBuilder.addField("Swap Used", this.swapUsed, true);
-				embedBuilder.addField("Swap Free", this.swapFree, true);
-				channel.sendMessage(embedBuilder.build()).complete();
+
+				if (size == 50) {
+					break;
+				}
+
+				size++;
+				count++;
 			}
-		}, true);
+
+			embedBuilder.setColor(Color.GREEN);
+			embedBuilder.setDescription("Created!");
+			channel.sendMessage(embedBuilder.build()).complete();
+			return;
+		}
 	}
 
 }

@@ -67,7 +67,7 @@ public class TextGenCommand implements BaseCommand {
 			httpClient.addHeader("origin", "https://ja.cooltext.com");
 			httpClient.addHeader("accept-encoding", "gzip, deflate, br");
 			httpClient.addHeader("accept-language", "ja-JP,ja;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6");
-			httpClient.addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
+			httpClient.addHeader("user-agent", instance.getBotUserAgent());
 			httpClient.addHeader("content-type", "application/x-www-form-urlencoded; charset=UTF-8");
 			httpClient.addHeader("accept", "*/*");
 			httpClient.addHeader("referer", "https://ja.cooltext.com/Logo-Design-Particle");

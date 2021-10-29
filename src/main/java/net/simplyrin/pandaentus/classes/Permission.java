@@ -25,6 +25,6 @@ package net.simplyrin.pandaentus.classes;
  */
 public enum Permission {
 
-	Everyone, Administrator;
+	Everyone, BotOwner, ServerAdministrator;
 
 }

@@ -3,6 +3,7 @@ package net.simplyrin.pandaentus.listeners;
 import java.util.HashMap;
 
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -60,6 +61,7 @@ public class CommandExecutor extends ListenerAdapter {
 		if (event.isFromType(ChannelType.PRIVATE)) {
 			return;
 		}
+		Member member = event.getMember();
 		User user = event.getAuthor();
 		if (user.isFake() || user.isBot()) {
 			return;
@@ -73,19 +75,29 @@ public class CommandExecutor extends ListenerAdapter {
 				switch (baseCommand.getType()) {
 				case EqualsIgnoreCase:
 					if (args[0].equalsIgnoreCase(baseCommand.getCommand())) {
-						if (baseCommand.getPermission().equals(Permission.Administrator) && !user.getId().equals(this.instance.getAdminId())) {
+						if (baseCommand.getPermission().equals(Permission.BotOwner) && !this.instance.isBotOwner(user)) {
+							return;
+						}
+						
+						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
 							return;
 						}
 
+						System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + args[0]);
 						baseCommand.execute(this.instance, event, args);
 					}
 					break;
 				case StartsWith:
 					if (args[0].toLowerCase().startsWith(baseCommand.getCommand().toLowerCase())) {
-						if (baseCommand.getPermission().equals(Permission.Administrator) && !user.getId().equals(this.instance.getAdminId())) {
+						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && !this.instance.isBotOwner(user)) {
+							return;
+						}
+						
+						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
 							return;
 						}
 
+						System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + args[0]);
 						baseCommand.execute(this.instance, event, args);
 					}
 					break;

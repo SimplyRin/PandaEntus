@@ -30,3 +30,4 @@ src/main/java/net/simplyrin/pandaentus/utils/Version.java
 *.m4a
 *.wav
 *.mkv
+*.exe

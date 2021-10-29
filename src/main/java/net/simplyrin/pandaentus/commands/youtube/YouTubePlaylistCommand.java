@@ -75,26 +75,12 @@ public class YouTubePlaylistCommand implements BaseCommand {
 
 		AudioTrack playingTrack = musicManager.player.getPlayingTrack();
 		if (playingTrack != null) {
-			String title = "不明";
-			for (String key : instance.getConfig().getSection("YouTube").getKeys()) {
-				String path = instance.getConfig().getString("YouTube." + key + ".Path");
-				if (path.equals(playingTrack.getIdentifier())) {
-					title = instance.getConfig().getString("YouTube." + key + ".Title");
-				}
-			}
-			embedBuilder.setAuthor("🎵 再生中の音楽: " + title);
+			embedBuilder.setAuthor("🎵 再生中の音楽: " + playingTrack.getInfo().title);
 		}
 
 		int i = 1;
 		for (AudioTrack audioTrack : queue) {
-			String title = "";
-			for (String key : instance.getConfig().getSection("YouTube").getKeys()) {
-				String path = instance.getConfig().getString("YouTube." + key + ".Path");
-				if (path.equals(audioTrack.getIdentifier())) {
-					title = instance.getConfig().getString("YouTube." + key + ".Title");
-				}
-			}
-			message += "**" + i + ":** __" + title + "__\n";
+			message += "**" + i + ":** __" + audioTrack.getInfo().title + "__\n";
 			i++;
 		}
 

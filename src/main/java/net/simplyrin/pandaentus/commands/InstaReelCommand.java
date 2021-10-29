@@ -84,7 +84,7 @@ public class InstaReelCommand implements BaseCommand {
 		connection.addRequestProperty("sec-fetch-dest", "video");
 		connection.addRequestProperty("sec-fetch-dest", "no-cors");
 		connection.addRequestProperty("sec-fetch-site", "cross-site");
-		connection.addRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36");
+		connection.addRequestProperty("user-agent", instance.getBotUserAgent());
 
 		String result = null;
 		try {

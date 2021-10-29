@@ -60,7 +60,7 @@ public class PoolCommand implements BaseCommand {
 		User user = event.getAuthor();
 
 		if (args.length > 1) {
-			if (user.getId().equals(instance.getAdminId()) && args.length > 3 && args[1].equalsIgnoreCase("set")) {
+			if (instance.isBotOwner(user) && args.length > 3 && args[1].equalsIgnoreCase("set")) {
 				String key = args[2];
 				String game = "";
 				for (int i = 3; i < args.length; i++) {
