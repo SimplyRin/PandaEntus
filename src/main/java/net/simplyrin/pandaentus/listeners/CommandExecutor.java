@@ -83,7 +83,7 @@ public class CommandExecutor extends ListenerAdapter {
 							return;
 						}
 
-						System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + args[0]);
+						System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + raw);
 						baseCommand.execute(this.instance, event, args);
 					}
 					break;
@@ -97,7 +97,7 @@ public class CommandExecutor extends ListenerAdapter {
 							return;
 						}
 
-						System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + args[0]);
+						System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + raw);
 						baseCommand.execute(this.instance, event, args);
 					}
 					break;

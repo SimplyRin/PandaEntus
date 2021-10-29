@@ -111,11 +111,13 @@ public class ReactionListener extends ListenerAdapter {
 		embedBuilder.setAuthor(user.getName() + " -> 処理中...", null, loadingUrl);
 		Message phase = channel.sendMessage(embedBuilder.build()).complete();
 		
-		String youtubeDlPath = "youtube-dl";
+		String youtubeDlPathTemp = "youtube-dl";
 		File youtubeDl = new File("youtube-dl");
 		if (youtubeDl.exists()) {
-			youtubeDlPath = youtubeDl.getAbsolutePath();
+			youtubeDlPathTemp = youtubeDl.getAbsolutePath();
 		}
+		
+		final String youtubeDlPath = youtubeDlPathTemp;
 
 		ProcessManager.runCommand(new String[]{ youtubeDlPath, "--get-title", videoId }, new Callback() {
 			@Override
@@ -152,16 +154,14 @@ public class ReactionListener extends ListenerAdapter {
 
 				embedBuilder.setAuthor(user.getName() + " -> ダウンロードしています...", null, downloadingUrl);
 				phase.editMessage(embedBuilder.build()).complete();
-				ProcessManager.runCommand(new String[] { "youtube-dl", "--audio-format", "mp3", "--output", "./ytdl/" + videoId + ".%(ext)s", "-x", videoId }, new Callback() {
+				
+				
+				ProcessManager.runCommand(new String[] { youtubeDlPath, "--audio-format", "mp3", "--output", "./ytdl/" + videoId + ".%(ext)s", "-x", videoId }, new Callback() {
 					@Override
 					public void line(String response) {
 						if (response.startsWith("[ffmpeg] Destination:")) {
 							String title = response.replace("[ffmpeg] Destination:", "").replace("\"", "").trim();
 							System.out.println("Filename: " + title);
-						}
-						if (mp3 != null) {
-							embedBuilder.setAuthor(user.getName() + " -> ダウンロード完了。送信準備をしています...。", null, loadingUrl);
-							phase.editMessage(embedBuilder.build()).complete();
 						}
 					}
 
@@ -172,8 +172,9 @@ public class ReactionListener extends ListenerAdapter {
 						phase.editMessage(embedBuilder.build()).complete();
 						if (mp3.exists()) {
 							EmbedBuilder embedBuilder = new EmbedBuilder();
-							embedBuilder.setColor(Color.RED);
+							embedBuilder.setColor(Color.GREEN);
 							embedBuilder.setAuthor("ファイルが準備できました。");
+							
 							embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
 							embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
 							Message message = channel.sendFile(mp3).embed(embedBuilder.build()).complete();
