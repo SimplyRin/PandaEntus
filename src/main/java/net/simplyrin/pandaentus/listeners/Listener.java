@@ -260,8 +260,10 @@ public class Listener extends ListenerAdapter {
 					embedBuilder.addField("開始時刻", this.instance.getNowTime(time), true);
 					embedBuilder.addField("終了時刻", this.instance.getNowTime(), true);
 				}
+				
+				String path = "Server." + guild.getId() + ".NoSendLogTimeLog";
 
-				if (this.instance.getConfig().getBoolean("Disable")) {
+				if (this.instance.getConfig().getBoolean(path)) {
 					return;
 				}
 
@@ -269,17 +271,9 @@ public class Listener extends ListenerAdapter {
 				if (general != null) {
 					textChannel = general;
 				}
+				
 				textChannel.sendMessage(embedBuilder.build()).complete();
 			} catch (Exception e) {
-				GuildChannel guildChannel = (GuildChannel) category.getChannels().get(1);
-				Date time = Date.from(guildChannel.getTimeCreated().toInstant());
-
-				EmbedBuilder embedBuilder = new EmbedBuilder();
-				embedBuilder.setColor(Color.GREEN);
-				embedBuilder.addField("開始時刻", this.instance.getNowTime(time), true);
-				embedBuilder.addField("通話時間", this.instance.getUptime(time), true);
-				embedBuilder.addField("終了時刻", this.instance.getNowTime(), true);
-
 				this.instance.postError(e);
 			}
 

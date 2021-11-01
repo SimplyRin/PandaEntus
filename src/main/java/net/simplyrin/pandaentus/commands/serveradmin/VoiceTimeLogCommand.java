@@ -3,6 +3,7 @@ package net.simplyrin.pandaentus.commands.serveradmin;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -47,7 +48,17 @@ public class VoiceTimeLogCommand implements BaseCommand {
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
+		
+		Configuration config = instance.getConfig();
+		
+		String path = "Server." + guild.getId() + ".NoSendLogTimeLog";
+		
+		boolean bool = config.getBoolean(path, false);
+		bool = !bool;
 
+		config.set(path, bool);
+		
+		channel.sendMessage("通話ログ表示を **" + (bool ? "無効" : "有効") + "** にしました。").complete();
 	}
 
 }

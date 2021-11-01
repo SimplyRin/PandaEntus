@@ -2,6 +2,7 @@ package net.simplyrin.pandaentus.listeners;
 
 import java.util.HashMap;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -74,7 +75,7 @@ public class CommandExecutor extends ListenerAdapter {
 							return;
 						}
 						
-						if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
+						if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(Permission.MANAGE_SERVER)) {
 							return;
 						}
 
@@ -88,7 +89,7 @@ public class CommandExecutor extends ListenerAdapter {
 							return;
 						}
 						
-						if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
+						if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(Permission.MANAGE_SERVER)) {
 							return;
 						}
 
