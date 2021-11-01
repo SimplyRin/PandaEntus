@@ -227,18 +227,18 @@ public class PandaEntus {
 	}
 	
 	public Category getTextChannelCategory(Guild guild) {
-		List<Category> list = guild.getCategoriesByName("テキストチャンネル", true);
+		List<Category> list = guild.getCategoriesByName("Text Channels", true);
 		if (list == null || list.isEmpty()) {
-			list = guild.getCategoriesByName("Text Channels", true);
+			list = guild.getCategoriesByName("テキストチャンネル", true);
 		}
 		
 		return list.get(0);
 	}
 	
 	public Category getVoiceChannelCategory(Guild guild) {
-		List<Category> list = guild.getCategoriesByName("ボイスチャンネル", true);
+		List<Category> list = guild.getCategoriesByName("Voice Channels", true);
 		if (list == null || list.isEmpty()) {
-			list = guild.getCategoriesByName("Voice Channels", true);
+			list = guild.getCategoriesByName("ボイスチャンネル", true);
 		}
 		
 		return list.get(0);
