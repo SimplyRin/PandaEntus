@@ -6,6 +6,7 @@ import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.ReactionMessage;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -54,7 +55,8 @@ public class YouTubeCommand implements BaseCommand {
 			}
 		}
 		event.getMessage().addReaction(emote).complete();
-		instance.getMessages().add(event.getMessage());
+		ReactionMessage rm = new ReactionMessage(event.getMessage(), emote);
+		instance.getMessages().add(rm);
 	}
 
 }

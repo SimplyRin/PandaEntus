@@ -75,7 +75,8 @@ public class KvCommand implements BaseCommand {
 		}
 
 		if (args.length > 1) {
-			String uniqueId = UUID.randomUUID().toString().split("-")[0] + ".wav";
+			String uniqueId = "./kv/" + UUID.randomUUID().toString().split("-")[0] + ".wav";
+			new File("kv").mkdirs();			
 			File file = new File(uniqueId);
 
 			String value = "";

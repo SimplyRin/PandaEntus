@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.PandaEntus;
+import net.simplyrin.pandaentus.classes.ReactionMessage;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
@@ -46,17 +47,21 @@ public class ReactionListener extends ListenerAdapter {
 			return;
 		}
 
-		Message message = null;
-		for (Message temp : this.instance.getMessages()) {
-			if (temp.getId().equals(event.getMessageId())) {
-				message = temp;
+		ReactionMessage reactionMessage = null;
+		for (ReactionMessage temp : this.instance.getMessages()) {
+			if (temp.getMessage().getId().equals(event.getMessageId())) {
+				reactionMessage = temp;
 			}
 		}
-		if (message == null) {
+		if (reactionMessage == null) {
 			return;
 		}
+		if (!event.getReactionEmote().getEmote().getName().equals(reactionMessage.getEmote().getName())) {
+			return;
+		}
+		Message message = reactionMessage.getMessage();
 
-		this.instance.getMessages().remove(message);
+		this.instance.getMessages().remove(reactionMessage);
 
 		final MessageChannel channel = message.getChannel();
 

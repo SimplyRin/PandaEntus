@@ -52,9 +52,6 @@ public class YouTubeVolumeCommand implements BaseCommand {
 				int volume = Integer.valueOf(args[1]);
 				if (volume >= 20 && volume <= 100) {
 					instance.getConfig().set("Guild." + event.getGuild().getId() + ".Voice-Volume", volume);
-					if (volume >= 40) {
-						volume = volume - 20;
-					}
 					GuildMusicManager musicManager = instance.getGuildAudioPlayer(event.getGuild());
 					musicManager.player.setVolume(volume);
 					channel.sendMessage("ボリュームを " + volume + " に変更しました。").complete();

@@ -94,13 +94,13 @@ public class YouTubePlayCommand implements BaseCommand {
 						message.editMessage(embedBuilder.build()).complete();
 						instance.getPreviousTrack().put(guild, track);
 
-						ThreadPool.run(() -> {
+						/* ThreadPool.run(() -> {
 							if (track.getInfo().isStream) {
 								return;
 							}
 							
 							try {
-								Thread.sleep(track.getDuration() + 2000L);
+								Thread.sleep(track.getDuration());
 							} catch (Exception e) {
 							}
 
@@ -112,7 +112,7 @@ public class YouTubePlayCommand implements BaseCommand {
 									}
 								}
 							}
-						});
+						}); */
 
 						instance.play(guild, musicManager, track);
 					}

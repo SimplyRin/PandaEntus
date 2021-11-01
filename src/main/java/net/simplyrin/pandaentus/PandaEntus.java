@@ -35,7 +35,6 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -45,6 +44,7 @@ import net.simplyrin.config.Config;
 import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
+import net.simplyrin.pandaentus.classes.ReactionMessage;
 import net.simplyrin.pandaentus.listeners.CommandExecutor;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
@@ -87,7 +87,7 @@ public class PandaEntus {
 	private JDA jda;
 	private TimeUtils timeUtils;
 	private String voiceTextApiKey;
-	private List<Message> messages = new ArrayList<>();
+	private List<ReactionMessage> messages = new ArrayList<>(); 
 
 	private CommandExecutor commandRegister;
 
@@ -242,6 +242,15 @@ public class PandaEntus {
 		}
 		
 		return list.get(0);
+	}
+	
+	public String getVoiceChannelName(Category category) {
+		String name = category.getName();
+		if (name.equals("ボイスチャンネル")) {
+			return "一般";
+		} else {
+			return "General";
+		}
 	}
 
 	public void addShutdownHook(Runnable runnable) {
@@ -552,7 +561,7 @@ public class PandaEntus {
 		GuildMusicManager musicManager = this.musicManagers.get(guildId);
 
 		if (musicManager == null) {
-			musicManager = new GuildMusicManager(this.playerManager);
+			musicManager = new GuildMusicManager(this, guild, this.playerManager);
 			this.musicManagers.put(guildId, musicManager);
 		}
 

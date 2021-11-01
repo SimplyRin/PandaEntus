@@ -121,7 +121,7 @@ public class Listener extends ListenerAdapter {
 	}
 
 	public void check(Member member, Guild guild) {
-		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
+		Category category = this.instance.getVoiceChannelCategory(guild);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
 		boolean[] max = new boolean[voiceChannels.size()];
@@ -153,7 +153,7 @@ public class Listener extends ListenerAdapter {
 
 		if (voiceChannels.size() == count) {
 			int c = (count + 1);
-			category.createVoiceChannel("General-" + c).setUserlimit(99).complete();
+			category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-" + c).setUserlimit(99).complete();
 		}
 	}
 
@@ -163,7 +163,7 @@ public class Listener extends ListenerAdapter {
 			return;
 		}
 		Guild guild = event.getGuild();
-		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
+		Category category = this.instance.getVoiceChannelCategory(guild);
 		Category parentCategory = event.getChannelLeft().getParent();
 
 		Member member = event.getMember();
@@ -223,7 +223,7 @@ public class Listener extends ListenerAdapter {
 				GuildChannel guildChannel = (GuildChannel) category.getChannels().get(1);
 				Date time = Date.from(guildChannel.getTimeCreated().toInstant());
 
-				Category textChannels = (Category) guild.getCategoriesByName("Text Channels", true).get(0);
+				Category textChannels = this.instance.getTextChannelCategory(guild);
 				TextChannel textChannel = (TextChannel) textChannels.getChannels().get(0);
 
 				EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -263,16 +263,15 @@ public class Listener extends ListenerAdapter {
 				
 				String path = "Server." + guild.getId() + ".NoSendLogTimeLog";
 
-				if (this.instance.getConfig().getBoolean(path)) {
-					return;
+				if (!this.instance.getConfig().getBoolean(path)) {
+					List<TextChannel> general = guild.getTextChannelsByName("general", true);
+					if (general != null && general.size() >= 1) {
+						textChannel = general.get(0);
+					}
+					
+					textChannel.sendMessage(embedBuilder.build()).complete();
 				}
 
-				TextChannel general = guild.getTextChannelsByName("general", true).get(0);
-				if (general != null) {
-					textChannel = general;
-				}
-				
-				textChannel.sendMessage(embedBuilder.build()).complete();
 			} catch (Exception e) {
 				this.instance.postError(e);
 			}
@@ -288,7 +287,7 @@ public class Listener extends ListenerAdapter {
 				}
 			}
 
-			category.createVoiceChannel("General-1").setUserlimit(99).complete();
+			category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-1").setUserlimit(99).complete();
 		}
 	}
 

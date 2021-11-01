@@ -1,9 +1,14 @@
-package net.simplyrin.pandaentus.utils;
+package net.simplyrin.pandaentus.classes;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import net.dv8tion.jda.api.entities.Emote;
+import net.dv8tion.jda.api.entities.Message;
 
 /**
- * Created by SimplyRin on 2019/05/31.
+ * Created by SimplyRin on 2021/11/01.
  *
- * Copyright (C) 2019 SimplyRin
+ * Copyright (C) 2021 SimplyRin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +23,11 @@ package net.simplyrin.pandaentus.utils;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class Version {
-
-	public static final String BUILD_NUMBER = "";
-	public static final String BUILD_TIME  ="2021-11-01 18:34:10";
-	public static final String POMVERSION = "1.3";
+@Getter
+@AllArgsConstructor
+public class ReactionMessage {
+	
+	private Message message;
+	private Emote emote;
 
 }

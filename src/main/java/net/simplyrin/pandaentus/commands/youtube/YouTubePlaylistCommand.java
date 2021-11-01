@@ -3,8 +3,6 @@ package net.simplyrin.pandaentus.commands.youtube;
 import java.awt.Color;
 import java.util.concurrent.BlockingQueue;
 
-import org.joor.Reflect;
-
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -58,7 +56,7 @@ public class YouTubePlaylistCommand implements BaseCommand {
 		MessageChannel channel = event.getChannel();
 
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(event.getGuild());
-		BlockingQueue<AudioTrack> queue = Reflect.on(musicManager.scheduler).field("queue").get();
+		BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
 
 		if (queue == null || queue.isEmpty()) {
 			channel.sendMessage("次に再生が予定されている曲はありません。\n"
