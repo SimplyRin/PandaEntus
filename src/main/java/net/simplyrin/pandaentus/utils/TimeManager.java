@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import lombok.Getter;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 
 /**
  * Created by SimplyRin on 2019/04/04.
@@ -26,14 +26,14 @@ import net.simplyrin.pandaentus.Main;
  */
 public class TimeManager {
 
-	private Main instance;
+	private PandaEntus instance;
 	private static HashMap<String, TimeManager> maps = new HashMap<>();
 
-	public TimeManager(Main instance) {
+	public TimeManager(PandaEntus instance) {
 		this.instance = instance;
 	}
 
-	public TimeManager(Main instance, String userId) {
+	public TimeManager(PandaEntus instance, String userId) {
 		this.instance = instance;
 	}
 

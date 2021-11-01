@@ -32,6 +32,7 @@ import lombok.Setter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -74,10 +75,10 @@ import net.simplyrin.rinstream.RinStream;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 @Getter
-public class Main {
+public class PandaEntus {
 
 	public static void main(String[] args) {
-		new Main().run(args);
+		new PandaEntus().run(args);
 	}
 
 	private Configuration config;
@@ -223,6 +224,24 @@ public class Main {
 
 			rinStream.close();
 		});
+	}
+	
+	public Category getTextChannelCategory(Guild guild) {
+		List<Category> list = guild.getCategoriesByName("テキストチャンネル", true);
+		if (list == null || list.isEmpty()) {
+			list = guild.getCategoriesByName("Text Channels", true);
+		}
+		
+		return list.get(0);
+	}
+	
+	public Category getVoiceChannelCategory(Guild guild) {
+		List<Category> list = guild.getCategoriesByName("ボイスチャンネル", true);
+		if (list == null || list.isEmpty()) {
+			list = guild.getCategoriesByName("Voice Channels", true);
+		}
+		
+		return list.get(0);
 	}
 
 	public void addShutdownHook(Runnable runnable) {
@@ -451,7 +470,7 @@ public class Main {
 		}
 
 		public void addTime(Date d) {
-			Time date = Main.addTime(this, dateToTime(d));
+			Time date = PandaEntus.addTime(this, dateToTime(d));
 
 			this.hour = date.getHour();
 			this.minute = date.getMinute();

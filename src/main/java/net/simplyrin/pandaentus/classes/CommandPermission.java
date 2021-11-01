@@ -23,7 +23,7 @@ package net.simplyrin.pandaentus.classes;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public enum Permission {
+public enum CommandPermission {
 
 	Everyone, BotOwner, ServerAdministrator;
 

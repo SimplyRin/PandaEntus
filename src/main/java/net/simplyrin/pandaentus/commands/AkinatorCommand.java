@@ -3,10 +3,10 @@ package net.simplyrin.pandaentus.commands;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.classes.Permission;
+import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.utils.AkinatorManager;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
@@ -46,12 +46,12 @@ public class AkinatorCommand implements BaseCommand {
 	}
 
 	@Override
-	public Permission getPermission() {
-		return Permission.Everyone;
+	public CommandPermission getPermission() {
+		return CommandPermission.Everyone;
 	}
 
 	@Override
-	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 
 		channel.sendMessage("**~~アｋ~~...バカネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**").complete();

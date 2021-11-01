@@ -15,10 +15,10 @@ import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Icon.IconType;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.classes.Permission;
+import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
@@ -57,12 +57,12 @@ public class EmojisCommand implements BaseCommand {
 	}
 
 	@Override
-	public Permission getPermission() {
-		return Permission.BotOwner;
+	public CommandPermission getPermission() {
+		return CommandPermission.BotOwner;
 	}
 
 	@Override
-	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		Guild guild = event.getGuild();
 		MessageChannel channel = event.getChannel();
 		
@@ -137,7 +137,7 @@ public class EmojisCommand implements BaseCommand {
 		this.printEmojis(instance, guild, channel);
 	}
 	
-	public void printEmojis(Main instance, Guild guild, MessageChannel channel) {
+	public void printEmojis(PandaEntus instance, Guild guild, MessageChannel channel) {
 		String message = "";
 		for (Emote emote : guild.getEmotes()) {
 			message += emote.getName() + " -> " + emote.getId() + ", " + emote.getImageUrl() + "\n";

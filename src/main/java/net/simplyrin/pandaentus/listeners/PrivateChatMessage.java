@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.utils.Version;
 
 /**
@@ -31,7 +31,7 @@ import net.simplyrin.pandaentus.utils.Version;
 @AllArgsConstructor
 public class PrivateChatMessage {
 
-	private Main instance;
+	private PandaEntus instance;
 
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
 		MessageChannel channel = event.getChannel();

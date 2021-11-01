@@ -10,11 +10,11 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.classes.Permission;
+import net.simplyrin.pandaentus.classes.CommandPermission;
 
 /**
  * Created by SimplyRin on 2020/07/11.
@@ -52,12 +52,12 @@ public class YouTubePlaylistCommand implements BaseCommand {
 	}
 
 	@Override
-	public Permission getPermission() {
-		return Permission.Everyone;
+	public CommandPermission getPermission() {
+		return CommandPermission.Everyone;
 	}
 
 	@Override
-	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		MessageChannel channel = event.getChannel();

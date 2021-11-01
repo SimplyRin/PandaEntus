@@ -117,7 +117,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>net.simplyrin.pandaentus.Main</mainClass>
+              <mainClass>net.simplyrin.pandaentus.PandaEntus</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

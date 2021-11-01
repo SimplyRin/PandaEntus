@@ -1,7 +1,7 @@
 package net.simplyrin.pandaentus.classes;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -30,7 +30,7 @@ public interface BaseCommand {
 
 	public String getCommand();
 	public CommandType getType();
-	public Permission getPermission();
-	public void execute(Main instance, MessageReceivedEvent event, String[] args);
+	public CommandPermission getPermission();
+	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args);
 
 }

@@ -5,10 +5,10 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.classes.Permission;
+import net.simplyrin.pandaentus.classes.CommandPermission;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -46,12 +46,12 @@ public class InitCommand implements BaseCommand {
 	}
 
 	@Override
-	public Permission getPermission() {
-		return Permission.ServerAdministrator;
+	public CommandPermission getPermission() {
+		return CommandPermission.ServerAdministrator;
 	}
 
 	@Override
-	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 

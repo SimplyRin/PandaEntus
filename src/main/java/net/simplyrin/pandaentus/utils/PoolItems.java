@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import net.simplyrin.config.Config;
 import net.simplyrin.config.Configuration;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 
 /**
  * Created by SimplyRin on 2019/09/16.
@@ -32,7 +32,7 @@ public class PoolItems {
 	private File file;
 	private Configuration config;
 
-	public PoolItems(Main instance) {
+	public PoolItems(PandaEntus instance) {
 		// this.instance = instance;
 
 		this.file = new File("pool.yml");

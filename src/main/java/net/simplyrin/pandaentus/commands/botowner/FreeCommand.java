@@ -5,10 +5,10 @@ import java.awt.Color;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.classes.Permission;
+import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
 
@@ -48,12 +48,12 @@ public class FreeCommand implements BaseCommand {
 	}
 
 	@Override
-	public Permission getPermission() {
-		return Permission.BotOwner;
+	public CommandPermission getPermission() {
+		return CommandPermission.BotOwner;
 	}
 
 	@Override
-	public void execute(Main instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 
 		ProcessManager.runCommand(new String[] { "free", "-h" }, new Callback() {

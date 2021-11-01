@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.utils.TimeUtils.CallTime;
 
 /**
@@ -39,10 +39,10 @@ import net.simplyrin.pandaentus.utils.TimeUtils.CallTime;
  */
 public class Listener extends ListenerAdapter {
 
-	private Main instance;
+	private PandaEntus instance;
 	// private HashMap<String, CallTimeManager> map = new HashMap<>();
 
-	public Listener(Main instance) {
+	public Listener(PandaEntus instance) {
 		this.instance = instance;
 	}
 
@@ -53,7 +53,7 @@ public class Listener extends ListenerAdapter {
 		}
 
 		Guild guild = event.getGuild();
-		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
+		Category category = this.instance.getVoiceChannelCategory(guild);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 		Category parentCategory = event.getChannelJoined().getParent();
 
@@ -94,7 +94,7 @@ public class Listener extends ListenerAdapter {
 		Member member = event.getMember();
 		Guild guild = event.getGuild();
 
-		Category category = guild.getCategoriesByName("Voice Channels", true).get(0);
+		Category category = this.instance.getTextChannelCategory(guild);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
 		boolean hasMember = false;

@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
@@ -39,9 +39,9 @@ import net.simplyrin.processmanager.ProcessManager;
  */
 public class ReactionListener extends ListenerAdapter {
 
-	private Main instance;
+	private PandaEntus instance;
 
-	public ReactionListener(Main instance) {
+	public ReactionListener(PandaEntus instance) {
 		this.instance = instance;
 	}
 

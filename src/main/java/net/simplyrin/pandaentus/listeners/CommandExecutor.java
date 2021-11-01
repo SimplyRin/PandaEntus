@@ -7,9 +7,9 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.simplyrin.pandaentus.Main;
+import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
-import net.simplyrin.pandaentus.classes.Permission;
+import net.simplyrin.pandaentus.classes.CommandPermission;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -36,10 +36,10 @@ import net.simplyrin.pandaentus.classes.Permission;
  */
 public class CommandExecutor extends ListenerAdapter {
 
-	private Main instance;
+	private PandaEntus instance;
 	private HashMap<String, BaseCommand> map = new HashMap<>();
 
-	public CommandExecutor(Main instance) {
+	public CommandExecutor(PandaEntus instance) {
 		this.instance = instance;
 	}
 
@@ -75,11 +75,11 @@ public class CommandExecutor extends ListenerAdapter {
 				switch (baseCommand.getType()) {
 				case EqualsIgnoreCase:
 					if (args[0].equalsIgnoreCase(baseCommand.getCommand())) {
-						if (baseCommand.getPermission().equals(Permission.BotOwner) && !this.instance.isBotOwner(user)) {
+						if (baseCommand.getPermission().equals(CommandPermission.BotOwner) && !this.instance.isBotOwner(user)) {
 							return;
 						}
 						
-						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && !member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
+						if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
 							return;
 						}
 
@@ -89,11 +89,11 @@ public class CommandExecutor extends ListenerAdapter {
 					break;
 				case StartsWith:
 					if (args[0].toLowerCase().startsWith(baseCommand.getCommand().toLowerCase())) {
-						if (baseCommand.getPermission().equals(Permission.BotOwner) && !this.instance.isBotOwner(user)) {
+						if (baseCommand.getPermission().equals(CommandPermission.BotOwner) && !this.instance.isBotOwner(user)) {
 							return;
 						}
 						
-						if (baseCommand.getPermission().equals(Permission.ServerAdministrator) && !member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
+						if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER)) {
 							return;
 						}
 
