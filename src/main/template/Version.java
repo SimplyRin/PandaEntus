@@ -3,8 +3,6 @@ package net.simplyrin.pandaentus.utils;
 /**
  * Created by SimplyRin on 2019/05/31.
  *
- * Copyright (c) 2019 SimplyRin
- *
  * Copyright (C) 2019 SimplyRin
  *
  * This program is free software: you can redistribute it and/or modify

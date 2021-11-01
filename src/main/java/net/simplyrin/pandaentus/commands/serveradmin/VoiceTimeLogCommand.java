@@ -30,7 +30,7 @@ public class VoiceTimeLogCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!init";
+		return "!voicetimelog";
 	}
 
 	@Override
@@ -48,9 +48,6 @@ public class VoiceTimeLogCommand implements BaseCommand {
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 
-		if (args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
-			
-		}
 	}
 
 }
