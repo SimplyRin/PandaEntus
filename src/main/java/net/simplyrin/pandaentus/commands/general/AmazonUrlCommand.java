@@ -1,7 +1,5 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.general;
 
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -9,7 +7,7 @@ import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
 
 /**
- * Created by SimplyRin on 2020/07/17.
+ * Created by SimplyRin on 2020/12/11.
  *
  * Copyright (C) 2020 SimplyRin
  *
@@ -26,16 +24,16 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class IconCommand implements BaseCommand {
+public class AmazonUrlCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!icon";
+		return "https://www.amazon.co.jp/";
 	}
 
 	@Override
 	public CommandType getType() {
-		return CommandType.EqualsIgnoreCase;
+		return CommandType.StartsWith;
 	}
 
 	@Override
@@ -45,25 +43,25 @@ public class IconCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
-
-		if (args.length > 1) {
-			String id = args[1];
-			id = id.replace("@", "");
-			id = id.replace("<", "");
-			id = id.replace(">", "");
-			id = id.replace("!", "");
-
-			Member member = event.getGuild().getMemberById(id);
-			if (member != null) {
-				channel.sendMessage(member.getUser().getAvatarUrl()).complete();
-			} else {
-				channel.sendMessage("ユーザーが見つかりませんでした。").complete();
-			}
+		String url = args[0];
+		if (url.length() <= 250) {
 			return;
 		}
 
-		channel.sendMessage("Usage: !icon <userId|mension>").complete();
+		String result = null;
+		if (url.contains("/dp/")) {
+			String id = url.split("/dp/")[1].split("/")[0];
+			result = "https://www.amazon.co.jp/dp/" + id;
+		}
+
+		if (result != null) {
+			System.out.println(result);
+		}
+	}
+
+	public static void main(String[] args) {
+		AmazonUrlCommand auc = new AmazonUrlCommand();
+		auc.execute(null, null, new String[] { "https://www.amazon.co.jp/Echo-Dot-%E3%82%A8%E3%82%B3%E3%83%BC%E3%83%89%E3%83%83%E3%83%88-%E7%AC%AC3%E4%B8%96%E4%BB%A3-with-Alexa-%E3%82%B9%E3%83%9E%E3%83%BC%E3%83%88%E3%82%B9%E3%83%94%E3%83%BC%E3%82%AB%E3%83%BC-%E3%83%98%E3%82%B6%E3%83%BC%E3%82%B0%E3%83%AC%E3%83%BC/dp/B07PFFMQ64/ref=sr_1_1?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&dchild=1&keywords=Echo+Dot&qid=1607696162&sr=8-1" });
 	}
 
 }

@@ -1,4 +1,4 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.general;
 
 import java.io.IOException;
 import java.net.URL;

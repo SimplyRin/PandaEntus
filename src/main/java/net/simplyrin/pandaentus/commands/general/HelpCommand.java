@@ -1,9 +1,5 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.general;
 
-import java.awt.Color;
-import java.util.Scanner;
-
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
@@ -29,16 +25,16 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class CalcCommand implements BaseCommand {
+public class HelpCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "=";
+		return "!help";
 	}
 
 	@Override
 	public CommandType getType() {
-		return CommandType.StartsWith;
+		return CommandType.EqualsIgnoreCase;
 	}
 
 	@Override
@@ -49,29 +45,8 @@ public class CalcCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-
-		String input = args[0].replace("=", "");
-		if (input.length() == 0) {
-			embedBuilder.setColor(Color.RED);
-			embedBuilder.setDescription("使用方法: =<計算式>\n=1+1");
-			channel.sendMessage(embedBuilder.build()).complete();
-			return;
-		}
-
-		Runtime runtime = Runtime.getRuntime();
-		Process process = null;
-		try {
-			process = runtime.exec(new String[] {"calc", input});
-		} catch (Exception e) {
-			instance.postError(e);
-			return;
-		}
-		Scanner scanner = new Scanner(process.getInputStream());
-		if (scanner.hasNext()) {
-			channel.sendMessage("結果: **" + scanner.nextLine().trim() + "**").complete();
-		}
-		scanner.close();
+		channel.sendMessage("この Bot で利用可能なコマンドは、以下のページをご確認ください。\nGitHub: https://git.io/JJOr9").complete();
+		return;
 	}
 
 }

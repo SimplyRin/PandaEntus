@@ -1,13 +1,17 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.general;
 
-import net.dv8tion.jda.api.entities.Message;
+import java.awt.Color;
+
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -27,11 +31,11 @@ import net.simplyrin.pandaentus.utils.ThreadPool;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class DabCommand implements BaseCommand {
+public class VanishCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!dab";
+		return "!vanish";
 	}
 
 	@Override
@@ -46,40 +50,37 @@ public class DabCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		ThreadPool.run(() -> {
-			MessageChannel channel = event.getChannel();
-			Message message = null;
-			String asi = "\n   |\n  /\\";
+		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-			int type = 0;
-			for (int i = 0; i <= 5; i++) {
-				if (message == null) {
-					message = channel.sendMessage("<o/" + asi).complete();
-				} else {
-					if (type == 1) {
-						type = 0;
-						message.editMessage("<o/" + asi).complete();
-					} else if (type == 0) {
-						type = 1;
-						message.editMessage("\\o>" + asi).complete();
-					}
-				}
+		MessageChannel channel = event.getChannel();
+		User user = event.getAuthor();
+		if (args.length > 1 && instance.isBotOwner(user)) {
+			String id = args[1];
+			id = id.replace("<", "");
+			id = id.replace(">", "");
+			id = id.replace("!", "");
+			id = id.replace("@", "");
 
-				try {
-					Thread.sleep(400);
-				} catch (InterruptedException e) {
-				}
+			Member member = event.getGuild().getMemberById(id);
+			if (member != null) {
+				user = member.getUser();
 			}
+		}
 
-			try {
-				Thread.sleep(2500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		Configuration config = instance.getConfig();
 
-			event.getMessage().delete().complete();
-			message.delete().complete();
-		});
+		String path = "User." + user.getId() + "." + event.getGuild().getId() + ".Vanish";
+
+		boolean bool = config.getBoolean(path);
+		bool = !bool;
+
+		instance.getConfig().set(path, bool);
+
+		embedBuilder.setColor(Color.GRAY);
+		embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
+
+		channel.sendMessage(embedBuilder.build()).complete();
+		return;
 	}
 
 }

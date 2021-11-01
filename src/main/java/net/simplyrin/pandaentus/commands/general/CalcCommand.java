@@ -1,4 +1,7 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.general;
+
+import java.awt.Color;
+import java.util.Scanner;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -7,8 +10,6 @@ import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.utils.AkinatorManager;
-import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -28,16 +29,16 @@ import net.simplyrin.pandaentus.utils.ThreadPool;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class AkinatorCommand implements BaseCommand {
+public class CalcCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!akinator";
+		return "=";
 	}
 
 	@Override
 	public CommandType getType() {
-		return CommandType.EqualsIgnoreCase;
+		return CommandType.StartsWith;
 	}
 
 	@Override
@@ -48,18 +49,29 @@ public class AkinatorCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
+		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		channel.sendMessage("**~~アｋ~~...バカネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**").complete();
-		channel.sendTyping().complete();
-		ThreadPool.run(() -> {
-			instance.getAkiMap().put(channel.getId(), new AkinatorManager(event.getGuild(), channel.getId()));
-			AkinatorManager am = instance.getAkiMap().get(channel.getId());
+		String input = args[0].replace("=", "");
+		if (input.length() == 0) {
+			embedBuilder.setColor(Color.RED);
+			embedBuilder.setDescription("使用方法: =<計算式>\n=1+1");
+			channel.sendMessage(embedBuilder.build()).complete();
+			return;
+		}
 
-			EmbedBuilder embedBuilder = new EmbedBuilder();
-			am.setEmbed(embedBuilder);
-			String latestId = channel.sendMessage(embedBuilder.build()).complete().getId();
-			am.setLatestMessageId(latestId);
-		});
+		Runtime runtime = Runtime.getRuntime();
+		Process process = null;
+		try {
+			process = runtime.exec(new String[] {"calc", input});
+		} catch (Exception e) {
+			instance.postError(e);
+			return;
+		}
+		Scanner scanner = new Scanner(process.getInputStream());
+		if (scanner.hasNext()) {
+			channel.sendMessage("結果: **" + scanner.nextLine().trim() + "**").complete();
+		}
+		scanner.close();
 	}
 
 }

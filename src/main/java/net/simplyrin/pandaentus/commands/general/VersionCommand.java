@@ -1,11 +1,16 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.general;
 
+import java.awt.Color;
+import java.util.Scanner;
+
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.utils.Version;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -25,11 +30,11 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class HelpCommand implements BaseCommand {
+public class VersionCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!help";
+		return "!version";
 	}
 
 	@Override
@@ -45,7 +50,43 @@ public class HelpCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
-		channel.sendMessage("この Bot で利用可能なコマンドは、以下のページをご確認ください。\nGitHub: https://git.io/JJOr9").complete();
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+
+		embedBuilder.setColor(Color.GREEN);
+		embedBuilder.addField("Version:", Version.BUILD_TIME, true);
+
+		String uptime = "unknown";
+
+		Runtime runtime = Runtime.getRuntime();
+		Process process = null;
+		try {
+			process = runtime.exec(new String[] {"uptime", "-p"});
+		} catch (Exception e) {
+			instance.postError(e);
+			return;
+		}
+		Scanner scanner = new Scanner(process.getInputStream());
+		if (scanner.hasNext()) {
+			uptime = scanner.nextLine();
+
+			uptime = uptime.replace("up ", "");
+			uptime = uptime.replace(",", "");
+			uptime = uptime.replace(" years", "年");
+			uptime = uptime.replace(" year", "年");
+
+			uptime = uptime.replace(" weeks", "週間");
+			uptime = uptime.replace(" week", "週間");
+			uptime = uptime.replace(" days", "日");
+			uptime = uptime.replace(" day", "日");
+			uptime = uptime.replace(" hours", "時間");
+			uptime = uptime.replace(" hour", "時間");
+			uptime = uptime.replace(" minutes", "分");
+			uptime = uptime.replace(" minute", "分");
+		}
+		scanner.close();
+		embedBuilder.addField("Server uptime", uptime, true);
+
+		channel.sendMessage(embedBuilder.build()).complete();
 		return;
 	}
 

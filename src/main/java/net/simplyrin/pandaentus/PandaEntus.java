@@ -253,6 +253,7 @@ public class PandaEntus {
 		return this.getNowTime(date);
 	}
 
+	@SuppressWarnings("deprecation")
 	public String getNowTime(Date date) {
 		return date.getHours() + "時" + date.getMinutes() + "分";
 	}
@@ -443,6 +444,7 @@ public class PandaEntus {
 		return date;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static Time dateToTime(Date date) {
 		Time time = new Time();
 
