@@ -36,6 +36,11 @@ public class YouTubeVolumeCommand implements BaseCommand {
 	}
 	
 	@Override
+	public String getDescription() {
+		return "ボリュームを調節";
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}

@@ -1,16 +1,15 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands.youtube;
 
-import java.awt.Color;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.ReactionMessage;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -30,11 +29,11 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class CalcCommand implements BaseCommand {
+public class YouTubeDownloadCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "=";
+		return "https://www.youtube.com/watch?v=";
 	}
 	
 	@Override
@@ -44,7 +43,7 @@ public class CalcCommand implements BaseCommand {
 	
 	@Override
 	public List<String> getAlias() {
-		return null;
+		return Arrays.asList("https://youtu.be/");
 	}
 
 	@Override
@@ -59,30 +58,18 @@ public class CalcCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-
-		String input = args[0].replace("=", "");
-		if (input.length() == 0) {
-			embedBuilder.setColor(Color.RED);
-			embedBuilder.setDescription("使用方法: =<計算式>\n=1+1");
-			channel.sendMessage(embedBuilder.build()).complete();
-			return;
+		Emote emote = null;
+		for (Emote temp : event.getGuild().getEmotes()) {
+			if (emote == null) {
+				emote = temp;
+			}
+			if (temp.getName().equals("download")) {
+				emote = temp;
+			}
 		}
-
-		Runtime runtime = Runtime.getRuntime();
-		Process process = null;
-		try {
-			process = runtime.exec(new String[] {"calc", input});
-		} catch (Exception e) {
-			instance.postError(e);
-			return;
-		}
-		Scanner scanner = new Scanner(process.getInputStream());
-		if (scanner.hasNext()) {
-			channel.sendMessage("結果: **" + scanner.nextLine().trim() + "**").complete();
-		}
-		scanner.close();
+		event.getMessage().addReaction(emote).complete();
+		ReactionMessage rm = new ReactionMessage(event.getMessage(), emote);
+		instance.getMessages().add(rm);
 	}
 
 }

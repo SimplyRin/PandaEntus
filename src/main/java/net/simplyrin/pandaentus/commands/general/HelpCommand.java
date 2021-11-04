@@ -35,6 +35,11 @@ public class HelpCommand implements BaseCommand {
 	}
 	
 	@Override
+	public String getDescription() {
+		return null;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}

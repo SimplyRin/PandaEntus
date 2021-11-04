@@ -62,7 +62,7 @@ public class TrackScheduler extends AudioEventAdapter {
 	@Override
 	public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
 		// Only start the next track if the end reason is suitable for it (FINISHED or LOAD_FAILED)
-		if (this.instance.getLoopMap().get(this.guild) != null) {
+		if (this.instance.getLoopMap().get(this.guild.getIdLong()) != null) {
 			VoiceChannel voiceChannel = null;
 			for (VoiceChannel vc : this.guild.getVoiceChannels()) {
 				for (Member member : vc.getMembers()) {
@@ -77,13 +77,11 @@ public class TrackScheduler extends AudioEventAdapter {
 			
 			if (voiceChannel != null) {
 				if (voiceChannel.getMembers().size() >= 2) {
-					this.instance.play(this.guild, this.instance.getGuildAudioPlayer(this.guild), track);
+					this.instance.play(this.guild, this.instance.getGuildAudioPlayer(this.guild), track.makeClone());
 					return;
 				}
 			}
-		}
-		
-		if (endReason.mayStartNext) {
+		} else if (endReason.mayStartNext) {
 			this.nextTrack();
 		}
 	}

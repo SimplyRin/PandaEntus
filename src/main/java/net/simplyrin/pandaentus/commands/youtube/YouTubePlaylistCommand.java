@@ -7,6 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
@@ -41,6 +42,11 @@ public class YouTubePlaylistCommand implements BaseCommand {
 	}
 	
 	@Override
+	public String getDescription() {
+		return "次に再生される曲を確認";
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -59,13 +65,25 @@ public class YouTubePlaylistCommand implements BaseCommand {
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
+		Guild guild = event.getGuild();
 		MessageChannel channel = event.getChannel();
 
-		GuildMusicManager musicManager = instance.getGuildAudioPlayer(event.getGuild());
+		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 		BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
 		
 		BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 		BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
+		BaseCommand loopCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeLoopCommand.class);
+		
+		AudioTrack at = instance.getLoopMap().get(guild.getIdLong());
+		if (at != null) {
+			embedBuilder.setColor(Color.CYAN);
+			embedBuilder.setAuthor("🎵 ループ再生が有効になっています。");
+			embedBuilder.setDescription("🔁 ループ再生中の音楽: " + at.getInfo().title);
+			embedBuilder.setFooter("詳細: !nowplaying, ループ無効: " + loopCommand.getCommand());
+			channel.sendMessage(embedBuilder.build()).complete();
+			return;
+		}
 
 		if (queue == null || queue.isEmpty()) {
 			channel.sendMessage("次に再生が予定されている曲はありません。\n"

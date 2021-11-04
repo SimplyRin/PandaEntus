@@ -49,6 +49,11 @@ public class YouTubePlayCommand implements BaseCommand {
 	}
 	
 	@Override
+	public String getDescription() {
+		return "曲を追加/再生";
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return Arrays.asList("!p");
 	}
@@ -102,10 +107,14 @@ public class YouTubePlayCommand implements BaseCommand {
 					public void trackLoaded(AudioTrack track) {
 						embedBuilder.setAuthor(null);
 						embedBuilder.clearFields();
-						embedBuilder.addField("タイトル", track.getInfo().title, true);
-						embedBuilder.addField("アーティスト", track.getInfo().author, true);
+						embedBuilder.addField("🎵 タイトル", track.getInfo().title, true);
+						embedBuilder.addField("💿 アーティスト", track.getInfo().author, true);
+						
+						BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
+						BaseCommand yt = instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
+						embedBuilder.setFooter("詳細: " + nowPlaying.getCommand() + ", コマンド一覧: " + yt.getCommand());
 						message.editMessage(embedBuilder.build()).complete();
-						instance.getPreviousTrack().put(guild, track);
+						instance.getPreviousTrack().put(guild.getIdLong(), track);
 						instance.play(guild, musicManager, track);
 					}
 
@@ -118,7 +127,7 @@ public class YouTubePlayCommand implements BaseCommand {
 							firstTrack = playlist.getTracks().get(0);
 						}
 
-						if (instance.getLoopMap().get(guild) == null) {
+						if (instance.getLoopMap().get(guild.getIdLong()) == null) {
 							instance.play(guild, musicManager, firstTrack);
 						}
 					}
@@ -135,10 +144,15 @@ public class YouTubePlayCommand implements BaseCommand {
 			});
 			return;
 		}
+		
+		YouTubeHelpCommand help = (YouTubeHelpCommand) instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
 
-		embedBuilder.setColor(Color.RED);
-		embedBuilder.setDescription("使用方法: " + args[0] + " <URL>");
-		channel.sendMessage(embedBuilder.build()).complete();
+		EmbedBuilder helpEmbed = help.getHelpEmbed(instance);
+		helpEmbed.setColor(Color.RED);
+		helpEmbed.setAuthor("使用方法: " + args[0] + " <YouTube, Twitch, Bandcamp>");
+		helpEmbed.setDescription(help.getHelpMessage());
+		
+		channel.sendMessage(helpEmbed.build()).complete();
 		return;
 	}
 

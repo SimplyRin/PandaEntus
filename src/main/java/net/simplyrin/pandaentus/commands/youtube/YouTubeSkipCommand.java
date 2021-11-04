@@ -34,6 +34,11 @@ public class YouTubeSkipCommand implements BaseCommand {
 	}
 	
 	@Override
+	public String getDescription() {
+		return "再生中の曲をスキップ";
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}

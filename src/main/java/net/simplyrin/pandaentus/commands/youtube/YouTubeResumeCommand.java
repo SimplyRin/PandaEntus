@@ -1,21 +1,23 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands.youtube;
 
-import java.awt.Color;
 import java.util.List;
-import java.util.Scanner;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
+import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
 
 /**
- * Created by SimplyRin on 2020/07/09.
+ * Created by SimplyRin on 2021/11/04.
  *
- * Copyright (C) 2020 SimplyRin
+ * Copyright (C) 2021 SimplyRin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,18 +32,18 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class CalcCommand implements BaseCommand {
+public class YouTubeResumeCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "=";
+		return "!resume";
 	}
-	
+
 	@Override
 	public String getDescription() {
-		return null;
+		return "一時停止してる曲を再生";
 	}
-	
+
 	@Override
 	public List<String> getAlias() {
 		return null;
@@ -49,7 +51,7 @@ public class CalcCommand implements BaseCommand {
 
 	@Override
 	public CommandType getType() {
-		return CommandType.StartsWith;
+		return CommandType.EqualsIgnoreCase;
 	}
 
 	@Override
@@ -60,29 +62,24 @@ public class CalcCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-
-		String input = args[0].replace("=", "");
-		if (input.length() == 0) {
-			embedBuilder.setColor(Color.RED);
-			embedBuilder.setDescription("使用方法: =<計算式>\n=1+1");
-			channel.sendMessage(embedBuilder.build()).complete();
+		Guild guild = event.getGuild();
+		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
+		
+		VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+		if (voiceChannel == null) {
+			channel.sendMessage("ボイスチャンネルに接続してください。").complete();
 			return;
 		}
-
-		Runtime runtime = Runtime.getRuntime();
-		Process process = null;
-		try {
-			process = runtime.exec(new String[] {"calc", input});
-		} catch (Exception e) {
-			instance.postError(e);
+		
+		AudioTrack audioTrack = musicManager.player.getPlayingTrack();
+		if (audioTrack == null) {
+			BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
+			channel.sendMessage("現在何も再生していません。\n" + playCommand.getCommand() + " コマンドを利用して音楽を再生することができます。").complete();
 			return;
 		}
-		Scanner scanner = new Scanner(process.getInputStream());
-		if (scanner.hasNext()) {
-			channel.sendMessage("結果: **" + scanner.nextLine().trim() + "**").complete();
-		}
-		scanner.close();
+		
+		musicManager.player.setPaused(false);
+		channel.sendMessage("一時停止している曲を再生します。").complete();
 	}
 
 }

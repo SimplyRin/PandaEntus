@@ -26,6 +26,7 @@ import net.simplyrin.pandaentus.PandaEntus;
 public interface BaseCommand {
 
 	public String getCommand();
+	public String getDescription();
 	public List<String> getAlias();
 	public CommandType getType();
 	public CommandPermission getPermission();

@@ -41,6 +41,11 @@ public class YouTubeNowPlayingCommand implements BaseCommand {
 	public String getCommand() {
 		return "!nowplaying";
 	}
+	
+	@Override
+	public String getDescription() {
+		return "現在再生中の曲を確認";
+	}
 
 	@Override
 	public List<String> getAlias() {
@@ -91,7 +96,13 @@ public class YouTubeNowPlayingCommand implements BaseCommand {
 		
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		embedBuilder.setColor(Color.GREEN);
-		embedBuilder.setDescription("⏯️ " + instance.formatMillis(audioTrack.getPosition())  + " / " + instance.formatMillis(audioTrack.getDuration()) + ": ~~" + bar + "~~");
+		
+		String prefix = instance.getLoopMap().get(guild.getIdLong()) != null ? "🔁" : "▶";
+		if (musicManager.player.isPaused()) {
+			prefix = "⏸";
+		}
+		
+		embedBuilder.setDescription(prefix + " " + instance.formatMillis(audioTrack.getPosition())  + " / " + instance.formatMillis(audioTrack.getDuration()) + ": ~~" + bar + "~~");
 		embedBuilder.addField("🎵 再生中の音楽", audioTrack.getInfo().title, false);
 		embedBuilder.addField("💿 アーティスト/チャンネル", audioTrack.getInfo().author, false);
 		embedBuilder.addField("🔗 リンク", audioTrack.getInfo().uri, false);

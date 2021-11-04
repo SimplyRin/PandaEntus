@@ -38,6 +38,11 @@ public class YouTubeLoopCommand implements BaseCommand {
 	}
 	
 	@Override
+	public String getDescription() {
+		return "再生中の曲をループ";
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -59,15 +64,15 @@ public class YouTubeLoopCommand implements BaseCommand {
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 
-		if (instance.getLoopMap().get(guild) != null) {
+		if (instance.getLoopMap().get(guild.getIdLong()) != null) {
 			embedBuilder.setColor(Color.RED);
-			embedBuilder.setDescription("ループ再生を無効にしました。");
-			instance.getLoopMap().remove(guild);
-			instance.getPreviousTrack().remove(guild);
+			embedBuilder.setDescription("🔁 ループ再生を無効にしました。");
+			instance.getLoopMap().remove(guild.getIdLong());
+			instance.getPreviousTrack().remove(guild.getIdLong());
 		} else {
 			embedBuilder.setColor(Color.GREEN);
-			embedBuilder.setDescription("ループ再生を有効にしました。");
-			instance.getLoopMap().put(guild, instance.getPreviousTrack().get(guild));
+			embedBuilder.setDescription("🔁 ループ再生を有効にしました。");
+			instance.getLoopMap().put(guild.getIdLong(), instance.getPreviousTrack().get(guild.getIdLong()));
 		}
 
 		channel.sendMessage(embedBuilder.build()).complete();
