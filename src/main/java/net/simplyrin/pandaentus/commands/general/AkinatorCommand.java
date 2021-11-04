@@ -56,7 +56,7 @@ public class AkinatorCommand implements BaseCommand {
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 
-		channel.sendMessage("**~~アｋ~~...バカネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**").complete();
+		channel.sendMessage("**アキネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**").complete();
 		channel.sendTyping().complete();
 		ThreadPool.run(() -> {
 			instance.getAkiMap().put(channel.getId(), new AkinatorManager(event.getGuild(), channel.getId()));

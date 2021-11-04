@@ -1,5 +1,6 @@
 package net.simplyrin.pandaentus.commands.general;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -51,18 +52,25 @@ public class AmazonUrlCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		String url = args[0];
-		if (url.length() <= 250) {
-			return;
-		}
 
 		String result = null;
-		if (url.contains("/dp/")) {
-			String id = url.split("/dp/")[1].split("/")[0];
-			result = "https://www.amazon.co.jp/dp/" + id;
+		
+		List<String> list = Arrays.asList("/dp/", "/ASIN/");
+		
+		for (String a : list) {
+			if (url.contains(a)) {
+				String id = url.split(a)[1].split("/")[0];
+				result = "https://www.amazon.co.jp/dp/" + id;
+				break;
+			}
 		}
-
+		
 		if (result != null) {
-			System.out.println(result);
+			try {
+				event.getMessage().delete();
+			} catch (Exception e) {
+			}
+			event.getChannel().sendMessage(result).complete();
 		}
 	}
 

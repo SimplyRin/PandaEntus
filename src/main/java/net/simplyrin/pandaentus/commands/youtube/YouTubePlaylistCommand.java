@@ -63,10 +63,13 @@ public class YouTubePlaylistCommand implements BaseCommand {
 
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(event.getGuild());
 		BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
+		
+		BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
+		BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
 
 		if (queue == null || queue.isEmpty()) {
 			channel.sendMessage("次に再生が予定されている曲はありません。\n"
-					+ "!play を使用することで、プレイリストに追加することができます。").complete();
+					+ playCommand.getCommand() + " を使用することで、プレイリストに追加することができます。").complete();
 			return;
 		}
 
@@ -92,7 +95,7 @@ public class YouTubePlaylistCommand implements BaseCommand {
 		}
 		embedBuilder.setDescription(message);
 		embedBuilder.setColor(Color.CYAN);
-		embedBuilder.setFooter("追加: !play, スキップ: !skip");
+		embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand());
 		channel.sendMessage(embedBuilder.build()).complete();
 	}
 

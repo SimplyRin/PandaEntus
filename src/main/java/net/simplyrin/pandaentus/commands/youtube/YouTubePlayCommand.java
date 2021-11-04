@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.List;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
@@ -49,7 +50,7 @@ public class YouTubePlayCommand implements BaseCommand {
 	
 	@Override
 	public List<String> getAlias() {
-		return null;
+		return Arrays.asList("!p");
 	}
 
 	@Override
@@ -81,9 +82,15 @@ public class YouTubePlayCommand implements BaseCommand {
 			embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
 			channel.sendTyping().complete();
 			Message message = channel.sendMessage(embedBuilder.build()).complete();
+			
+			VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+			if (voiceChannel == null) {
+				channel.sendMessage("ボイスチャンネルに接続してください。").complete();
+				return;
+			}
 
 			ThreadPool.run(() -> {
-				VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+				
 				AudioManager audioManager = guild.getAudioManager();
 				audioManager.openAudioConnection(voiceChannel);
 				audioManager.setAutoReconnect(false);
@@ -99,27 +106,6 @@ public class YouTubePlayCommand implements BaseCommand {
 						embedBuilder.addField("アーティスト", track.getInfo().author, true);
 						message.editMessage(embedBuilder.build()).complete();
 						instance.getPreviousTrack().put(guild, track);
-
-						/* ThreadPool.run(() -> {
-							if (track.getInfo().isStream) {
-								return;
-							}
-							
-							try {
-								Thread.sleep(track.getDuration());
-							} catch (Exception e) {
-							}
-
-							if (instance.getLoopMap().get(guild) != null) {
-								VoiceChannel vc = guild.getVoiceChannelById(voiceChannel.getId());
-								if (vc != null) {
-									if (vc.getMembers().size() >= 1) {
-										this.trackLoaded(instance.getLoopMap().get(guild).makeClone());
-									}
-								}
-							}
-						}); */
-
 						instance.play(guild, musicManager, track);
 					}
 

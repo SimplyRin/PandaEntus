@@ -601,6 +601,14 @@ public class PandaEntus {
 
 		return i;
 	}
+	
+	/**
+	 * https://stackoverflow.com/questions/9214786/how-to-convert-the-seconds-in-this-format-hhmmss/47841277
+	 */
+	public String formatMillis(long millis) {
+		long secs = millis / 1000;
+		return String.format("%02d:%02d", (secs % 3600) / 60, secs % 60);
+	}
 
 	public String formatSize(double size) {
 		String hrSize = null;
