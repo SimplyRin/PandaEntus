@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.botowner;
 
 import java.awt.Color;
+import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -8,8 +9,8 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
-import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.CommandPermission;
+import net.simplyrin.pandaentus.classes.CommandType;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -39,6 +40,11 @@ public class SetGameCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!setgame";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

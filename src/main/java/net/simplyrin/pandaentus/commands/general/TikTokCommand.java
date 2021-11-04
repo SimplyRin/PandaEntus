@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.general;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonObject;
@@ -40,6 +41,11 @@ public class TikTokCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "https://vt.tiktok.com/";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

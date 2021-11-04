@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands.botowner;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.config.Configuration;
@@ -31,6 +33,11 @@ public class AddCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!add";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

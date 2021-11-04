@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.botowner;
 
 import java.awt.Color;
+import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -35,6 +36,11 @@ public class FreeCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!free";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

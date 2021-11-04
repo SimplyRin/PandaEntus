@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.general;
 
 import java.awt.Color;
+import java.util.List;
 
 import com.google.gson.JsonObject;
 
@@ -36,6 +37,11 @@ public class TextGenCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!textgen";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

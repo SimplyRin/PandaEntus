@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
 import java.awt.Color;
+import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -34,6 +35,11 @@ public class YouTubeLoopCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!loop";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

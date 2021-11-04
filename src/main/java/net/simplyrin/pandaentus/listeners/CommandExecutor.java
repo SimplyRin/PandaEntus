@@ -1,6 +1,8 @@
 package net.simplyrin.pandaentus.listeners;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
@@ -33,6 +35,7 @@ import net.simplyrin.pandaentus.classes.CommandPermission;
 public class CommandExecutor extends ListenerAdapter {
 
 	private PandaEntus instance;
+
 	private HashMap<String, BaseCommand> map = new HashMap<>();
 
 	public CommandExecutor(PandaEntus instance) {
@@ -51,6 +54,20 @@ public class CommandExecutor extends ListenerAdapter {
 		this.map.remove(command);
 		System.out.println("[Command:Un-Register] " + command);
 	}
+	
+	public BaseCommand getCommand(String command) {
+		return this.map.get(command);
+	}
+	
+	public BaseCommand getRegisteredCommand(Class<?> clazz) {
+		BaseCommand command = null;
+		for (BaseCommand baseCommand : this.map.values()) {
+			if (baseCommand.getClass().getCanonicalName().equals(clazz.getCanonicalName())) {
+				command = baseCommand;
+			}
+		}
+		return command;
+	}
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
@@ -68,33 +85,32 @@ public class CommandExecutor extends ListenerAdapter {
 
 		if (args.length > 0) {
 			for (BaseCommand baseCommand : this.map.values()) {
+				List<String> commands = new ArrayList<>();
+				
+				commands.add(baseCommand.getCommand());
+				if (baseCommand.getAlias() != null && !baseCommand.getAlias().isEmpty()) {
+					commands.addAll(baseCommand.getAlias());
+				}
+				
 				switch (baseCommand.getType()) {
 				case EqualsIgnoreCase:
 					if (args[0].equalsIgnoreCase(baseCommand.getCommand())) {
-						if (baseCommand.getPermission().equals(CommandPermission.BotOwner) && !this.instance.isBotOwner(user)) {
-							return;
+						if (baseCommand.getAlias() != null) {
+							for (String command : baseCommand.getAlias()) {
+								if (args[0].equalsIgnoreCase(command)) {
+									this.execute(baseCommand, user, member, event, raw, args);
+								}
+							}
 						}
-						
-						if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(Permission.MANAGE_SERVER)) {
-							return;
-						}
-
-						System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + raw);
-						baseCommand.execute(this.instance, event, args);
 					}
 					break;
 				case StartsWith:
 					if (args[0].toLowerCase().startsWith(baseCommand.getCommand().toLowerCase())) {
-						if (baseCommand.getPermission().equals(CommandPermission.BotOwner) && !this.instance.isBotOwner(user)) {
-							return;
+						for (String command : commands) {
+							if (args[0].equalsIgnoreCase(command)) {
+								this.execute(baseCommand, user, member, event, raw, args);
+							}
 						}
-						
-						if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(Permission.MANAGE_SERVER)) {
-							return;
-						}
-
-						System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + raw);
-						baseCommand.execute(this.instance, event, args);
 					}
 					break;
 				default:
@@ -102,6 +118,19 @@ public class CommandExecutor extends ListenerAdapter {
 				}
 			}
 		}
+	}
+	
+	public void execute(BaseCommand baseCommand, User user, Member member, MessageReceivedEvent event, String raw, String[] args) {
+		if (baseCommand.getPermission().equals(CommandPermission.BotOwner) && !this.instance.isBotOwner(user)) {
+			return;
+		}
+		
+		if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(Permission.MANAGE_SERVER)) {
+			return;
+		}
+
+		System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + raw);
+		baseCommand.execute(this.instance, event, args);
 	}
 
 }

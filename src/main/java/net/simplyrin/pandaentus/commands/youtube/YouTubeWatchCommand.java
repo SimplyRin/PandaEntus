@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -31,6 +33,11 @@ public class YouTubeWatchCommand implements BaseCommand {
 	public YouTubeWatchCommand() {
 		this.yt = new YouTubeCommand();
 	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
+	}
 
 	@Override
 	public String getCommand() {
@@ -49,7 +56,7 @@ public class YouTubeWatchCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		this.yt.execute(instance, event, args);
+		instance.getCommandRegister().getRegisteredCommand(YouTubeCommand.class).execute(instance, event, args);
 	}
 
 }

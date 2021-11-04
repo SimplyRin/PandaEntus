@@ -2,6 +2,7 @@ package net.simplyrin.pandaentus.commands.general;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 
@@ -38,6 +39,11 @@ public class StatsCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!stats";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package net.simplyrin.pandaentus.commands.general;
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -36,6 +37,11 @@ public class ProfileCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!profile";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

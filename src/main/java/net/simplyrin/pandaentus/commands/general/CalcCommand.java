@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.general;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.Scanner;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -34,6 +35,11 @@ public class CalcCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "=";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

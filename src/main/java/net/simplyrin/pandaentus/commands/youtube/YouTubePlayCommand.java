@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
 import java.awt.Color;
+import java.util.List;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -44,6 +45,11 @@ public class YouTubePlayCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!play";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

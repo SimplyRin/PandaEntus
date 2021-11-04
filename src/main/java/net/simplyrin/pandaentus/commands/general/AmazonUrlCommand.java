@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands.general;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -29,6 +31,11 @@ public class AmazonUrlCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "https://www.amazon.co.jp/";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

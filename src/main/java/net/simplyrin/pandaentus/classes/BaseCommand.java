@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.classes;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 
@@ -24,6 +26,7 @@ import net.simplyrin.pandaentus.PandaEntus;
 public interface BaseCommand {
 
 	public String getCommand();
+	public List<String> getAlias();
 	public CommandType getType();
 	public CommandPermission getPermission();
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args);

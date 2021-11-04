@@ -3,6 +3,7 @@ package net.simplyrin.pandaentus.commands.general;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -37,6 +38,11 @@ public class InstaReelCommand implements BaseCommand {
 
 	public static void main(String[] args) {
 		new InstaReelCommand().execute(null, null, new String[] { "https://www.instagram.com/reel/..." });
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

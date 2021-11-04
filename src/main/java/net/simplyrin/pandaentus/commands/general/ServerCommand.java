@@ -3,6 +3,7 @@ package net.simplyrin.pandaentus.commands.general;
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -35,6 +36,11 @@ public class ServerCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!server";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

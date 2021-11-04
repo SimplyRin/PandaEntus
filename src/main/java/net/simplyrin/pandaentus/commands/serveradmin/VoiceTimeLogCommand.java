@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands.serveradmin;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -32,6 +34,11 @@ public class VoiceTimeLogCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!voicetimelog";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

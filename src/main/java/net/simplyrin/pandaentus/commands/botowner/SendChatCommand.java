@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.botowner;
 
 import java.awt.Color;
+import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -33,6 +34,11 @@ public class SendChatCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!sendchat";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

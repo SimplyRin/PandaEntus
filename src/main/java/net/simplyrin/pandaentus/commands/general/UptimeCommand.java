@@ -43,6 +43,11 @@ public class UptimeCommand implements BaseCommand {
 	public String getCommand() {
 		return "!uptime";
 	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
+	}
 
 	@Override
 	public CommandType getType() {
@@ -118,9 +123,10 @@ public class UptimeCommand implements BaseCommand {
 			return;
 		}
 
+		// General-2 チャンネルを取得
 		GuildChannel guildChannel = category.getChannels().get(1);
 		Date time = Date.from(guildChannel.getTimeCreated().toInstant());
-
+		
 		embedBuilder.setColor(Color.GREEN);
 		embedBuilder.addField("グループ合計通話時間", instance.getUptime(time), false);
 		channel.sendMessage(embedBuilder.build()).complete();

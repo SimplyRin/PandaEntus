@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
@@ -31,6 +33,11 @@ public class YouTubeCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "https://www.youtube.com/watch?v=";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

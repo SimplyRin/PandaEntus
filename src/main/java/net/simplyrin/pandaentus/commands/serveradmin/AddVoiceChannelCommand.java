@@ -37,6 +37,11 @@ public class AddVoiceChannelCommand implements BaseCommand {
 	public String getCommand() {
 		return "!add-vc";
 	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
+	}
 
 	@Override
 	public CommandType getType() {

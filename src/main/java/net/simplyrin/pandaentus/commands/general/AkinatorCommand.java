@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands.general;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -33,6 +35,11 @@ public class AkinatorCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!akinator";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

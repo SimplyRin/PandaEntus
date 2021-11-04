@@ -2,6 +2,7 @@ package net.simplyrin.pandaentus.commands.general;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
@@ -47,6 +48,11 @@ public class KvCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!kv";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

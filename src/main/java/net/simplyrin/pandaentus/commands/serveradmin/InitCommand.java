@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands.serveradmin;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -33,6 +35,11 @@ public class InitCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!init";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override

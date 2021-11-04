@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -37,6 +38,11 @@ public class YouTubePlaylistCommand implements BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!playlist";
+	}
+	
+	@Override
+	public List<String> getAlias() {
+		return null;
 	}
 
 	@Override
