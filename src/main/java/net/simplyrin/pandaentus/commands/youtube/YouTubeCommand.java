@@ -1,5 +1,6 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Emote;
@@ -37,7 +38,7 @@ public class YouTubeCommand implements BaseCommand {
 	
 	@Override
 	public List<String> getAlias() {
-		return null;
+		return Arrays.asList("https://youtu.be/");
 	}
 
 	@Override

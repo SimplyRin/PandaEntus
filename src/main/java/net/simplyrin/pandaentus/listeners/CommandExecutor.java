@@ -88,28 +88,22 @@ public class CommandExecutor extends ListenerAdapter {
 				List<String> commands = new ArrayList<>();
 				
 				commands.add(baseCommand.getCommand());
-				if (baseCommand.getAlias() != null && !baseCommand.getAlias().isEmpty()) {
+				if (baseCommand.getAlias() != null && baseCommand.getAlias().size() >= 1) {
 					commands.addAll(baseCommand.getAlias());
 				}
 				
 				switch (baseCommand.getType()) {
 				case EqualsIgnoreCase:
-					if (args[0].equalsIgnoreCase(baseCommand.getCommand())) {
-						if (baseCommand.getAlias() != null) {
-							for (String command : baseCommand.getAlias()) {
-								if (args[0].equalsIgnoreCase(command)) {
-									this.execute(baseCommand, user, member, event, raw, args);
-								}
-							}
+					for (String command : commands) {
+						if (args[0].equalsIgnoreCase(command)) {
+							this.execute(baseCommand, user, member, event, raw, args);
 						}
 					}
 					break;
 				case StartsWith:
-					if (args[0].toLowerCase().startsWith(baseCommand.getCommand().toLowerCase())) {
-						for (String command : commands) {
-							if (args[0].equalsIgnoreCase(command)) {
-								this.execute(baseCommand, user, member, event, raw, args);
-							}
+					for (String command : commands) {
+						if (args[0].toLowerCase().startsWith(command.toLowerCase())) {
+							this.execute(baseCommand, user, member, event, raw, args);
 						}
 					}
 					break;
