@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -38,7 +39,7 @@ public class YouTubeQueueCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!playlist";
+		return "!queue";
 	}
 	
 	@Override
@@ -48,7 +49,7 @@ public class YouTubeQueueCommand implements BaseCommand {
 	
 	@Override
 	public List<String> getAlias() {
-		return null;
+		return Arrays.asList("!playlists");
 	}
 
 	@Override
