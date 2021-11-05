@@ -49,7 +49,7 @@ public class YouTubeQueueCommand implements BaseCommand {
 	
 	@Override
 	public List<String> getAlias() {
-		return Arrays.asList("!playlists");
+		return Arrays.asList("!playlist");
 	}
 
 	@Override

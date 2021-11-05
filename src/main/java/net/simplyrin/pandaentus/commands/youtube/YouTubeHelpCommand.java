@@ -82,7 +82,7 @@ public class YouTubeHelpCommand implements BaseCommand {
 			for (final ClassPath.ClassInfo classInfo : ClassPath.from(classLoader).getTopLevelClasses()) {
 				if (classInfo.getName().startsWith(YouTubeHelpCommand.class.getPackageName())) {
 					BaseCommand command = instance.getCommandRegister().getRegisteredCommand(Class.forName(classInfo.getName()));
-					System.out.println(command.getCommand());
+
 					if (command.getDescription() != null) {
 						String aliases = null;
 						if (command.getAlias() != null) {
