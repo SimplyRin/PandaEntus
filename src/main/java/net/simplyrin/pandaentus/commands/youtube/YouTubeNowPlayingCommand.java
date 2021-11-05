@@ -68,7 +68,7 @@ public class YouTubeNowPlayingCommand implements BaseCommand {
 		Guild guild = event.getGuild();
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 		
-		AudioTrack audioTrack = musicManager.player.getPlayingTrack();
+		AudioTrack audioTrack = musicManager.getPlayer().getPlayingTrack();
 		if (audioTrack == null) {
 			BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 			channel.sendMessage("現在何も再生していません。\n" + playCommand.getCommand() + " コマンドを利用して音楽を再生することができます。").complete();
@@ -98,7 +98,7 @@ public class YouTubeNowPlayingCommand implements BaseCommand {
 		embedBuilder.setColor(Color.GREEN);
 		
 		String prefix = instance.getLoopMap().get(guild.getIdLong()) != null ? "🔁" : "▶";
-		if (musicManager.player.isPaused()) {
+		if (musicManager.getPlayer().isPaused()) {
 			prefix = "⏸";
 		}
 		

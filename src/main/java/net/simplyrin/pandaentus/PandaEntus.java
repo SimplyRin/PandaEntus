@@ -572,13 +572,13 @@ public class PandaEntus {
 
 	public void play(Guild guild, GuildMusicManager musicManager, AudioTrack track) {
 		int volume = this.config.getInt("Guild." + guild.getId() + ".Voice-Volume", 20);
-		musicManager.player.setVolume(volume);
-		musicManager.scheduler.queue(track);
+		musicManager.getPlayer().setVolume(volume);
+		musicManager.getScheduler().queue(track);
 	}
 
 	public void skipTrack(TextChannel channel) {
 		GuildMusicManager musicManager = getGuildAudioPlayer(channel.getGuild());
-		musicManager.scheduler.nextTrack();
+		musicManager.getScheduler().nextTrack();
 
 		channel.sendMessage("次の曲にスキップします。").queue();
 	}

@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
+import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -22,8 +23,10 @@ public class TrackScheduler extends AudioEventAdapter {
 	private PandaEntus instance;
 	private Guild guild;
 	
-	public final AudioPlayer player;
-	public final BlockingQueue<AudioTrack> queue;
+	@Getter
+	private final AudioPlayer player;
+	@Getter
+	private final BlockingQueue<AudioTrack> queue;
 
 	/**
 	 * @param player The audio player this scheduler uses

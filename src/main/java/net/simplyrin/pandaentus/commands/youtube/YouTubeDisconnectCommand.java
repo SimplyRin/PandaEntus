@@ -67,7 +67,7 @@ public class YouTubeDisconnectCommand implements BaseCommand {
 			return;
 		}
 
-		instance.getGuildAudioPlayer(guild).player.destroy();
+		instance.getGuildAudioPlayer(guild).getPlayer().destroy();
 		guild.getAudioManager().closeAudioConnection();
 	}
 

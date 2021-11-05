@@ -71,14 +71,14 @@ public class YouTubePauseCommand implements BaseCommand {
 			return;
 		}
 		
-		AudioTrack audioTrack = musicManager.player.getPlayingTrack();
+		AudioTrack audioTrack = musicManager.getPlayer().getPlayingTrack();
 		if (audioTrack == null) {
 			BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 			channel.sendMessage("現在何も再生していません。\n" + playCommand.getCommand() + " コマンドを利用して音楽を再生することができます。").complete();
 			return;
 		}
 		
-		musicManager.player.setPaused(true);
+		musicManager.getPlayer().setPaused(true);
 		channel.sendMessage("曲を一時停止しました。").complete();
 	}
 

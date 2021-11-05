@@ -70,7 +70,7 @@ public class YouTubeQueueCommand implements BaseCommand {
 		MessageChannel channel = event.getChannel();
 
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
-		BlockingQueue<AudioTrack> queue = musicManager.scheduler.queue;
+		BlockingQueue<AudioTrack> queue = musicManager.getScheduler().getQueue();
 		
 		BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 		BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
@@ -94,7 +94,7 @@ public class YouTubeQueueCommand implements BaseCommand {
 
 		String message = "";
 
-		AudioTrack playingTrack = musicManager.player.getPlayingTrack();
+		AudioTrack playingTrack = musicManager.getPlayer().getPlayingTrack();
 		if (playingTrack != null) {
 			embedBuilder.setAuthor("🎵 再生中の音楽: " + playingTrack.getInfo().title);
 		}
