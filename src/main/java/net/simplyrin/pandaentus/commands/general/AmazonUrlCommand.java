@@ -60,11 +60,11 @@ public class AmazonUrlCommand implements BaseCommand {
 
 		String result = null;
 		
-		List<String> list = Arrays.asList("/dp/", "/ASIN/");
+		List<String> list = Arrays.asList("/dp/", "/ASIN/", "/product/");
 		
 		for (String a : list) {
 			if (url.contains(a)) {
-				String id = url.split(a)[1].split("/")[0];
+				String id = url.split(a)[1].split("/")[0].split("[?]")[0];
 				result = "https://www.amazon.co.jp/dp/" + id;
 				break;
 			}

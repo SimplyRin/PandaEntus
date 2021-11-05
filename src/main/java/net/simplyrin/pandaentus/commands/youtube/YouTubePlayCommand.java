@@ -82,6 +82,11 @@ public class YouTubePlayCommand implements BaseCommand {
 				channel.sendMessage("現在プレイリストには対応していません。").complete();
 				return;
 			}
+			
+			if (!url.startsWith("http")) {
+				channel.sendMessage("検索機能を使用することはできません。URL を入力してください。").complete();
+				return;
+			}
 
 			embedBuilder.setColor(Color.RED);
 			embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
