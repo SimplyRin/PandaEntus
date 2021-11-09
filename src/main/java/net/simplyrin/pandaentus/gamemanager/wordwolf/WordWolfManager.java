@@ -181,7 +181,12 @@ public class WordWolfManager extends ListenerAdapter {
 				
 				if (this.gameEnd) {
 					message.editMessage("残り時間: 0:00").complete();
-					this.channel.sendMessage("ゲームが終了しました。\n個人チャットへ送信したメッセージに従ってください。").complete();
+					String mention = "";
+					for (String id : this.players) {
+						Member mem = guild.getMemberById(id);
+						mention += mem.getAsMention() + " ";
+					}
+					this.channel.sendMessage(mention + "\n話し合いの時間が終了しました。\n個人チャットへ送信したメッセージに従ってください。").complete();
 					this.voteReception = true;
 					break;
 				} else {
@@ -224,9 +229,7 @@ public class WordWolfManager extends ListenerAdapter {
 		
 		return this;
 	}
-	
-	// 投票内容受付 -> 全員が終わったら結果を表示してゲーム終了
-	
+
 	@Override
 	public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
 		if (!this.voteReception) {
@@ -283,7 +286,9 @@ public class WordWolfManager extends ListenerAdapter {
 		}
 	}
 	
-	public WordWolfManager showResult() {
+	public void showResult() {		
+		this.voteNeededPlayers.clear();
+		
 		String msg = "";
 		
 		// 人狼の投票率が一番多い場合
@@ -293,7 +298,7 @@ public class WordWolfManager extends ListenerAdapter {
 			max = 
 		} */
 		
-		msg += "人狼:\n";
+		msg += "人狼: " + this.wolfTheme + "\n";
 		for (String id : this.wolfPlayers) {
 			try {
 				Member member = this.guild.getMemberById(id);
@@ -302,7 +307,7 @@ public class WordWolfManager extends ListenerAdapter {
 			}
 		}
 		
-		msg += "\n市民:\n";
+		msg += "\n市民: " + this.playerTheme + "\n";
 		for (String id : this.generalPlayers) {
 			try {
 				Member member = this.guild.getMemberById(id);
@@ -318,7 +323,7 @@ public class WordWolfManager extends ListenerAdapter {
 		
 		this.instance.getJda().removeEventListener(this);
 		games.remove(this.gameId);
-		return this;
+		return;
 	}
 	
 	public int getVotedCount(Member member) {
