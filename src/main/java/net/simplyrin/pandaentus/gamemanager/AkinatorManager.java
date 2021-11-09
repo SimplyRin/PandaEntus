@@ -1,4 +1,4 @@
-package net.simplyrin.pandaentus.utils;
+package net.simplyrin.pandaentus.gamemanager;
 
 import java.util.List;
 
@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
  * Created by SimplyRin on 2020/03/18.

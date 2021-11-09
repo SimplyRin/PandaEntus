@@ -45,10 +45,10 @@ import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.ReactionMessage;
+import net.simplyrin.pandaentus.gamemanager.AkinatorManager;
 import net.simplyrin.pandaentus.listeners.CommandExecutor;
 import net.simplyrin.pandaentus.listeners.Listener;
 import net.simplyrin.pandaentus.listeners.ReactionListener;
-import net.simplyrin.pandaentus.utils.AkinatorManager;
 import net.simplyrin.pandaentus.utils.PoolItems;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.pandaentus.utils.TimeManager;
@@ -255,6 +255,16 @@ public class PandaEntus {
 
 	public void addShutdownHook(Runnable runnable) {
 		Runtime.getRuntime().addShutdownHook(new Thread(runnable));
+	}
+	
+	public int mmssToSeconds(String time) {
+		int mm, ss;
+		
+		String[] split = time.contains(":") ? time.split(":") : time.split("：");
+		mm = Integer.valueOf(split[0]);
+		ss = Integer.valueOf(split[1]);
+		
+		return (mm * 60) + ss;
 	}
 
 	public String getNowTime() {

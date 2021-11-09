@@ -1,4 +1,4 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands.minigame;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.utils.AkinatorManager;
+import net.simplyrin.pandaentus.gamemanager.AkinatorManager;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
