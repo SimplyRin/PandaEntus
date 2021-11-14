@@ -43,7 +43,7 @@ public class YouTubeDownloadCommand implements BaseCommand {
 	
 	@Override
 	public List<String> getAlias() {
-		return Arrays.asList("https://youtu.be/");
+		return Arrays.asList("https://youtu.be/", "https://soundcloud.com/");
 	}
 
 	@Override
@@ -58,6 +58,23 @@ public class YouTubeDownloadCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+		String message = "";
+		for (int i = 1; i < args.length; i++) {
+			message += args[i] + " ";
+		}
+		message = message.trim();
+		
+		System.out.println(message.split("[\\/]").length);
+		
+		if (message.startsWith("https://soundcloud.com/")) {
+			System.out.println(message.split("[\\/]").length);
+		}
+		
+		if (message.startsWith("https://soundcloud.com/") && !message.contains("-") && message.split("[\\/]").length <= 4) {
+			
+			return;
+		}
+		
 		Emote emote = null;
 		for (Emote temp : event.getGuild().getEmotes()) {
 			if (emote == null) {

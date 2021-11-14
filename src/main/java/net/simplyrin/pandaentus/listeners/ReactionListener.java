@@ -147,12 +147,20 @@ public class ReactionListener extends ListenerAdapter {
 					instance.getConfig().set("YouTube." + videoId + ".Duration", response);
 				}
 				boolean ok = false;
-				int ll = response.split(":").length;
-				if (ll == 2) {
-					int length = Integer.valueOf(response.split(":")[0]);
-					if (length <= 5) {
-						ok = true;
+				int seconds = 0;
+				try {
+					if (response.contains(":")) {
+						String[] time = response.trim().split(":");
+						seconds += Integer.valueOf(time[0]);
+						seconds += Integer.valueOf(time[1]) * 60;
+					} else {
+						seconds += Integer.valueOf(response.trim());
 					}
+				} catch (Exception e) {
+					
+				}
+				if (seconds <= 60 * 8) {
+					ok = true;
 				}
 
 				if (!ok) {

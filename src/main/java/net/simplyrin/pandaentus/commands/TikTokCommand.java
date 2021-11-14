@@ -1,4 +1,4 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands;
 
 import java.io.File;
 import java.util.List;

@@ -48,6 +48,11 @@ public class CommandExecutor extends ListenerAdapter {
 		}
 		this.map.put(command, baseCommand);
 		System.out.println("[Command:Register] " + command);
+		if (baseCommand.getAlias() != null && !baseCommand.getAlias().isEmpty()) {
+			for (String alias : baseCommand.getAlias()) {
+				System.out.println("[Command:Register-Alias] - " + alias);
+			}
+		}
 	}
 
 	public void unregisterCommand(String command) {

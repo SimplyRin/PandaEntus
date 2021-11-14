@@ -1,14 +1,12 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands;
 
 import java.awt.Color;
 import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.simplyrin.config.Configuration;
+import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -32,11 +30,11 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class VanishCommand implements BaseCommand {
+public class OjichatCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!vanish";
+		return "!ojichat";
 	}
 	
 	@Override
@@ -64,33 +62,50 @@ public class VanishCommand implements BaseCommand {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		MessageChannel channel = event.getChannel();
-		User user = event.getAuthor();
-		if (args.length > 1 && instance.isBotOwner(user)) {
-			String id = args[1];
-			id = id.replace("<", "");
-			id = id.replace(">", "");
-			id = id.replace("!", "");
-			id = id.replace("@", "");
 
-			Member member = event.getGuild().getMemberById(id);
-			if (member != null) {
-				user = member.getUser();
-			}
+		String name = "";
+		for (int i = 1; i < args.length; i++) {
+			name = name + args[i] + " ";
 		}
 
-		Configuration config = instance.getConfig();
+		boolean normalText = false;
 
-		String path = "User." + user.getId() + "." + event.getGuild().getId() + ".Vanish";
+		name = name.trim();
 
-		boolean bool = config.getBoolean(path);
-		bool = !bool;
+		// テキトー！！
+		if (name.contains("-normal") || name.contains("-n")) {
+			normalText = true;
+			name = name.replace("-normal", "");
+			name = name.replace("-n", "");
+		}
 
-		instance.getConfig().set(path, bool);
+		name = name.trim();
 
-		embedBuilder.setColor(Color.GRAY);
-		embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
+		HttpClient httpClient = new HttpClient("https://ojichat.appspot.com/post");
+		httpClient.setData("name=" + name + "&emoji_level=4&punctuation_level=0");
 
-		channel.sendMessage(embedBuilder.build()).complete();
+		httpClient.setUserAgent(instance.getBotUserAgent());
+
+		httpClient.addHeader("Accept", "application/json, text/plain, */*");
+		httpClient.addHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+		httpClient.addHeader("Origin", "https://oji.netlify.com");
+		httpClient.addHeader("Referer", "https://oji.netlify.com/");
+
+		String result;
+		try {
+			result = httpClient.getAsJsonObject().get("message").getAsString();
+		} catch (Exception e) {
+			return;
+		}
+
+		embedBuilder.setColor(Color.GREEN);
+		embedBuilder.setDescription(result);
+
+		if (normalText) {
+			channel.sendMessage(result).complete();
+		} else {
+			channel.sendMessage(embedBuilder.build()).complete();
+		}
 		return;
 	}
 

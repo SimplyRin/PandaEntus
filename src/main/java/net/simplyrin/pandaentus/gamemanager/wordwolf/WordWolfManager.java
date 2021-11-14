@@ -201,7 +201,7 @@ public class WordWolfManager extends ListenerAdapter {
 				Member member = this.guild.getMemberById(id);
 				this.voteMap.put(i, member);
 				
-				members += i + ": " + member.getEffectiveName() + "\n";
+				members += i + ": " + this.instance.getNickname(member) + "\n";
 				i++;
 				
 				this.voteNeededPlayers.add(id);

@@ -1,11 +1,7 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands;
 
-import java.awt.Color;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
@@ -31,11 +27,11 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class ServerCommand implements BaseCommand {
+public class HelpCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!server";
+		return "!help";
 	}
 	
 	@Override
@@ -61,13 +57,7 @@ public class ServerCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-		embedBuilder.setColor(Color.ORANGE);
-
-		Date date = new Date(event.getGuild().getTimeCreated().toInstant().toEpochMilli());
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
-		embedBuilder.addField("サーバー作成日", simpleDateFormat.format(date), true);
-		channel.sendMessage(embedBuilder.build()).complete();
+		channel.sendMessage("この Bot で利用可能なコマンドは、以下のページをご確認ください。\nGitHub: https://git.io/JJOr9").complete();
 		return;
 	}
 

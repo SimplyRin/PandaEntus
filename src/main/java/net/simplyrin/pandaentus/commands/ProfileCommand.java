@@ -1,10 +1,12 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands;
 
 import java.awt.Color;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
@@ -30,11 +32,11 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class CalcCommand implements BaseCommand {
+public class ProfileCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "=";
+		return "!profile";
 	}
 	
 	@Override
@@ -49,7 +51,7 @@ public class CalcCommand implements BaseCommand {
 
 	@Override
 	public CommandType getType() {
-		return CommandType.StartsWith;
+		return CommandType.EqualsIgnoreCase;
 	}
 
 	@Override
@@ -61,28 +63,22 @@ public class CalcCommand implements BaseCommand {
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 		EmbedBuilder embedBuilder = new EmbedBuilder();
+		embedBuilder.setColor(Color.ORANGE);
 
-		String input = args[0].replace("=", "");
-		if (input.length() == 0) {
-			embedBuilder.setColor(Color.RED);
-			embedBuilder.setDescription("使用方法: =<計算式>\n=1+1");
-			channel.sendMessage(embedBuilder.build()).complete();
-			return;
+		Member member = event.getMember();
+		if (args.length > 1) {
+			try {
+				member = event.getGuild().getMemberById(args[1]);
+			} catch (Exception e) {
+			}
 		}
 
-		Runtime runtime = Runtime.getRuntime();
-		Process process = null;
-		try {
-			process = runtime.exec(new String[] {"calc", input});
-		} catch (Exception e) {
-			instance.postError(e);
-			return;
-		}
-		Scanner scanner = new Scanner(process.getInputStream());
-		if (scanner.hasNext()) {
-			channel.sendMessage("結果: **" + scanner.nextLine().trim() + "**").complete();
-		}
-		scanner.close();
+		Date date = new Date(member.getUser().getTimeCreated().toInstant().toEpochMilli());
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+		embedBuilder.addField("アカウント名", instance.getNickname(member), false);
+		embedBuilder.addField("アカウント作成日", simpleDateFormat.format(date), false);
+		channel.sendMessage(embedBuilder.build()).complete();
+		return;
 	}
 
 }

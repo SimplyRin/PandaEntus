@@ -1,17 +1,21 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands;
 
+import java.awt.Color;
 import java.util.List;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
 
 /**
- * Created by SimplyRin on 2020/07/17.
+ * Created by SimplyRin on 2020/07/09.
  *
  * Copyright (C) 2020 SimplyRin
  *
@@ -28,11 +32,11 @@ import net.simplyrin.pandaentus.classes.CommandType;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class IconCommand implements BaseCommand {
+public class VanishCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!icon";
+		return "!vanish";
 	}
 	
 	@Override
@@ -57,25 +61,37 @@ public class IconCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
+		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		if (args.length > 1) {
+		MessageChannel channel = event.getChannel();
+		User user = event.getAuthor();
+		if (args.length > 1 && instance.isBotOwner(user)) {
 			String id = args[1];
-			id = id.replace("@", "");
 			id = id.replace("<", "");
 			id = id.replace(">", "");
 			id = id.replace("!", "");
+			id = id.replace("@", "");
 
 			Member member = event.getGuild().getMemberById(id);
 			if (member != null) {
-				channel.sendMessage(member.getUser().getAvatarUrl()).complete();
-			} else {
-				channel.sendMessage("ユーザーが見つかりませんでした。").complete();
+				user = member.getUser();
 			}
-			return;
 		}
 
-		channel.sendMessage("Usage: !icon <userId|mension>").complete();
+		Configuration config = instance.getConfig();
+
+		String path = "User." + user.getId() + "." + event.getGuild().getId() + ".Vanish";
+
+		boolean bool = config.getBoolean(path);
+		bool = !bool;
+
+		instance.getConfig().set(path, bool);
+
+		embedBuilder.setColor(Color.GRAY);
+		embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
+
+		channel.sendMessage(embedBuilder.build()).complete();
+		return;
 	}
 
 }

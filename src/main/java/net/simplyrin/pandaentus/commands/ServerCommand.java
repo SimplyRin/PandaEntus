@@ -1,15 +1,17 @@
-package net.simplyrin.pandaentus.commands.general;
+package net.simplyrin.pandaentus.commands;
 
+import java.awt.Color;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
-import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
-import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -29,11 +31,11 @@ import net.simplyrin.pandaentus.utils.ThreadPool;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class DabCommand implements BaseCommand {
+public class ServerCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!dab";
+		return "!server";
 	}
 	
 	@Override
@@ -58,40 +60,15 @@ public class DabCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		ThreadPool.run(() -> {
-			MessageChannel channel = event.getChannel();
-			Message message = null;
-			String asi = "\n   |\n  /\\";
+		MessageChannel channel = event.getChannel();
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+		embedBuilder.setColor(Color.ORANGE);
 
-			int type = 0;
-			for (int i = 0; i <= 5; i++) {
-				if (message == null) {
-					message = channel.sendMessage("<o/" + asi).complete();
-				} else {
-					if (type == 1) {
-						type = 0;
-						message.editMessage("<o/" + asi).complete();
-					} else if (type == 0) {
-						type = 1;
-						message.editMessage("\\o>" + asi).complete();
-					}
-				}
-
-				try {
-					Thread.sleep(400);
-				} catch (InterruptedException e) {
-				}
-			}
-
-			try {
-				Thread.sleep(2500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			event.getMessage().delete().complete();
-			message.delete().complete();
-		});
+		Date date = new Date(event.getGuild().getTimeCreated().toInstant().toEpochMilli());
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+		embedBuilder.addField("サーバー作成日", simpleDateFormat.format(date), true);
+		channel.sendMessage(embedBuilder.build()).complete();
+		return;
 	}
 
 }
