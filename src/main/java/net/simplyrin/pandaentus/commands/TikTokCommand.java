@@ -9,6 +9,7 @@ import com.google.gson.JsonParser;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -49,8 +50,8 @@ public class TikTokCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return false;
+	public CommandData getCommandData() {
+		return null;
 	}
 	
 	@Override

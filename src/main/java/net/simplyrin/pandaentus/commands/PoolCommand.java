@@ -6,6 +6,8 @@ import java.util.List;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -43,8 +45,14 @@ public class PoolCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return true;
+	public CommandData getCommandData() {
+		return new CommandData("pool", this.getDescription())
+				.addOption(OptionType.STRING, "1", "1個目のアイテム", true)
+				.addOption(OptionType.STRING, "2", "2個目のアイテム", true)
+				.addOption(OptionType.STRING, "3", "3個目のアイテム")
+				.addOption(OptionType.STRING, "4", "4個目のアイテム")
+				.addOption(OptionType.STRING, "5", "5個目のアイテム")
+				.addOption(OptionType.STRING, "6", "6個目のアイテム");
 	}
 	
 	@Override
@@ -65,6 +73,19 @@ public class PoolCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
+		
+		if (event.isSlashCommand()) {
+			var s = event.getSlashCommandEvent();
+			
+			args = new String[7];
+			args[0] = this.getCommand();
+			args[1] = s.getOption("1").getAsString();
+			args[2] = s.getOption("2").getAsString();
+			args[3] = s.getOption("3") != null ? s.getOption("3").getAsString() : null;
+			args[4] = s.getOption("4") != null ? s.getOption("4").getAsString() : null;
+			args[5] = s.getOption("5") != null ? s.getOption("5").getAsString() : null;
+			args[6] = s.getOption("6") != null ? s.getOption("6").getAsString() : null;
+		}
 
 		User user = event.getAuthor();
 

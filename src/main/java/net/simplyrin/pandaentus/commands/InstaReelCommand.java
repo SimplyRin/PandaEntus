@@ -10,6 +10,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.IOUtils;
 
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -46,8 +47,8 @@ public class InstaReelCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return false;
+	public CommandData getCommandData() {
+		return null;
 	}
 	
 	@Override

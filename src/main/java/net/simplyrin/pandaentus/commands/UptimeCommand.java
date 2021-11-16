@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -49,8 +50,8 @@ public class UptimeCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return true;
+	public CommandData getCommandData() {
+		return new CommandData("uptime", this.getDescription());
 	}
 	
 	@Override

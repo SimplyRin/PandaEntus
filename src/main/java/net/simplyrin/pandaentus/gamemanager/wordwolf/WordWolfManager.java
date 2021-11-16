@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.PandaEntus;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.commands.minigame.WordWolfCommand;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
@@ -110,9 +111,9 @@ public class WordWolfManager extends ListenerAdapter {
 		games.put(this.gameId, this);
 	}
 	
-	public WordWolfManager startRecruit() {
-		this.recruitMessage = this.channel.sendMessage("ワードウルフのプレイヤー募集をします。\n"
-				+ "参加したいユーザーはリアクション 👌 を押して待機してください。 (" + this.gameId + ")").complete();
+	public WordWolfManager startRecruit(PandaMessageEvent event) {
+		this.recruitMessage = event.reply("ワードウルフのプレイヤー募集をします。\n"
+				+ "参加したいユーザーはリアクション 👌 を押して待機してください。 (" + this.gameId + ")");
 		this.recruitMessage.addReaction("👌").complete();
 
 		return this;

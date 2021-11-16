@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -43,8 +44,8 @@ public class InitCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return false;
+	public CommandData getCommandData() {
+		return null;
 	}
 	
 	@Override

@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -53,20 +52,14 @@ public class CommandExecutor extends ListenerAdapter {
 		this.map.put(command, baseCommand);
 
 		System.out.println("[Command:Register] " + command);
-		if (baseCommand.isAllowedToRegisterSlashCommand()) {
-			String slash = this.getSlashCommand(command);
+		if (baseCommand.getCommandData() != null) {
 			System.out.println("[Command:Register|Slash] " + command);
-			commands.addCommands(new CommandData(slash, baseCommand.getDescription()));
+			commands.addCommands(baseCommand.getCommandData());
 		}
 		
 		if (baseCommand.getAlias() != null && !baseCommand.getAlias().isEmpty()) {
 			for (String alias : baseCommand.getAlias()) {
 				System.out.println("[Command:Register-Alias] - " + alias);
-				if (baseCommand.isAllowedToRegisterSlashCommand()) {
-					String slash = this.getSlashCommand(alias);
-					System.out.println("[Command:Register-Alias|Slash] " + slash);
-					commands.addCommands(new CommandData(this.getSlashCommand(alias), baseCommand.getDescription()));
-				}
 			}
 		}
 	}
@@ -78,14 +71,6 @@ public class CommandExecutor extends ListenerAdapter {
 
 	public BaseCommand getCommand(String command) {
 		return this.map.get(command);
-	}
-	
-	private String getSlashCommand(String command) {
-		if (!command.startsWith("!")) {
-			return command;
-		}
-		
-		return command.substring(1, command.length());
 	}
 	
 	public BaseCommand getRegisteredCommand(Class<?> clazz) {
@@ -115,7 +100,7 @@ public class CommandExecutor extends ListenerAdapter {
 		args[0] = "!" + args[0];
 		
 		System.out.println(user.getName() + ": " + raw + " (" + args[0] + ")");
-	
+
 		if (args.length > 0) {
 			this.check(args, user, member, PandaMessageEvent.get(event), raw);
 		}

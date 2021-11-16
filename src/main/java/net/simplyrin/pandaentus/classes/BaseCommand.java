@@ -2,6 +2,7 @@ package net.simplyrin.pandaentus.classes;
 
 import java.util.List;
 
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 
 /**
@@ -26,7 +27,7 @@ public interface BaseCommand {
 
 	public String getCommand();
 	public String getDescription();
-	public boolean isAllowedToRegisterSlashCommand();
+	public CommandData getCommandData();
 	public List<String> getAlias();
 	public CommandType getType();
 	public CommandPermission getPermission();

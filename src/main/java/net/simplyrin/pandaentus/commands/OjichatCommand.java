@@ -5,6 +5,8 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -39,12 +41,13 @@ public class OjichatCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return "おじさん構文。";
+		return "おじさん構文を生成";
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return true;
+	public CommandData getCommandData() {
+		return new CommandData("ojichat", this.getDescription())
+				.addOption(OptionType.STRING, "名前", "指定した名前でおじさん構文を生成します。");
 	}
 	
 	@Override

@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -45,8 +46,8 @@ public class TextGenCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return false;
+	public CommandData getCommandData() {
+		return null;
 	}
 	
 	@Override

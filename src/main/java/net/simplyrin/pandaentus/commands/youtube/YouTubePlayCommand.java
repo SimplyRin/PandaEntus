@@ -13,6 +13,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
@@ -53,8 +55,9 @@ public class YouTubePlayCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return true;
+	public CommandData getCommandData() {
+		return new CommandData("play", this.getDescription())
+				.addOption(OptionType.STRING, "url", "YouTube, Twitch, Bandcamp の URL を入力", true);
 	}
 	
 	@Override
@@ -75,6 +78,14 @@ public class YouTubePlayCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
+		
+		if (event.isSlashCommand()) {
+			var s = event.getSlashCommandEvent();
+			
+			args = new String[s.getOptions().size() + 1];
+			args[0] = this.getCommand();
+			args[1] = s.getOption("url").getAsString();
+		}
 
 		Guild guild = event.getGuild();
 

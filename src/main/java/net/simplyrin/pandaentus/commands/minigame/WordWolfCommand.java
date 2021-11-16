@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.config.Config;
 import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.PandaEntus;
@@ -44,8 +46,11 @@ public class WordWolfCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return true;
+	public CommandData getCommandData() {
+		return new CommandData("wordwolf", this.getDescription())
+				.addOption(OptionType.INTEGER, "人狼の人数", "人狼の人数を入力", true)
+				.addOption(OptionType.STRING, "時間", "話し合いの時間を指定 (分:秒, HH:ss)", true)
+				.addOption(OptionType.STRING, "テーマ", "選ばれるお題のテーマを指定 (入力しなければランダム)");
 	}
 
 	@Override
@@ -66,6 +71,16 @@ public class WordWolfCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
+
+		if (event.isSlashCommand()) {
+			var s = event.getSlashCommandEvent();
+			
+			args = new String[s.getOptions().size() + 1];
+			args[0] = this.getCommand();
+			args[1] = s.getOption("人狼の人数").getAsString();
+			args[2] = s.getOption("時間").getAsString();
+			args[3] = s.getOption("テーマ") != null ? s.getOption("テーマ").getAsString() : null;
+		}
 		
 		if (args.length > 1) {
 			if (args[1].equalsIgnoreCase("start")) {
@@ -105,7 +120,7 @@ public class WordWolfCommand implements BaseCommand {
 			}
 			
 			WordWolfManager wwm = new WordWolfManager(instance, event.getGuild(), channel, wolfs, time, theme);
-			wwm.startRecruit();
+			wwm.startRecruit(event);
 			return;
 		}
 		

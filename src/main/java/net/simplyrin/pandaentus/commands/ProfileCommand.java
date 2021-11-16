@@ -7,6 +7,8 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -44,8 +46,9 @@ public class ProfileCommand implements BaseCommand {
 	}
 	
 	@Override
-	public boolean isAllowedToRegisterSlashCommand() {
-		return true;
+	public CommandData getCommandData() {
+		return new CommandData("profile", this.getDescription())
+				.addOption(OptionType.USER, "ユーザー", "指定したユーザーのアカウント作成日を確認", false);
 	}
 	
 	@Override
@@ -67,11 +70,19 @@ public class ProfileCommand implements BaseCommand {
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		embedBuilder.setColor(Color.ORANGE);
+		
+		if (event.isSlashCommand()) {
+			var s = event.getSlashCommandEvent();
+			
+			args = new String[s.getOptions().size() + 1];
+			args[0] = this.getCommand();
+			args[1] = s.getOption("ユーザー") != null ? s.getOption("ユーザー").getAsString() : event.getUser().getId();
+		}
 
 		Member member = event.getMember();
 		if (args.length > 1) {
 			try {
-				member = event.getGuild().getMemberById(args[1]);
+				member = event.getGuild().getMemberById(args[1].replace("<", "").replace(">", "").replace("@", "").replace("!", ""));
 			} catch (Exception e) {
 			}
 		}
