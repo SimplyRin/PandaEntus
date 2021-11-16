@@ -74,7 +74,7 @@ public class ProfileCommand implements BaseCommand {
 		if (event.isSlashCommand()) {
 			var s = event.getSlashCommandEvent();
 			
-			args = new String[s.getOptions().size() + 1];
+			args = new String[2];
 			args[0] = this.getCommand();
 			args[1] = s.getOption("ユーザー") != null ? s.getOption("ユーザー").getAsString() : event.getUser().getId();
 		}
