@@ -2,11 +2,11 @@ package net.simplyrin.pandaentus.commands.youtube;
 
 import java.util.List;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -39,6 +39,11 @@ public class YouTubeSkipCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -54,8 +59,9 @@ public class YouTubeSkipCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		instance.skipTrack(event.getTextChannel());
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
+		event.reply("スキップします。");
+		instance.skipTrack(event.getGuild(), event.getChannel());
 	}
 
 }

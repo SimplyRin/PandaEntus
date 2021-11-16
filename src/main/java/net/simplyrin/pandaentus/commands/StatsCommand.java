@@ -8,12 +8,11 @@ import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDAInfo;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.utils.Version;
 
 /**
@@ -43,7 +42,12 @@ public class StatsCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "Bot の詳細情報を表示";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 	
 	@Override
@@ -62,9 +66,7 @@ public class StatsCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
-
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		Date date = instance.getStartupDate();
 		Runtime runtime = Runtime.getRuntime();
 		JDA jda = instance.getJda();
@@ -94,7 +96,7 @@ public class StatsCommand implements BaseCommand {
 		message += "  JDA: " + JDAInfo.VERSION + "\n";
 		message += "  LavaPlayer: " + PlayerLibrary.VERSION;
 
-		channel.sendMessage(message + "```").complete();
+		event.reply(message + "```");
 	}
 
 }

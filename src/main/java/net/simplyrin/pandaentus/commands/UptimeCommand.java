@@ -9,14 +9,13 @@ import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.utils.TimeManager;
 
 /**
@@ -46,7 +45,12 @@ public class UptimeCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "Bot の起動時間を確認";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 	
 	@Override
@@ -65,19 +69,18 @@ public class UptimeCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		Guild guild = event.getGuild();
 
 		Category category = instance.getVoiceChannelCategory(event.getGuild());
-		MessageChannel channel = event.getChannel();
 		User user = event.getAuthor();
 
 		if (instance.getConfig().getBoolean("Disable")) {
 			embedBuilder.setColor(Color.RED);
 			embedBuilder.setDescription("この機能は現在一時的に無効にされています。");
-			channel.sendMessage(embedBuilder.build()).complete();
+			event.reply(embedBuilder.build());
 			return;
 		}
 
@@ -99,7 +102,7 @@ public class UptimeCommand implements BaseCommand {
 			if (!_if) {
 				embedBuilder.setColor(Color.RED);
 				embedBuilder.setDescription("このユーザーは現在通話していません。");
-				channel.sendMessage(embedBuilder.build()).complete();
+				event.reply(embedBuilder.build());
 				return;
 			}
 
@@ -107,7 +110,8 @@ public class UptimeCommand implements BaseCommand {
 			if ((!timeManager.isJoined()) || (!_if)) {
 				embedBuilder.setColor(Color.RED);
 				embedBuilder.setDescription("このユーザーは現在通話していません。");
-				channel.sendMessage(embedBuilder.build()).complete();
+				
+				event.reply(embedBuilder.build());
 				return;
 			}
 
@@ -116,7 +120,7 @@ public class UptimeCommand implements BaseCommand {
 			embedBuilder.addField("参加時間", timeManager.getJoinedTime(), true);
 			embedBuilder.addField("通話時間", timeManager.getCurrentTime(), true);
 
-			channel.sendMessage(embedBuilder.build()).complete();
+			event.reply(embedBuilder.build());
 			return;
 		}
 
@@ -124,7 +128,8 @@ public class UptimeCommand implements BaseCommand {
 		if (channels.size() == 1) {
 			embedBuilder.setDescription("現在通話していません。");
 			embedBuilder.setColor(Color.GREEN);
-			channel.sendMessage(embedBuilder.build()).complete();
+			
+			event.reply(embedBuilder.build());
 			return;
 		}
 
@@ -134,7 +139,8 @@ public class UptimeCommand implements BaseCommand {
 		
 		embedBuilder.setColor(Color.GREEN);
 		embedBuilder.addField("グループ合計通話時間", instance.getUptime(time), false);
-		channel.sendMessage(embedBuilder.build()).complete();
+		
+		event.reply(embedBuilder.build());
 	}
 
 

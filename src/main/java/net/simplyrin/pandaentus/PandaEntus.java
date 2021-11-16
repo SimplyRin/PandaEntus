@@ -35,9 +35,11 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.simplyrin.config.Config;
@@ -183,15 +185,21 @@ public class PandaEntus {
 
 		// 自動登録
 		try {
+			System.out.println("コマンドを登録しています...");
+			CommandListUpdateAction commands = this.getJda().updateCommands();
+			
 			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			for (final ClassPath.ClassInfo classInfo : ClassPath.from(classLoader).getTopLevelClasses()) {
 				if (classInfo.getName().startsWith("net.simplyrin.pandaentus.command")) {
 					BaseCommand baseCommand = (BaseCommand) Class.forName(classInfo.getName()).getDeclaredConstructor().newInstance();
-					this.commandRegister.registerCommand(baseCommand.getCommand(), baseCommand);
+					this.commandRegister.registerCommand(commands, baseCommand.getCommand(), baseCommand);
 				}
 			}
+			
+			List<Command> commandList = commands.complete();
+			System.out.println("コマンドを登録しました。スラッシュコマンド: " + commandList.size());
 		} catch (Exception e) {
-			System.out.println("Please report this error!");
+			System.out.println("エラーが発生しました。");
 			e.printStackTrace();
 			return;
 		}
@@ -586,8 +594,8 @@ public class PandaEntus {
 		musicManager.getScheduler().queue(track);
 	}
 
-	public void skipTrack(TextChannel channel) {
-		GuildMusicManager musicManager = getGuildAudioPlayer(channel.getGuild());
+	public void skipTrack(Guild guild, MessageChannel channel) {
+		GuildMusicManager musicManager = getGuildAudioPlayer(guild);
 		musicManager.getScheduler().nextTrack();
 
 		channel.sendMessage("次の曲にスキップします。").queue();

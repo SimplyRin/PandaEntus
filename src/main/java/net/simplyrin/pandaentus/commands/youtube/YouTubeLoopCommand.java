@@ -5,12 +5,11 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -43,6 +42,11 @@ public class YouTubeLoopCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -58,10 +62,9 @@ public class YouTubeLoopCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 
 		if (instance.getLoopMap().get(guild.getIdLong()) != null) {
@@ -75,7 +78,7 @@ public class YouTubeLoopCommand implements BaseCommand {
 			instance.getLoopMap().put(guild.getIdLong(), instance.getPreviousTrack().get(guild.getIdLong()));
 		}
 
-		channel.sendMessage(embedBuilder.build()).complete();
+		event.reply(embedBuilder.build());
 	}
 
 }

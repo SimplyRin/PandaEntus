@@ -7,12 +7,11 @@ import java.util.List;
 import com.google.common.reflect.ClassPath;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2021/11/04.
@@ -41,7 +40,12 @@ public class YouTubeHelpCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "Music Bot のヘルプを表示";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 
 	@Override
@@ -60,11 +64,8 @@ public class YouTubeHelpCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		// !play, !loop, !nowplaying, !playlist, !skip, !volume
-		MessageChannel channel = event.getChannel();
-		
-		channel.sendMessage(this.getHelpEmbed(instance).build()).complete();
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
+		event.reply(this.getHelpEmbed(instance).build());
 	}
 	
 	public String getHelpMessage() {

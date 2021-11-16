@@ -9,11 +9,11 @@ import com.google.gson.JsonParser;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
@@ -49,6 +49,11 @@ public class TikTokCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return false;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -64,7 +69,7 @@ public class TikTokCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		File file = new File(new File("tiktok"), "api.php");
 		ProcessManager.runCommand(new String[] { "/usr/bin/php", file.getAbsolutePath(), event.getMessage().getContentRaw() }, new Callback() {
 			@Override

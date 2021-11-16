@@ -5,14 +5,13 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -41,7 +40,12 @@ public class VanishCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "通話ログ一覧から自分を表示しないように";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 	
 	@Override
@@ -60,10 +64,9 @@ public class VanishCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		MessageChannel channel = event.getChannel();
 		User user = event.getAuthor();
 		if (args.length > 1 && instance.isBotOwner(user)) {
 			String id = args[1];
@@ -88,9 +91,9 @@ public class VanishCommand implements BaseCommand {
 		instance.getConfig().set(path, bool);
 
 		embedBuilder.setColor(Color.GRAY);
-		embedBuilder.setDescription("You are now " + (bool ? "vanished" : "unvanished") + ".");
+		embedBuilder.setDescription("通話ログ表示: " + (bool ? "オフ" : "オン") + ".");
 
-		channel.sendMessage(embedBuilder.build()).complete();
+		event.reply(embedBuilder.build());
 		return;
 	}
 

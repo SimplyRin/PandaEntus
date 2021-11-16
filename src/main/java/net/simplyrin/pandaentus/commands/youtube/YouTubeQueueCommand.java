@@ -9,13 +9,12 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/11.
@@ -48,6 +47,11 @@ public class YouTubeQueueCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return Arrays.asList("!playlist");
 	}
@@ -63,11 +67,10 @@ public class YouTubeQueueCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		Guild guild = event.getGuild();
-		MessageChannel channel = event.getChannel();
 
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 		BlockingQueue<AudioTrack> queue = musicManager.getScheduler().getQueue();
@@ -82,13 +85,14 @@ public class YouTubeQueueCommand implements BaseCommand {
 			embedBuilder.setAuthor("🎵 ループ再生が有効になっています。");
 			embedBuilder.setDescription("🔁 ループ再生中の音楽: " + at.getInfo().title);
 			embedBuilder.setFooter("詳細: !nowplaying, ループ無効: " + loopCommand.getCommand());
-			channel.sendMessage(embedBuilder.build()).complete();
+
+			event.reply(embedBuilder.build());
 			return;
 		}
 
 		if (queue == null || queue.isEmpty()) {
-			channel.sendMessage("次に再生が予定されている曲はありません。\n"
-					+ playCommand.getCommand() + " を使用することで、プレイリストに追加することができます。").complete();
+			event.reply("次に再生が予定されている曲はありません。\n"
+					+ playCommand.getCommand() + " を使用することで、プレイリストに追加することができます。");
 			return;
 		}
 
@@ -106,7 +110,7 @@ public class YouTubeQueueCommand implements BaseCommand {
 		}
 
 		if (message.length() == 0) {
-			channel.sendMessage("再生待ちの曲はありません。").complete();
+			event.reply("再生待ちの曲はありません。");
 			return;
 		}
 		if (message.length() >= 1800) {
@@ -115,7 +119,8 @@ public class YouTubeQueueCommand implements BaseCommand {
 		embedBuilder.setDescription(message);
 		embedBuilder.setColor(Color.CYAN);
 		embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand());
-		channel.sendMessage(embedBuilder.build()).complete();
+
+		event.reply(embedBuilder.build());
 	}
 
 }

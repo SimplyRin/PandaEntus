@@ -7,11 +7,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -44,6 +44,11 @@ public class AddVoiceChannelCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return false;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -59,7 +64,7 @@ public class AddVoiceChannelCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		MessageChannel channel = event.getChannel();

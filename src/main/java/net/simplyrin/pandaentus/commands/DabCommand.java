@@ -3,12 +3,11 @@ package net.simplyrin.pandaentus.commands;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
@@ -38,7 +37,12 @@ public class DabCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "<o/ ｲｲﾈ!";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 	
 	@Override
@@ -57,16 +61,15 @@ public class DabCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		ThreadPool.run(() -> {
-			MessageChannel channel = event.getChannel();
 			Message message = null;
 			String asi = "\n   |\n  /\\";
 
 			int type = 0;
 			for (int i = 0; i <= 5; i++) {
 				if (message == null) {
-					message = channel.sendMessage("<o/" + asi).complete();
+					message = event.reply("<o/" + asi);
 				} else {
 					if (type == 1) {
 						type = 0;
@@ -89,7 +92,10 @@ public class DabCommand implements BaseCommand {
 				e.printStackTrace();
 			}
 
-			event.getMessage().delete().complete();
+			if (event.getMessage() != null) {
+				event.getMessage().delete().complete();
+			}
+
 			message.delete().complete();
 		});
 	}

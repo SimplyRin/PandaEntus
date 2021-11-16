@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.classes.ReactionMessage;
 
 /**
@@ -42,6 +42,11 @@ public class YouTubeDownloadCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return false;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return Arrays.asList("https://youtu.be/", "https://soundcloud.com/");
 	}
@@ -57,7 +62,7 @@ public class YouTubeDownloadCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		String message = "";
 		for (int i = 1; i < args.length; i++) {
 			message += args[i] + " ";
@@ -71,7 +76,6 @@ public class YouTubeDownloadCommand implements BaseCommand {
 		}
 		
 		if (message.startsWith("https://soundcloud.com/") && !message.contains("-") && message.split("[\\/]").length <= 4) {
-			
 			return;
 		}
 		

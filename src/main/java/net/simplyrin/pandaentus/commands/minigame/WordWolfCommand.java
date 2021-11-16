@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.config.Config;
 import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.gamemanager.wordwolf.WordWolfManager;
 
 /**
@@ -40,7 +40,12 @@ public class WordWolfCommand implements BaseCommand {
 
 	@Override
 	public String getDescription() {
-		return null;
+		return "ワードウルフゲームに接続";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 
 	@Override
@@ -59,7 +64,7 @@ public class WordWolfCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 		
 		if (args.length > 1) {
@@ -67,11 +72,12 @@ public class WordWolfCommand implements BaseCommand {
 				WordWolfManager wwm = WordWolfManager.getGameByChannel(channel);
 				if (wwm != null) {
 					if (wwm.start() == null) {
-						channel.sendMessage("ゲームは既に開始されています。").complete();
+						event.reply("ゲームは既に開始されています。");
 					}
 					return;
 				}
-				channel.sendMessage("このチャンネルで開始を予定しているゲームを見つけることができませんでした。\n" + this.getCommand() + " コマンドを使用してゲームの開始を予約してください。").complete();
+
+				event.reply("このチャンネルで開始を予定しているゲームを見つけることができませんでした。\n" + this.getCommand() + " コマンドを使用してゲームの開始を予約してください。");
 				return;
 			}
 		}
@@ -89,12 +95,12 @@ public class WordWolfCommand implements BaseCommand {
 				wolfs = Integer.valueOf(args[1]);
 				time = instance.mmssToSeconds(args[2]);
 			} catch (Exception e) {
-				channel.sendMessage("値は数字で入力してください。").complete();
+				event.reply("値は数字で入力してください。");
 				return;
 			}
 			
 			if (WordWolfManager.getGameByChannel(channel) != null) {
-				channel.sendMessage("既に開始されているゲームがあります。").complete();
+				event.reply("既に開始されているゲームがあります。");
 				return;
 			}
 			
@@ -112,10 +118,12 @@ public class WordWolfCommand implements BaseCommand {
 			Configuration config = Config.getConfig(file);
 			theme +=  config.getString("name") + "\n";
 		}
-		channel.sendMessage(args[0] + " <ワードウルフの人数> <時間 (分:秒)> <トークテーマ, 入力しなければランダム>\n"
+		
+		String reply = args[0] + " <ワードウルフの人数> <時間 (分:秒)> <トークテーマ, 入力しなければランダム>\n"
 				+ "開始するには `" + args[0] + " start` と入力してください。\n"
 				+ "```テーマ:\n"
-				+ theme + "```").complete();
+				+ theme + "```";
+		event.reply(reply);
 	}
 
 }

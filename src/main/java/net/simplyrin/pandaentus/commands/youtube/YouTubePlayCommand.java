@@ -12,15 +12,14 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
 /**
@@ -54,6 +53,11 @@ public class YouTubePlayCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return Arrays.asList("!p");
 	}
@@ -69,35 +73,33 @@ public class YouTubePlayCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 
 		if (args.length > 1) {
 			String url = args[1];
 
 			if (url.contains("playlist") || url.contains("list")) {
-				channel.sendMessage("現在プレイリストには対応していません。").complete();
+				event.reply("現在プレイリストには対応していません。");
 				return;
 			}
 			
 			if (!url.startsWith("http")) {
-				channel.sendMessage("検索機能を使用することはできません。URL を入力してください。").complete();
+				event.reply("検索機能を使用することはできません。URL を入力してください。");
+				return;
+			}
+			
+			VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+			if (voiceChannel == null) {
+				event.reply("ボイスチャンネルに接続してください。");
 				return;
 			}
 
 			embedBuilder.setColor(Color.RED);
 			embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
-			channel.sendTyping().complete();
-			Message message = channel.sendMessage(embedBuilder.build()).complete();
-			
-			VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
-			if (voiceChannel == null) {
-				channel.sendMessage("ボイスチャンネルに接続してください。").complete();
-				return;
-			}
+			Message message = event.reply(embedBuilder.build());
 
 			ThreadPool.run(() -> {
 				
@@ -143,7 +145,7 @@ public class YouTubePlayCommand implements BaseCommand {
 
 					@Override
 					public void loadFailed(FriendlyException exception) {
-						channel.sendMessage("Could not play: " + exception.getMessage()).queue();
+						event.reply("Could not play: " + exception.getMessage());
 					}
 				});
 			});
@@ -157,7 +159,7 @@ public class YouTubePlayCommand implements BaseCommand {
 		helpEmbed.setAuthor("使用方法: " + args[0] + " <YouTube, Twitch, Bandcamp>");
 		helpEmbed.setDescription(help.getHelpMessage());
 		
-		channel.sendMessage(helpEmbed.build()).complete();
+		event.reply(helpEmbed.build());
 		return;
 	}
 

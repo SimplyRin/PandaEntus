@@ -15,13 +15,13 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
 
@@ -54,6 +54,11 @@ public class KvCommand implements BaseCommand {
 	public String getDescription() {
 		return null;
 	}
+
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return false;
+	}
 	
 	@Override
 	public List<String> getAlias() {
@@ -71,7 +76,7 @@ public class KvCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		MessageChannel channel = event.getChannel();

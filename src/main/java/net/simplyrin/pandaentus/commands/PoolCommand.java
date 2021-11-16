@@ -5,13 +5,12 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -40,7 +39,12 @@ public class PoolCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "投票用プールメッセージを作成";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 	
 	@Override
@@ -59,10 +63,9 @@ public class PoolCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
-		MessageChannel channel = event.getChannel();
 		User user = event.getAuthor();
 
 		if (args.length > 1) {
@@ -78,7 +81,8 @@ public class PoolCommand implements BaseCommand {
 
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.setDescription("`" + key + "` を `" + game + "` として覚えました。");
-				channel.sendMessage(embedBuilder.build()).complete();
+				
+				event.reply(embedBuilder.build());
 				return;
 			}
 
@@ -93,20 +97,22 @@ public class PoolCommand implements BaseCommand {
 
 			embedBuilder.setColor(Color.GREEN);
 			embedBuilder.setDescription("投票が開始されました。");
-			Message message = channel.sendMessage(embedBuilder.build()).complete();
+			Message message = event.reply(embedBuilder.build());
 
 			for (int integer = 1; integer <= size; integer++) {
 				String value = instance.getPoolItems().getReaction(integer);
 
 				System.out.println("Add: " + value);
+				
+				
 				message.addReaction(value).complete();
 			}
 			return;
 		}
 
 		embedBuilder.setColor(Color.RED);
-		embedBuilder.setDescription("使用方法: " + args[0] + " <1> <2> <3>... (max 6)");
-		channel.sendMessage(embedBuilder.build()).complete();
+		embedBuilder.setDescription("使用方法: " + args[0] + " <1> <2> <3>... (最大: 6)");
+		event.reply(embedBuilder.build());
 		return;
 	}
 

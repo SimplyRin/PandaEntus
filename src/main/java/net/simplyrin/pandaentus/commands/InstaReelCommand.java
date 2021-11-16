@@ -10,11 +10,11 @@ import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.IOUtils;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/11/25.
@@ -46,6 +46,11 @@ public class InstaReelCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return false;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -66,7 +71,7 @@ public class InstaReelCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		String url = args[0];
 		if (url.contains(Pattern.quote("?"))) {
 			url = url.split(Pattern.quote("?"))[0];

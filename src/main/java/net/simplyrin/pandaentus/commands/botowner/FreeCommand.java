@@ -5,11 +5,11 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.processmanager.Callback;
 import net.simplyrin.processmanager.ProcessManager;
 
@@ -44,6 +44,11 @@ public class FreeCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return false;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -59,7 +64,7 @@ public class FreeCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 
 		ProcessManager.runCommand(new String[] { "free", "-h" }, new Callback() {

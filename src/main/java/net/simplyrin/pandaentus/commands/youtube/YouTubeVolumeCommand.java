@@ -2,13 +2,12 @@ package net.simplyrin.pandaentus.commands.youtube;
 
 import java.util.List;
 
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/17.
@@ -41,6 +40,11 @@ public class YouTubeVolumeCommand implements BaseCommand {
 	}
 	
 	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
+	}
+	
+	@Override
 	public List<String> getAlias() {
 		return null;
 	}
@@ -56,9 +60,7 @@ public class YouTubeVolumeCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
-
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		if (args.length > 1) {
 			try {
 				int volume = Integer.valueOf(args[1]);
@@ -66,14 +68,14 @@ public class YouTubeVolumeCommand implements BaseCommand {
 					instance.getConfig().set("Guild." + event.getGuild().getId() + ".Voice-Volume", volume);
 					GuildMusicManager musicManager = instance.getGuildAudioPlayer(event.getGuild());
 					musicManager.getPlayer().setVolume(volume);
-					channel.sendMessage("ボリュームを " + volume + " に変更しました。").complete();
+					event.reply("ボリュームを " + volume + " に変更しました。");
 					return;
 				}
 			} catch (Exception e) {
 			}
 		}
 
-		channel.sendMessage("使用方法: " + this.getCommand() + " <20-100>").complete();
+		event.reply("使用方法: " + this.getCommand() + " <20-100>");
 	}
 
 }

@@ -7,12 +7,12 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2021/11/04.
@@ -43,6 +43,11 @@ public class YouTubePauseCommand implements BaseCommand {
 	public String getDescription() {
 		return "再生中の曲を一時停止";
 	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
+	}
 
 	@Override
 	public List<String> getAlias() {
@@ -60,7 +65,7 @@ public class YouTubePauseCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);

@@ -6,12 +6,11 @@ import java.util.Date;
 import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -40,7 +39,12 @@ public class ServerCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "サーバーの作成日を表示";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 	
 	@Override
@@ -59,15 +63,15 @@ public class ServerCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		embedBuilder.setColor(Color.ORANGE);
 
 		Date date = new Date(event.getGuild().getTimeCreated().toInstant().toEpochMilli());
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 		embedBuilder.addField("サーバー作成日", simpleDateFormat.format(date), true);
-		channel.sendMessage(embedBuilder.build()).complete();
+		
+		event.reply(embedBuilder.build());
 		return;
 	}
 

@@ -8,11 +8,15 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -42,15 +46,27 @@ public class CommandExecutor extends ListenerAdapter {
 		this.instance = instance;
 	}
 
-	public void registerCommand(String command, BaseCommand baseCommand) {
+	public void registerCommand(CommandListUpdateAction commands, String command, BaseCommand baseCommand) {
 		if (command == null) {
 			throw new NullPointerException(baseCommand.getClass().getName() + "#getCommand() is null!");
 		}
 		this.map.put(command, baseCommand);
+
 		System.out.println("[Command:Register] " + command);
+		if (baseCommand.isAllowedToRegisterSlashCommand()) {
+			String slash = this.getSlashCommand(command);
+			System.out.println("[Command:Register|Slash] " + command);
+			commands.addCommands(new CommandData(slash, baseCommand.getDescription()));
+		}
+		
 		if (baseCommand.getAlias() != null && !baseCommand.getAlias().isEmpty()) {
 			for (String alias : baseCommand.getAlias()) {
 				System.out.println("[Command:Register-Alias] - " + alias);
+				if (baseCommand.isAllowedToRegisterSlashCommand()) {
+					String slash = this.getSlashCommand(alias);
+					System.out.println("[Command:Register-Alias|Slash] " + slash);
+					commands.addCommands(new CommandData(this.getSlashCommand(alias), baseCommand.getDescription()));
+				}
 			}
 		}
 	}
@@ -59,9 +75,17 @@ public class CommandExecutor extends ListenerAdapter {
 		this.map.remove(command);
 		System.out.println("[Command:Un-Register] " + command);
 	}
-	
+
 	public BaseCommand getCommand(String command) {
 		return this.map.get(command);
+	}
+	
+	private String getSlashCommand(String command) {
+		if (!command.startsWith("!")) {
+			return command;
+		}
+		
+		return command.substring(1, command.length());
 	}
 	
 	public BaseCommand getRegisteredCommand(Class<?> clazz) {
@@ -72,6 +96,29 @@ public class CommandExecutor extends ListenerAdapter {
 			}
 		}
 		return command;
+	}
+	
+	@Override
+	public void onSlashCommand(SlashCommandEvent event) {
+		if (event.getGuild() == null) {
+			return;
+		}
+		Member member = event.getMember();
+		User user = event.getUser();
+		if (user.isBot()) {
+			return;
+		}
+		
+		String raw = event.getCommandPath();
+		String[] args = raw.split("[\\/]");
+		
+		args[0] = "!" + args[0];
+		
+		System.out.println(user.getName() + ": " + raw + " (" + args[0] + ")");
+	
+		if (args.length > 0) {
+			this.check(args, user, member, PandaMessageEvent.get(event), raw);
+		}
 	}
 
 	@Override
@@ -89,37 +136,41 @@ public class CommandExecutor extends ListenerAdapter {
 		String[] args = raw.split(" ");
 
 		if (args.length > 0) {
-			for (BaseCommand baseCommand : this.map.values()) {
-				List<String> commands = new ArrayList<>();
-				
-				commands.add(baseCommand.getCommand());
-				if (baseCommand.getAlias() != null && baseCommand.getAlias().size() >= 1) {
-					commands.addAll(baseCommand.getAlias());
-				}
-				
-				switch (baseCommand.getType()) {
-				case EqualsIgnoreCase:
-					for (String command : commands) {
-						if (args[0].equalsIgnoreCase(command)) {
-							this.execute(baseCommand, user, member, event, raw, args);
-						}
+			this.check(args, user, member, PandaMessageEvent.get(event), raw);
+		}
+	}
+	
+	public void check(String[] args, User user, Member member, PandaMessageEvent event, String raw) {
+		for (BaseCommand baseCommand : this.map.values()) {
+			List<String> commands = new ArrayList<>();
+			
+			commands.add(baseCommand.getCommand());
+			if (baseCommand.getAlias() != null && baseCommand.getAlias().size() >= 1) {
+				commands.addAll(baseCommand.getAlias());
+			}
+			
+			switch (baseCommand.getType()) {
+			case EqualsIgnoreCase:
+				for (String command : commands) {
+					if (args[0].equalsIgnoreCase(command)) {
+						this.execute(baseCommand, user, member, event, raw, args);
 					}
-					break;
-				case StartsWith:
-					for (String command : commands) {
-						if (args[0].toLowerCase().startsWith(command.toLowerCase())) {
-							this.execute(baseCommand, user, member, event, raw, args);
-						}
-					}
-					break;
-				default:
-					break;
 				}
+				break;
+			case StartsWith:
+				for (String command : commands) {
+					if (args[0].toLowerCase().startsWith(command.toLowerCase())) {
+						this.execute(baseCommand, user, member, event, raw, args);
+					}
+				}
+				break;
+			default:
+				break;
 			}
 		}
 	}
 	
-	public void execute(BaseCommand baseCommand, User user, Member member, MessageReceivedEvent event, String raw, String[] args) {
+	public void execute(BaseCommand baseCommand, User user, Member member, PandaMessageEvent event, String raw, String[] args) {
 		if (baseCommand.getPermission().equals(CommandPermission.BotOwner) && !this.instance.isBotOwner(user)) {
 			return;
 		}

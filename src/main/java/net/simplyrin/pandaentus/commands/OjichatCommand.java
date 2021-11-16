@@ -5,12 +5,12 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.httpclient.HttpClient;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -39,7 +39,12 @@ public class OjichatCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "おじさん構文。";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 	
 	@Override
@@ -58,7 +63,7 @@ public class OjichatCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 
 		MessageChannel channel = event.getChannel();
@@ -101,10 +106,14 @@ public class OjichatCommand implements BaseCommand {
 		embedBuilder.setColor(Color.GREEN);
 		embedBuilder.setDescription(result);
 
-		if (normalText) {
-			channel.sendMessage(result).complete();
+		if (event.isSlashCommand()) {
+			event.reply(embedBuilder.build());
 		} else {
-			channel.sendMessage(embedBuilder.build()).complete();
+			if (normalText) {
+				channel.sendMessage(result).complete();
+			} else {
+				channel.sendMessage(embedBuilder.build()).complete();
+			}
 		}
 		return;
 	}

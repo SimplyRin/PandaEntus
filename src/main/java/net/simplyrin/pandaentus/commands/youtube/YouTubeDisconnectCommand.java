@@ -3,13 +3,12 @@ package net.simplyrin.pandaentus.commands.youtube;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2021/11/04.
@@ -40,6 +39,11 @@ public class YouTubeDisconnectCommand implements BaseCommand {
 	public String getDescription() {
 		return "Bot を VC から切断";
 	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
+	}
 
 	@Override
 	public List<String> getAlias() {
@@ -57,18 +61,19 @@ public class YouTubeDisconnectCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		Guild guild = event.getGuild();
 		
 		VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 		if (voiceChannel == null) {
-			channel.sendMessage("ボイスチャンネルに接続してください。").complete();
+			event.reply("ボイスチャンネルに接続してください。");
 			return;
 		}
 
 		instance.getGuildAudioPlayer(guild).getPlayer().destroy();
 		guild.getAudioManager().closeAudioConnection();
+		
+		event.reply("切断しました。");
 	}
 
 }

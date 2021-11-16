@@ -4,11 +4,11 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.gamemanager.AkinatorManager;
 import net.simplyrin.pandaentus.utils.ThreadPool;
 
@@ -39,7 +39,12 @@ public class AkinatorCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return null;
+		return "アキネーターに接続";
+	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
 	}
 	
 	@Override
@@ -58,11 +63,13 @@ public class AkinatorCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		MessageChannel channel = event.getChannel();
 
-		channel.sendMessage("**アキネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**").complete();
-		channel.sendTyping().complete();
+		String message = "**アキネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**";
+		
+		event.reply(message);
+		
 		ThreadPool.run(() -> {
 			instance.getAkiMap().put(channel.getId(), new AkinatorManager(event.getGuild(), channel.getId()));
 			AkinatorManager am = instance.getAkiMap().get(channel.getId());

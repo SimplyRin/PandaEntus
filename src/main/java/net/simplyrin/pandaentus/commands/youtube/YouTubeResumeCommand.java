@@ -5,14 +5,13 @@ import java.util.List;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
+import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
  * Created by SimplyRin on 2021/11/04.
@@ -43,6 +42,11 @@ public class YouTubeResumeCommand implements BaseCommand {
 	public String getDescription() {
 		return "一時停止してる曲を再生";
 	}
+	
+	@Override
+	public boolean isAllowedToRegisterSlashCommand() {
+		return true;
+	}
 
 	@Override
 	public List<String> getAlias() {
@@ -60,26 +64,25 @@ public class YouTubeResumeCommand implements BaseCommand {
 	}
 
 	@Override
-	public void execute(PandaEntus instance, MessageReceivedEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		Guild guild = event.getGuild();
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 		
 		VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 		if (voiceChannel == null) {
-			channel.sendMessage("ボイスチャンネルに接続してください。").complete();
+			event.reply("ボイスチャンネルに接続してください。");
 			return;
 		}
 		
 		AudioTrack audioTrack = musicManager.getPlayer().getPlayingTrack();
 		if (audioTrack == null) {
 			BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
-			channel.sendMessage("現在何も再生していません。\n" + playCommand.getCommand() + " コマンドを利用して音楽を再生することができます。").complete();
+			event.reply("現在何も再生していません。\n" + playCommand.getCommand() + " コマンドを利用して音楽を再生することができます。");
 			return;
 		}
 		
 		musicManager.getPlayer().setPaused(false);
-		channel.sendMessage("一時停止している曲を再生します。").complete();
+		event.reply("一時停止している曲を再生します。");
 	}
 
 }
