@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -51,7 +52,8 @@ public class UptimeCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("uptime", this.getDescription());
+		return new CommandData("uptime", this.getDescription())
+				.addOption(OptionType.USER, "ユーザー", "指定したユーザーの通話時間を確認");
 	}
 	
 	@Override
@@ -84,9 +86,17 @@ public class UptimeCommand implements BaseCommand {
 			event.reply(embedBuilder.build());
 			return;
 		}
+		
+		if (event.isSlashCommand()) {
+			var s = event.getSlashCommandEvent();
+			
+			args = new String[2];
+			args[0] = this.getCommand();
+			args[1] = s.getOption("ユーザー") != null ? s.getOption("ユーザー").getAsString() : event.getUser().getId();
+		}
 
 		if (args.length > 1) {
-			String id = args[1].replace("<@", "").replace(">", "");
+			String id = args[1].replace("<", "").replace("<", "").replace("@", "").replace("!", "");
 
 			if (id.length() != 18) {
 				id = user.getId();

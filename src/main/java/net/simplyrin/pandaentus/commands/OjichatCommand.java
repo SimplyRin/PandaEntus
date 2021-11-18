@@ -68,12 +68,20 @@ public class OjichatCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
+		
+		if (event.isSlashCommand()) {
+			var s = event.getSlashCommandEvent();
+			
+			args = new String[2];
+			args[0] = this.getCommand();
+			args[1] = s.getOption("名前") != null ? s.getOption("名前").getAsString() : "";
+		}
 
 		MessageChannel channel = event.getChannel();
 
 		String name = "";
 		for (int i = 1; i < args.length; i++) {
-			name = name + args[i] + " ";
+			name += args[i] + " ";
 		}
 
 		boolean normalText = false;

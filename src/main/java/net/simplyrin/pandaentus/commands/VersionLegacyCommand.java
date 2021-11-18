@@ -1,19 +1,20 @@
 package net.simplyrin.pandaentus.commands;
 
+import java.awt.Color;
 import java.util.List;
+import java.util.Scanner;
 
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.PandaMessageEvent;
+import net.simplyrin.pandaentus.utils.Version;
 
 /**
- * Created by SimplyRin on 2020/07/17.
+ * Created by SimplyRin on 2020/07/09.
  *
  * Copyright (C) 2020 SimplyRin
  *
@@ -30,22 +31,21 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class IconCommand implements BaseCommand {
+public class VersionLegacyCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!icon";
+		return "!version_legacy";
 	}
 	
 	@Override
 	public String getDescription() {
-		return "アカウントのアイコンを表示";
+		return "PandaEntus のバージョンを確認";
 	}
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("icon", this.getDescription())
-				.addOption(OptionType.USER, "ユーザー", "指定したユーザーのアイコンを表示", true);
+		return null;
 	}
 	
 	@Override
@@ -65,33 +65,48 @@ public class IconCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
-		
-		if (event.isSlashCommand()) {
-			var s = event.getSlashCommandEvent();
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+
+		embedBuilder.setColor(Color.GREEN);
+		embedBuilder.addField("Version:", Version.BUILD_TIME, true);
+		embedBuilder.addField("Server uptime", this.getUptime(instance), true);
+
+		event.reply(embedBuilder.build());
+		return;
+	}
+	
+	public String getUptime(PandaEntus instance) {
+		String uptime = "unknown";
+
+		Runtime runtime = Runtime.getRuntime();
+		Process process = null;
+		try {
+			process = runtime.exec(new String[] {"uptime", "-p"});
 			
-			args = new String[2];
-			args[0] = this.getCommand();
-			args[1] = s.getOption("ユーザー") != null ? s.getOption("ユーザー").getAsString() : event.getUser().getId();
-		}
+			Scanner scanner = new Scanner(process.getInputStream());
+			if (scanner.hasNext()) {
+				uptime = scanner.nextLine();
 
-		if (args.length > 1) {
-			String id = args[1];
-			id = id.replace("@", "");
-			id = id.replace("<", "");
-			id = id.replace(">", "");
-			id = id.replace("!", "");
+				uptime = uptime.replace("up ", "");
+				uptime = uptime.replace(",", "");
+				uptime = uptime.replace(" years", "年");
+				uptime = uptime.replace(" year", "年");
 
-			Member member = event.getGuild().getMemberById(id);
-			if (member != null) {
-				channel.sendMessage(member.getUser().getAvatarUrl()).complete();
-			} else {
-				channel.sendMessage("ユーザーが見つかりませんでした。").complete();
+				uptime = uptime.replace(" weeks", "週間");
+				uptime = uptime.replace(" week", "週間");
+				uptime = uptime.replace(" days", "日");
+				uptime = uptime.replace(" day", "日");
+				uptime = uptime.replace(" hours", "時間");
+				uptime = uptime.replace(" hour", "時間");
+				uptime = uptime.replace(" minutes", "分");
+				uptime = uptime.replace(" minute", "分");
 			}
-			return;
+			scanner.close();
+		} catch (Exception e) {
+			instance.postError(e);
 		}
-
-		event.reply("使用方法: !icon <ユーザーID|メンション>");
+		
+		return uptime;
 	}
 
 }

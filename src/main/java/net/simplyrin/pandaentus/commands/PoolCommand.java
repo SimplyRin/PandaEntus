@@ -113,6 +113,10 @@ public class PoolCommand implements BaseCommand {
 					break;
 				}
 				size = i;
+				if (args[i] == null) {
+					continue;
+				}
+
 				embedBuilder.addField(String.valueOf(i), instance.getPoolItems().getItem(args[i]), true);
 			}
 

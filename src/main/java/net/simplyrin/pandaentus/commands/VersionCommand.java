@@ -1,10 +1,14 @@
 package net.simplyrin.pandaentus.commands;
 
-import java.awt.Color;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary;
+
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -14,7 +18,7 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.utils.Version;
 
 /**
- * Created by SimplyRin on 2020/07/09.
+ * Created by SimplyRin on 2020/07/13.
  *
  * Copyright (C) 2020 SimplyRin
  *
@@ -40,7 +44,7 @@ public class VersionCommand implements BaseCommand {
 	
 	@Override
 	public String getDescription() {
-		return "PandaEntus のバージョンを確認";
+		return "Bot の詳細情報を表示";
 	}
 	
 	@Override
@@ -50,7 +54,7 @@ public class VersionCommand implements BaseCommand {
 	
 	@Override
 	public List<String> getAlias() {
-		return null;
+		return Arrays.asList("stats");
 	}
 
 	@Override
@@ -65,46 +69,39 @@ public class VersionCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-		EmbedBuilder embedBuilder = new EmbedBuilder();
-
-		embedBuilder.setColor(Color.GREEN);
-		embedBuilder.addField("Version:", Version.BUILD_TIME, true);
-
-		String uptime = "unknown";
-
+		Date date = instance.getStartupDate();
 		Runtime runtime = Runtime.getRuntime();
-		Process process = null;
-		try {
-			process = runtime.exec(new String[] {"uptime", "-p"});
-		} catch (Exception e) {
-			instance.postError(e);
-			embedBuilder.setDescription("エラーが発生しました。");
-			event.reply(embedBuilder.build());
-			return;
-		}
-		Scanner scanner = new Scanner(process.getInputStream());
-		if (scanner.hasNext()) {
-			uptime = scanner.nextLine();
+		JDA jda = instance.getJda();
 
-			uptime = uptime.replace("up ", "");
-			uptime = uptime.replace(",", "");
-			uptime = uptime.replace(" years", "年");
-			uptime = uptime.replace(" year", "年");
+		String startup = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(date);
 
-			uptime = uptime.replace(" weeks", "週間");
-			uptime = uptime.replace(" week", "週間");
-			uptime = uptime.replace(" days", "日");
-			uptime = uptime.replace(" day", "日");
-			uptime = uptime.replace(" hours", "時間");
-			uptime = uptime.replace(" hour", "時間");
-			uptime = uptime.replace(" minutes", "分");
-			uptime = uptime.replace(" minute", "分");
-		}
-		scanner.close();
-		embedBuilder.addField("Server uptime", uptime, true);
+		String message = "```";
+		message += "PandaEntus 起動日: " + startup + "\n";
+		message += "PandaEntus 稼働日: " + instance.getUptime(date) + "\n\n";
+		
+		VersionLegacyCommand vlc = (VersionLegacyCommand) instance.getCommandRegister().getRegisteredCommand(VersionCommand.class);
+		
+		message += "サーバー起動日: " + vlc.getUptime(instance) + "\n";
+		message += "利用可能コア数: " + runtime.availableProcessors() + "\n\n";
 
-		event.reply(embedBuilder.build());
-		return;
+		message += "メモリ空き状態:\n";
+		message += "  空き状態: " + instance.formatSize(runtime.freeMemory()) + "\n";
+		message += "  使用容量: " + instance.formatSize(runtime.totalMemory()) + "\n";
+		message += "  最大容量: " + (runtime.maxMemory() == Long.MAX_VALUE ? "無制限" : instance.formatSize(runtime.maxMemory())) + "\n\n";
+
+		message += "サーバー情報:\n";
+		message += "  サーバー数: " + jda.getGuilds().size() + "\n";
+		message += "  テキストチャンネル数: " + jda.getTextChannels().size() + "\n";
+		message += "  ボイスチャンネル数: " + jda.getVoiceChannels().size() + "\n";
+		message += "  ユーザー数: " + jda.getUsers().size() + "\n\n";
+
+		message += "バージョン情報:\n";
+		message += "  Java: " + System.getProperty("java.version") + "\n";
+		message += "  PandaEntus: " + Version.POMVERSION + " (" + Version.BUILD_TIME + ")\n";
+		message += "  JDA: " + JDAInfo.VERSION + "\n";
+		message += "  LavaPlayer: " + PlayerLibrary.VERSION;
+
+		event.reply(message + "```");
 	}
 
 }

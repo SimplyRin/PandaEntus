@@ -84,10 +84,5 @@ public class PandaMessageEvent {
 		return new PandaMessageEvent(event.getUser(), event.getChannel(), event.getChannelType(), event.getGuild(), event.getJDA(), 
 				null, event.getMember(), true, event, event.deferReply());
 	}
-	
-	@Getter
-	public class PandaReply {
-		private Message message;
-	}
 
 }
