@@ -7,8 +7,8 @@ import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -94,7 +94,7 @@ public class Listener extends ListenerAdapter {
 		Member member = event.getMember();
 		Guild guild = event.getGuild();
 
-		Category category = this.instance.getTextChannelCategory(guild);
+		Category category = this.instance.getVoiceChannelCategory(guild);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
 		boolean hasMember = false;
@@ -153,7 +153,7 @@ public class Listener extends ListenerAdapter {
 
 		if (voiceChannels.size() == count) {
 			int c = (count + 1);
-			category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-" + c).setUserlimit(99).complete();
+			category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-" + c).setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
 		}
 	}
 
@@ -220,8 +220,11 @@ public class Listener extends ListenerAdapter {
 
 		if (voiceChannels.size() == count) {
 			try {
-				GuildChannel guildChannel = (GuildChannel) category.getChannels().get(1);
-				Date time = Date.from(guildChannel.getTimeCreated().toInstant());
+				System.out.println("Category: " + category.getName());
+				System.out.println("Size: " + category.getVoiceChannels().size());
+				
+				VoiceChannel voiceChannel = (VoiceChannel) category.getVoiceChannels().get(1);
+				Date time = Date.from(voiceChannel.getTimeCreated().toInstant());
 
 				Category textChannels = this.instance.getTextChannelCategory(guild);
 				TextChannel textChannel = (TextChannel) textChannels.getChannels().get(0);
@@ -278,16 +281,15 @@ public class Listener extends ListenerAdapter {
 
 			for (VoiceChannel voiceChannel : voiceChannels) {
 				try {
-					if (voiceChannel != null) {
+					if (voiceChannel != null && voiceChannel.getType().equals(ChannelType.VOICE)) {
 						voiceChannel.delete().complete();
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
-					// this.instance.postError(e);
+					this.instance.postError(e);
 				}
 			}
 
-			category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-1").setUserlimit(99).complete();
+			category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-1").setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
 		}
 	}
 

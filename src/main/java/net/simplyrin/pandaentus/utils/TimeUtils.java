@@ -76,12 +76,21 @@ public class TimeUtils {
 
 		private int totalTime = 0;
 		private long joined = 0;
+		
+		private boolean alreadyJoined = false;
 
 		public void join() {
+			if (this.alreadyJoined) {
+				return;
+			}
+			
+			this.alreadyJoined = true;
 			this.joined = System.currentTimeMillis();
 		}
 
 		public void quit() {
+			this.alreadyJoined = false;
+			
 			if (this.joined == 0) {
 				return;
 			}

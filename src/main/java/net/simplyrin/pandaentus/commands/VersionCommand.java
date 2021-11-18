@@ -100,8 +100,10 @@ public class VersionCommand implements BaseCommand {
 		message += "  PandaEntus: " + Version.POMVERSION + " (" + Version.BUILD_TIME + ")\n";
 		message += "  JDA: " + JDAInfo.VERSION + "\n";
 		message += "  LavaPlayer: " + PlayerLibrary.VERSION;
+		
+		message += "```";
 
-		event.reply(message + "```");
+		event.reply(message);
 	}
 
 }
