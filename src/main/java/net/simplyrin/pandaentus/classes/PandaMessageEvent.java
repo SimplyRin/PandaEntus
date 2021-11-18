@@ -45,7 +45,6 @@ public class PandaMessageEvent {
 	private Message message;
 	private Member member;
 
-	private boolean slashCommand;
 	private SlashCommandEvent slashCommandEvent;
 	private ReplyAction replyAction;
 
@@ -54,7 +53,7 @@ public class PandaMessageEvent {
 	}
 	
 	public Message reply(String message) {
-		if (this.slashCommand) {
+		if (this.isSlashCommand()) {
 			return this.replyAction.setContent(message).complete().retrieveOriginal().complete();
 		} else {
 			this.channel.sendTyping().complete();
@@ -67,7 +66,7 @@ public class PandaMessageEvent {
 	}
 	
 	public Message reply(MessageEmbed embed) {
-		if (this.slashCommand) {
+		if (this.isSlashCommand()) {
 			return this.replyAction.addEmbeds(embed).complete().retrieveOriginal().complete();
 		} else {
 			this.channel.sendTyping().complete();
@@ -75,14 +74,18 @@ public class PandaMessageEvent {
 		}
 	}
 	
+	public boolean isSlashCommand() {
+		return this.slashCommandEvent != null;
+	}
+	
 	public static PandaMessageEvent get(MessageReceivedEvent event) {
 		return new PandaMessageEvent(event.getAuthor(), event.getChannel(), event.getChannelType(), event.getGuild(), event.getJDA(), 
-				event.getMessage(), event.getMember(), false, null, null);
+				event.getMessage(), event.getMember(), null, null);
 	}
 	
 	public static PandaMessageEvent get(SlashCommandEvent event) {
 		return new PandaMessageEvent(event.getUser(), event.getChannel(), event.getChannelType(), event.getGuild(), event.getJDA(), 
-				null, event.getMember(), true, event, event.deferReply());
+				null, event.getMember(), event, event.deferReply());
 	}
 
 }
