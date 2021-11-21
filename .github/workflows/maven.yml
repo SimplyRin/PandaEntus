@@ -20,9 +20,10 @@ jobs:
       with:
         name: dist-without-markdown
         path: |
-          /home/runner/work/PandaEntus/PandaEntus/traget/*.jar
+          target/PandaEntus-*.jar
     - name: Archive code coverage results
       uses: actions/upload-artifact@v2
       with:
         name: code-coverage-report
-        path: /home/runner/work/PandaEntus/PandaEntus/traget/*.jar
+        path: |
+          target/PandaEntus-*.jar
