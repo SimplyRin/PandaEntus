@@ -79,7 +79,7 @@ public class VersionCommand implements BaseCommand {
 		message += "PandaEntus 起動日: " + startup + "\n";
 		message += "PandaEntus 稼働日: " + instance.getUptime(date) + "\n\n";
 		
-		VersionLegacyCommand vlc = (VersionLegacyCommand) instance.getCommandRegister().getRegisteredCommand(VersionCommand.class);
+		VersionLegacyCommand vlc = (VersionLegacyCommand) instance.getCommandRegister().getRegisteredCommand(VersionLegacyCommand.class);
 		
 		message += "サーバー起動日: " + vlc.getUptime(instance) + "\n";
 		message += "利用可能コア数: " + runtime.availableProcessors() + "\n\n";

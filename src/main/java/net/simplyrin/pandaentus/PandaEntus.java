@@ -153,6 +153,12 @@ public class PandaEntus {
 		}
 
 		this.config = Config.getConfig(file);
+		
+		// パス再設定
+		if (this.config.getString("Bot.Restart-Script", null) == null) {
+			this.config.set("Bot.Restart-Script", "start.sh");
+		}
+		
 		this.timeManager = new TimeManager(this);
 		this.poolItems = new PoolItems(this);
 		this.timeUtils = new TimeUtils();
