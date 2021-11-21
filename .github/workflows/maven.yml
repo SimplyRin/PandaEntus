@@ -20,3 +20,33 @@ jobs:
       with:
         name: PandaEntus Artifacts
         path: target/PandaEntus-*.jar
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset - Jar
+      id: upload-release-asset-linux 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./target/PandaEntus-1.3.jar
+        asset_name: PandaEntus-1.3.jar
+        asset_content_type: application/java-archive
+    - name: Upload Release Asset - Jar With Dependencies
+      id: upload-release-asset-linux 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./target/PandaEntus-1.3-jar-with-dependencies.jar
+        asset_name: PandaEntus-1.3-jar-with-dependencies.jar
+        asset_content_type: application/java-archive
