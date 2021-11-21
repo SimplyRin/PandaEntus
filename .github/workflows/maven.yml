@@ -31,7 +31,7 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload Release Asset - Jar
-      id: upload-release-asset-linux 
+      id: upload-release-asset-jar
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,7 +41,7 @@ jobs:
         asset_name: PandaEntus-1.3.jar
         asset_content_type: application/java-archive
     - name: Upload Release Asset - Jar With Dependencies
-      id: upload-release-asset-linux 
+      id: upload-release-asset-jar-with-dependencies
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
