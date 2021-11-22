@@ -30,7 +30,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: "$GITHUB_HASH"
-        release_name: Release ${{ $GITHUB_HASH }}
+        release_name: "Release $GITHUB_HASH"
         draft: false
         prerelease: false
     - name: Upload Release Asset - Jar
