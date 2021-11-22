@@ -107,7 +107,7 @@ public class UpdateCommand implements BaseCommand {
 				File now = new File("PandaEntus-1.3-jar-with-dependencies.jar");
 				if (now.delete()) {
 					file.renameTo(now);
-					message.editMessage("PandaEntus を更新しました。再起動してください。");
+					message.editMessage("PandaEntus を更新しました。再起動してください。").complete();
 				} else {
 					message.editMessage("更新に失敗しました。Bot を停止して " + file.getName() + " を " + now.getName() + " に置き換えて使用してください。").complete();
 				}
