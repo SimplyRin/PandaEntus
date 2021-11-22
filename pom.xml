@@ -130,11 +130,6 @@
 
   <repositories>
     <repository>
-      <id>jcenter</id>
-      <name>jcenter-bintray</name>
-      <url>https://jcenter.bintray.com</url>
-    </repository>
-    <repository>
       <id>net.simplyrin</id>
       <name>api</name>
       <url>https://api.simplyrin.net/maven/</url>

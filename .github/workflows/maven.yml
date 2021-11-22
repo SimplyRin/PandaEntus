@@ -20,19 +20,21 @@ jobs:
       with:
         name: PandaEntus Artifacts
         path: target/PandaEntus-*.jar
-    - name: Get Hash
-      id: hash
-      run: echo "git_hash=$(git rev-parse --short '$GITHUB_SHA')" >> $GITHUB_HASH
+    - name: Set outputs
+      id: vars
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+    - name: Check outputs
+      run: echo ${{ steps.vars.outputs.sha_short }}
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "$GITHUB_HASH"
-        release_name: "Release $GITHUB_HASH"
+        tag_name: "${{ steps.vars.outputs.sha_short }}"
+        release_name: "Release ${{ steps.vars.outputs.sha_short }}"
         draft: false
-        prerelease: false
+        prerelease: true
     - name: Upload Release Asset - Jar
       id: upload-release-asset-jar
       uses: actions/upload-release-asset@v1
