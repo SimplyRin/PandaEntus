@@ -228,7 +228,7 @@ public class PandaEntus {
 		AudioSourceManagers.registerRemoteSources(this.playerManager);
 		AudioSourceManagers.registerLocalSource(this.playerManager);
 
-		this.jda.getPresence().setActivity(Activity.playing("Try !help"));
+		this.jda.getPresence().setActivity(Activity.playing("🐼"));
 
 		this.addShutdownHook(() -> {
 			jda.shutdown();

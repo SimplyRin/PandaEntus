@@ -97,7 +97,7 @@ public class VersionCommand implements BaseCommand {
 
 		message += "バージョン情報:\n";
 		message += "  Java: " + System.getProperty("java.version") + "\n";
-		message += "  PandaEntus: " + Version.POMVERSION + " (" + Version.BUILD_TIME + ")\n";
+		message += "  PandaEntus: " + Version.SHA + "\n";
 		message += "  JDA: " + JDAInfo.VERSION + "\n";
 		message += "  LavaPlayer: " + PlayerLibrary.VERSION;
 		

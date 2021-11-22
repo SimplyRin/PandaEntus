@@ -99,6 +99,10 @@
               <token>@pomversion@</token>
               <value>${project.version}</value>
             </replacement>
+            <replacement>
+              <token>@commitId@</token>
+              <value>${SHA}</value>
+            </replacement>
           </replacements>
         </configuration>
       </plugin>
