@@ -88,7 +88,7 @@ public class DiskCommand implements BaseCommand {
 		embedBuilder.addField("Size", instance.formatSize(totalSpace), true);
 		embedBuilder.addField("Used", instance.formatSize(usedSpace), true);
 		embedBuilder.addField("Free", instance.formatSize(usableSpace), true);
-		channel.sendMessage(embedBuilder.build()).complete();
+		channel.sendMessageEmbeds(embedBuilder.build()).complete();
 	}
 
 }

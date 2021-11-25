@@ -77,7 +77,7 @@ public class AkinatorCommand implements BaseCommand {
 
 			EmbedBuilder embedBuilder = new EmbedBuilder();
 			am.setEmbed(embedBuilder);
-			String latestId = channel.sendMessage(embedBuilder.build()).complete().getId();
+			String latestId = channel.sendMessageEmbeds(embedBuilder.build()).complete().getId();
 			am.setLatestMessageId(latestId);
 		});
 	}

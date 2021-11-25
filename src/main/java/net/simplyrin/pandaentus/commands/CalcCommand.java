@@ -72,7 +72,7 @@ public class CalcCommand implements BaseCommand {
 		if (input.length() == 0) {
 			embedBuilder.setColor(Color.RED);
 			embedBuilder.setDescription("使用方法: =<計算式>\n=1+1");
-			channel.sendMessage(embedBuilder.build()).complete();
+			channel.sendMessageEmbeds(embedBuilder.build()).complete();
 			return;
 		}
 

@@ -123,7 +123,7 @@ public class OjichatCommand implements BaseCommand {
 			if (normalText) {
 				channel.sendMessage(result).complete();
 			} else {
-				channel.sendMessage(embedBuilder.build()).complete();
+				channel.sendMessageEmbeds(embedBuilder.build()).complete();
 			}
 		}
 		return;

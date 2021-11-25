@@ -85,7 +85,7 @@ public class SetGameCommand implements BaseCommand {
 
 				embedBuilder.setColor(Color.RED);
 				embedBuilder.setDescription("Reset");
-				channel.sendMessage(embedBuilder.build()).complete();
+				channel.sendMessageEmbeds(embedBuilder.build()).complete();
 				return;
 			}
 
@@ -93,13 +93,13 @@ public class SetGameCommand implements BaseCommand {
 
 			embedBuilder.setColor(Color.GREEN);
 			embedBuilder.setDescription("Playing game has been set to '" + game + "'!");
-			channel.sendMessage(embedBuilder.build()).complete();
+			channel.sendMessageEmbeds(embedBuilder.build()).complete();
 			return;
 		}
 
 		embedBuilder.setColor(Color.RED);
 		embedBuilder.setDescription("Usage: !setgame <game>");
-		channel.sendMessage(embedBuilder.build()).complete();
+		channel.sendMessageEmbeds(embedBuilder.build()).complete();
 		return;
 	}
 

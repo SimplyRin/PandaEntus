@@ -8,6 +8,8 @@ import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.PandaMessageEvent;
+import net.simplyrin.processmanager.Callback;
+import net.simplyrin.processmanager.ProcessManager;
 
 /**
  * Created by SimplyRin on 2021/11/21.
@@ -73,9 +75,28 @@ public class RestartCommand implements BaseCommand {
 						try {
 							boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 							
-							System.out.println("Restarting... isWindows: " + isWindows);
+							System.out.println("Restarting with " + brs + " isWindows: " + isWindows);
+							String cmd = (isWindows ? "cmd /c start " : "/bin/sh ") + brs;
+							System.out.println("Command: " + cmd);
 							
-							Runtime.getRuntime().exec((isWindows ? "cmd /c start " : "sh ") + brs);
+							String[] command = null;
+							if (isWindows) {
+								command = new String[] { "cmd", "/c", "start", brs };
+							} else {
+								command = new String[] { "/bin/bash", brs };
+							}
+
+							ProcessManager.runCommand(command, new Callback() {
+								@Override
+								public void line(String line) {
+									System.out.println(line);
+								}
+								
+								@Override
+								public void processEnded() {
+									System.out.println("Process ended.");
+								}
+							}, false);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

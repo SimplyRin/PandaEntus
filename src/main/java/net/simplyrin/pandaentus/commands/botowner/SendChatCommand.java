@@ -83,7 +83,7 @@ public class SendChatCommand implements BaseCommand {
 
 		embedBuilder.setColor(Color.RED);
 		embedBuilder.setDescription("Usage: !sendchat <channelId> <message>");
-		event.getChannel().sendMessage(embedBuilder.build()).complete();
+		event.getChannel().sendMessageEmbeds(embedBuilder.build()).complete();
 		return;
 	}
 

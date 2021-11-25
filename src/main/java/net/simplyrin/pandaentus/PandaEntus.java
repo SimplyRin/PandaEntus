@@ -117,6 +117,17 @@ public class PandaEntus {
 		rinStream.setSaveLog(true);
 		rinStream.setEnableColor(true);
 		rinStream.setEnableTranslateColor(true);
+		
+		if (Version.SHA.equals("")) {
+			System.out.println("あなたは現在開発者ビルドを使用しています。");
+			System.out.println("PandaEntus の公式ビルドは GitHub からダウンロードすることができます。");
+			System.out.println("GitHub: https://github.com/SimplyRin/PandaEntus");
+			
+			try {
+				Thread.sleep(1000);
+			} catch (Exception e) {
+			}
+		}
 
 		if (args.length > 0 && args[0].equalsIgnoreCase("-tail")) {
 			rinStream.tail();
@@ -581,7 +592,7 @@ public class PandaEntus {
 	}
 
 	public synchronized GuildMusicManager getGuildAudioPlayer(Guild guild) {
-		long guildId = Long.parseLong(guild.getId());
+		long guildId = guild.getIdLong();
 		GuildMusicManager musicManager = this.musicManagers.get(guildId);
 
 		if (musicManager == null) {
@@ -601,10 +612,10 @@ public class PandaEntus {
 	}
 
 	public void skipTrack(Guild guild, MessageChannel channel) {
-		GuildMusicManager musicManager = getGuildAudioPlayer(guild);
+		GuildMusicManager musicManager = this.getGuildAudioPlayer(guild);
 		musicManager.getScheduler().nextTrack();
 
-		channel.sendMessage("次の曲にスキップします。").queue();
+		// channel.sendMessage("次の曲にスキップします。").queue();
 	}
 
 	public int durationToTime(String duration) {

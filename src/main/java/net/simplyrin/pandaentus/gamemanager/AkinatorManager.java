@@ -130,7 +130,7 @@ public class AkinatorManager extends ListenerAdapter {
 
 			this.akiWrapper.undoAnswer();
 
-			textChannel.sendMessage(this.setEmbed(null).build()).complete();
+			textChannel.sendMessageEmbeds(this.setEmbed(null).build()).complete();
 			return null;
 		case "やめる":
 		case "8":
@@ -201,7 +201,7 @@ public class AkinatorManager extends ListenerAdapter {
 						embedBuilder.addField("違うので続ける...", "2", true);
 
 						this.checkEnd = true;
-						channel.sendMessage(embedBuilder.build()).complete();
+						channel.sendMessageEmbeds(embedBuilder.build()).complete();
 					}
 				}
 
@@ -215,7 +215,7 @@ public class AkinatorManager extends ListenerAdapter {
 					this.akiWrapper.answerCurrentQuestion(answer);
 
 					this.setEmbed(embedBuilder);
-					channel.sendMessage(embedBuilder.build()).complete();
+					channel.sendMessageEmbeds(embedBuilder.build()).complete();
 				}
 			}
 		});

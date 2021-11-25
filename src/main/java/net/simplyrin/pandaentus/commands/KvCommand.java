@@ -87,7 +87,7 @@ public class KvCommand implements BaseCommand {
 		if (member.getVoiceState() == null && member.getVoiceState().getChannel() == null) {
 			embedBuilder.setColor(Color.RED);
 			embedBuilder.setDescription("ボイスチャンネルに接続してください！");
-			channel.sendMessage(embedBuilder.build()).complete();
+			channel.sendMessageEmbeds(embedBuilder.build()).complete();
 			return;
 		}
 
@@ -166,7 +166,7 @@ public class KvCommand implements BaseCommand {
 
 		embedBuilder.setColor(Color.RED);
 		embedBuilder.setDescription("使用方法: " + args[0] + " <ボイス>");
-		channel.sendMessage(embedBuilder.build()).complete();
+		channel.sendMessageEmbeds(embedBuilder.build()).complete();
 	}
 
 }

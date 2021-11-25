@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -85,9 +86,11 @@ public class CommandExecutor extends ListenerAdapter {
 	
 	@Override
 	public void onSlashCommand(SlashCommandEvent event) {
-		if (event.getGuild() == null) {
+		Guild guild = event.getGuild();
+		if (guild == null) {
 			return;
 		}
+		
 		Member member = event.getMember();
 		User user = event.getUser();
 		if (user.isBot()) {
@@ -99,7 +102,7 @@ public class CommandExecutor extends ListenerAdapter {
 		
 		args[0] = "!" + args[0];
 		
-		System.out.println(user.getName() + ": " + raw + " (" + args[0] + ")");
+		System.out.println(guild.getName() + "@" + guild.getIdLong() + ", " + user.getName() + ": " + raw + " (" + args[0] + ")");
 
 		if (args.length > 0) {
 			this.check(args, user, member, PandaMessageEvent.get(event), raw);

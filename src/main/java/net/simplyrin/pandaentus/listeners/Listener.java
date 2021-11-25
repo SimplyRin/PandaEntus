@@ -272,7 +272,7 @@ public class Listener extends ListenerAdapter {
 						textChannel = general.get(0);
 					}
 					
-					textChannel.sendMessage(embedBuilder.build()).complete();
+					textChannel.sendMessageEmbeds(embedBuilder.build()).complete();
 				}
 
 			} catch (Exception e) {

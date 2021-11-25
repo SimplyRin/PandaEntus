@@ -70,7 +70,7 @@ public class PandaMessageEvent {
 			return this.replyAction.addEmbeds(embed).complete().retrieveOriginal().complete();
 		} else {
 			this.channel.sendTyping().complete();
-			return this.channel.sendMessage(embed).complete();
+			return this.channel.sendMessageEmbeds(embed).complete();
 		}
 	}
 	

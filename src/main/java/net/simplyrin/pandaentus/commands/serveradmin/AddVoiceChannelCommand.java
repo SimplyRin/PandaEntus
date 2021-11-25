@@ -78,7 +78,7 @@ public class AddVoiceChannelCommand implements BaseCommand {
 			} catch (Exception e) {
 				embedBuilder.setColor(Color.RED);
 				embedBuilder.setDescription("Invalid usage!");
-				channel.sendMessage(embedBuilder.build()).complete();
+				channel.sendMessageEmbeds(embedBuilder.build()).complete();
 				return;
 			}
 
@@ -106,7 +106,7 @@ public class AddVoiceChannelCommand implements BaseCommand {
 
 			embedBuilder.setColor(Color.GREEN);
 			embedBuilder.setDescription("Created!");
-			channel.sendMessage(embedBuilder.build()).complete();
+			channel.sendMessageEmbeds(embedBuilder.build()).complete();
 			return;
 		}
 	}

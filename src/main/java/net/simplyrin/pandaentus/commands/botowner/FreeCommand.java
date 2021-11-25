@@ -115,7 +115,7 @@ public class FreeCommand implements BaseCommand {
 				embedBuilder.addField("Swap Total", this.swapTotal, true);
 				embedBuilder.addField("Swap Used", this.swapUsed, true);
 				embedBuilder.addField("Swap Free", this.swapFree, true);
-				channel.sendMessage(embedBuilder.build()).complete();
+				channel.sendMessageEmbeds(embedBuilder.build()).complete();
 			}
 		}, true);
 	}

@@ -131,7 +131,7 @@ public class YouTubePlayCommand implements BaseCommand {
 						BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
 						BaseCommand yt = instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
 						embedBuilder.setFooter("詳細: " + nowPlaying.getCommand() + ", コマンド一覧: " + yt.getCommand());
-						message.editMessage(embedBuilder.build()).complete();
+						message.editMessageEmbeds(embedBuilder.build()).complete();
 						instance.getPreviousTrack().put(guild.getIdLong(), track);
 						instance.play(guild, musicManager, track);
 					}

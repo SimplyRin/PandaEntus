@@ -100,7 +100,7 @@ public class ReactionListener extends ListenerAdapter {
 				embedBuilder.setAuthor("ファイルが準備できました。");
 				embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
 				embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
-				Message tempMessage = channel.sendFile(mp3).embed(embedBuilder.build()).complete();
+				Message tempMessage = channel.sendFile(mp3).setEmbeds(embedBuilder.build()).complete();
 
 				try {
 					Thread.sleep(1000 * 60 * 60 * 48);
@@ -119,7 +119,7 @@ public class ReactionListener extends ListenerAdapter {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		embedBuilder.setColor(Color.GREEN);
 		embedBuilder.setAuthor(user.getName() + " -> 処理中...", null, loadingUrl);
-		Message phase = channel.sendMessage(embedBuilder.build()).complete();
+		Message phase = channel.sendMessageEmbeds(embedBuilder.build()).complete();
 		
 		String youtubeDlPathTemp = "youtube-dl";
 		File youtubeDl = new File("youtube-dl");
@@ -166,12 +166,12 @@ public class ReactionListener extends ListenerAdapter {
 				if (!ok) {
 					embedBuilder.setColor(Color.RED);
 					embedBuilder.setAuthor(user.getName() + " -> 動画が長すぎます！", null, loadingUrl);
-					phase.editMessage(embedBuilder.build()).complete();
+					phase.editMessageEmbeds(embedBuilder.build()).complete();
 					return;
 				}
 
 				embedBuilder.setAuthor(user.getName() + " -> ダウンロードしています...", null, downloadingUrl);
-				phase.editMessage(embedBuilder.build()).complete();
+				phase.editMessageEmbeds(embedBuilder.build()).complete();
 				
 				
 				ProcessManager.runCommand(new String[] { youtubeDlPath, "--audio-format", "mp3", "--output", "./ytdl/" + videoId + ".%(ext)s", "-x", videoId }, new Callback() {
@@ -187,7 +187,7 @@ public class ReactionListener extends ListenerAdapter {
 					public void processEnded() {
 						instance.getConfig().set("YouTube." + videoId + ".Path", mp3.getAbsolutePath());
 						embedBuilder.setAuthor(user.getName() + " -> 送信しています...", null, uploadingUrl);
-						phase.editMessage(embedBuilder.build()).complete();
+						phase.editMessageEmbeds(embedBuilder.build()).complete();
 						if (mp3.exists()) {
 							EmbedBuilder embedBuilder = new EmbedBuilder();
 							embedBuilder.setColor(Color.GREEN);
@@ -195,7 +195,7 @@ public class ReactionListener extends ListenerAdapter {
 							
 							embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
 							embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
-							channel.sendFile(mp3).embed(embedBuilder.build()).complete();
+							channel.sendFile(mp3).setEmbeds(embedBuilder.build()).complete();
 							phase.delete().complete();
 
 						}
