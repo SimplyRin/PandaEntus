@@ -13,11 +13,12 @@ jobs:
       with:
         distribution: 'adopt'
         java-version: '16'
-    - name: Set outputs
+    - name: Checking commit sha
       id: vars
       run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-    - name: Check outputs
-      run: echo ${{ steps.vars.outputs.sha_short }}
+    - name: Setting up Release tag 
+      id: time
+      run: echo "::set-output name=tag_date::$(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M:%S')"
     - name: Build with Maven
       run: mvn clean package -DSHA=${{ steps.vars.outputs.sha_short }}
     - name: Upload Artifact
@@ -31,7 +32,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "${{ steps.vars.outputs.sha_short }}"
+        tag_name: "${{ steps.time.outputs.tag_date }}"
         release_name: "Release ${{ steps.vars.outputs.sha_short }}"
         draft: false
         prerelease: true
