@@ -32,3 +32,5 @@ src/main/java/net/simplyrin/pandaentus/utils/Version.java
 *.mkv
 *.exe
 *.txt
+*.traineddata
+*.png

@@ -286,6 +286,7 @@ public class Listener extends ListenerAdapter {
 					}
 				} catch (Exception e) {
 					this.instance.postError(e);
+					return;
 				}
 			}
 

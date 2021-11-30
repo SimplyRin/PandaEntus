@@ -257,7 +257,7 @@ public class PandaEntus {
 			list = guild.getCategoriesByName("テキストチャンネル", true);
 		}
 		
-		return list.get(0);
+		return list.size() > 0 ? list.get(0) : null;
 	}
 	
 	public Category getVoiceChannelCategory(Guild guild) {
@@ -266,7 +266,7 @@ public class PandaEntus {
 			list = guild.getCategoriesByName("ボイスチャンネル", true);
 		}
 		
-		return list.get(0);
+		return list.size() > 0 ? list.get(0) : null;
 	}
 	
 	public String getVoiceChannelName(Category category) {
