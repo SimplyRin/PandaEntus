@@ -75,6 +75,8 @@ public class UpdateCommand implements BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		String url = "https://api.github.com/repos/SimplyRin/PandaEntus/commits/master";
+		String commitUrl = "https://github.com/SimplyRin/PandaEntus/commit/";
+		
 		try {
 			HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
 			connection.addRequestProperty("user-agent", instance.getBotUserAgent());
@@ -86,11 +88,11 @@ public class UpdateCommand implements BaseCommand {
 			String currentSha = Version.SHA.length() == 0 ? "Development" : Version.SHA;
 			
 			if (latestSha.equalsIgnoreCase(currentSha)) {
-				event.reply("最新の PandaEntus 🐼 を利用しています。");
+				event.reply("最新の PandaEntus 🐼 を利用しています。\n" + commitUrl + currentSha);
 			} else {
 				event.reply("アップデートを確認しました。PandaEntus 🐼 を更新しています...。\n"
-						+ "現在のバージョン: **" + currentSha + "**\n"
-						+ "最新のバージョン: **" + latestSha + "**");
+						+ "現在のバージョン: **" + currentSha + "** ( " + commitUrl + currentSha + " )\n"
+						+ "最新のバージョン: **" + latestSha + "** ( " + commitUrl + latestSha + " )");
 				
 				// https://github.com/SimplyRin/PandaEntus/releases/download/fd46e5b/PandaEntus-1.3-jar-with-dependencies.jar
 				String downloadUrl = "https://github.com/SimplyRin/PandaEntus/releases/download/" + latestSha + "/PandaEntus-1.3-jar-with-dependencies.jar";
