@@ -23,7 +23,7 @@ jobs:
       id: buildtime
       run: echo "::set-output name=buildtime::$(TZ=Asia/Tokyo date '+%Y%m%d_%H%M%S')"
     - name: Build with Maven
-      run: mvn clean package -DSHA=${{ steps.sha.outputs.sha_short }} -build.time=${{ steps.buildtime.outputs.buildtime }}
+      run: mvn clean package -DSHA=${{ steps.sha.outputs.sha_short }} -Dbuild.time=${{ steps.buildtime.outputs.buildtime }}
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
