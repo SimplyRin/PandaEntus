@@ -2,6 +2,9 @@ package net.simplyrin.pandaentus.listeners;
 
 import java.awt.Color;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -84,7 +87,7 @@ public class ReactionListener extends ListenerAdapter {
 		
 		final String videoId = tempVideoId;
 		
-		System.out.println("Original: " + url + ", Repalced: " + videoId);
+		System.out.println("[YouTube Download Task] Original: " + url + ", Repalced: " + videoId);
 
 		final File file = new File("ytdl");
 		file.mkdirs();
@@ -133,8 +136,8 @@ public class ReactionListener extends ListenerAdapter {
 			@Override
 			public void line(String response) {
 				if (!response.toLowerCase().startsWith("error:")) {
-					System.out.println("Title: " + response);
-					instance.getConfig().set("YouTube." + videoId + ".Title", response);
+					System.out.println("[YouTube Download Task] Title: " + response);
+					instance.getConfig().set("YouTube." + videoId + ".Title", response.trim());
 				}
 			}
 		}, true);
@@ -143,27 +146,24 @@ public class ReactionListener extends ListenerAdapter {
 			@Override
 			public void line(String response) {
 				if (response.contains(":")) {
-					System.out.println("Duration: " + response);
-					instance.getConfig().set("YouTube." + videoId + ".Duration", response);
+					System.out.println("[YouTube Download Task] Duration: " + response);
+					instance.getConfig().set("YouTube." + videoId + ".Duration", response.trim());
 				}
-				boolean ok = false;
-				int seconds = 0;
+				long seconds = 0;
 				try {
-					if (response.contains(":")) {
-						String[] time = response.trim().split(":");
-						seconds += Integer.valueOf(time[0]);
-						seconds += Integer.valueOf(time[1]) * 60;
-					} else {
-						seconds += Integer.valueOf(response.trim());
-					}
+					DateFormat dateFormat = new SimpleDateFormat("mm:ss");
+				    Date reference = dateFormat.parse("00:00");
+				    Date date = dateFormat.parse(response.trim());
+				    seconds = (date.getTime() - reference.getTime()) / 1000L;
 				} catch (Exception e) {
-					
+					seconds = Integer.MAX_VALUE;
 				}
-				if (seconds <= 60 * 8) {
-					ok = true;
-				}
+				
+				int max = 60 * 8;
+				
+				System.out.println("[YouTube Download Task] Seconds: " + seconds + "s (Duration: " + response.trim() + ", Max: " + instance.formatMillis(max * 1000) + ")");
 
-				if (!ok) {
+				if (seconds >= max) {
 					embedBuilder.setColor(Color.RED);
 					embedBuilder.setAuthor(user.getName() + " -> 動画が長すぎます！", null, loadingUrl);
 					phase.editMessageEmbeds(embedBuilder.build()).complete();
@@ -173,13 +173,12 @@ public class ReactionListener extends ListenerAdapter {
 				embedBuilder.setAuthor(user.getName() + " -> ダウンロードしています...", null, downloadingUrl);
 				phase.editMessageEmbeds(embedBuilder.build()).complete();
 				
-				
-				ProcessManager.runCommand(new String[] { youtubeDlPath, "--audio-format", "mp3", "--output", "./ytdl/" + videoId + ".%(ext)s", "-x", videoId }, new Callback() {
+				ProcessManager.runCommand(new String[] { youtubeDlPath, "-f", "bestaudio", "--audio-format", "mp3", "--no-playlist", "--output", "./ytdl/" + videoId + ".%(ext)s", "-x", videoId }, new Callback() {
 					@Override
 					public void line(String response) {
 						if (response.startsWith("[ffmpeg] Destination:")) {
 							String title = response.replace("[ffmpeg] Destination:", "").replace("\"", "").trim();
-							System.out.println("Filename: " + title);
+							System.out.println("[YouTube Download Task] Filename: " + title);
 						}
 					}
 
