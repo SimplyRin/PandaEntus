@@ -1,4 +1,4 @@
-package net.simplyrin.pandaentus.commands;
+package net.simplyrin.pandaentus.commands.botowner;
 
 import java.awt.Color;
 import java.util.List;
@@ -60,7 +60,7 @@ public class CalcCommand implements BaseCommand {
 
 	@Override
 	public CommandPermission getPermission() {
-		return CommandPermission.Everyone;
+		return CommandPermission.BotOwner;
 	}
 
 	@Override
