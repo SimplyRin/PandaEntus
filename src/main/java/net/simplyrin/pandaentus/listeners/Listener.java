@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.PandaEntus;
+import net.simplyrin.pandaentus.commands.serveradmin.VoiceOnlyChatCommand;
 import net.simplyrin.pandaentus.utils.TimeUtils.CallTime;
 
 /**
@@ -48,16 +49,25 @@ public class Listener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
-		if (event.getMember().getUser().isBot()) {
+		var member = event.getMember();
+		
+		if (member.getUser().isBot()) {
 			return;
 		}
+		
+		// 通話参加者専用チャンネル管理
+		var voc = (VoiceOnlyChatCommand) this.instance.getCommandRegister().getRegisteredCommand(VoiceOnlyChatCommand.class);
+		voc.join(this.instance, member);
 
 		Guild guild = event.getGuild();
 		Category category = this.instance.getVoiceChannelCategory(guild);
+		
+		if (category == null) {
+			return;
+		}
+		
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 		Category parentCategory = event.getChannelJoined().getParent();
-
-		Member member = event.getMember();
 
 		System.out.println("[" + guild.getName() + "@" + guild.getId() + "] #" + event.getChannelJoined().getName() + " JOINED: " + this.getNickname(member) + "@" + member.getId());
 
@@ -84,6 +94,8 @@ public class Listener extends ListenerAdapter {
 			timeUtils.join();
 		}
 		System.out.println("Joined " + event.getChannelJoined().getName());
+		
+		
 	}
 
 	@Override
@@ -150,23 +162,32 @@ public class Listener extends ListenerAdapter {
 				count++;
 			}
 		}
-
-		if (voiceChannels.size() == count) {
-			int c = (count + 1);
-			category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-" + c).setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
+		
+		String path = "Server." + guild.getId() + ".DisableChannelManagement";
+		
+		if (!this.instance.getConfig().getBoolean(path)) {
+			if (voiceChannels.size() == count) {
+				int c = (count + 1);
+				category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-" + c).setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
+			}
 		}
 	}
 
 	@Override
 	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
+		var member = event.getMember();
+		
 		if (event.getMember().getUser().isBot()) {
 			return;
 		}
+		
+		// 通話参加者専用チャンネル管理
+		var voc = (VoiceOnlyChatCommand) this.instance.getCommandRegister().getRegisteredCommand(VoiceOnlyChatCommand.class);
+		voc.quit(this.instance, member);
+
 		Guild guild = event.getGuild();
 		Category category = this.instance.getVoiceChannelCategory(guild);
 		Category parentCategory = event.getChannelLeft().getParent();
-
-		Member member = event.getMember();
 
 		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getUser().getId());
 		timeUtils.quit();
@@ -278,19 +299,24 @@ public class Listener extends ListenerAdapter {
 			} catch (Exception e) {
 				this.instance.postError(e);
 			}
-
-			for (VoiceChannel voiceChannel : voiceChannels) {
-				try {
-					if (voiceChannel != null && voiceChannel.getType().equals(ChannelType.VOICE)) {
-						voiceChannel.delete().complete();
+			
+			String path = "Server." + guild.getId() + ".DisableChannelManagement";
+			
+			if (!this.instance.getConfig().getBoolean(path)) {
+				for (VoiceChannel voiceChannel : voiceChannels) {
+					try {
+						if (voiceChannel != null && voiceChannel.getType().equals(ChannelType.VOICE)) {
+							voiceChannel.delete().complete();
+						}
+					} catch (Exception e) {
+						this.instance.postError(e);
+						return;
 					}
-				} catch (Exception e) {
-					this.instance.postError(e);
-					return;
 				}
+	
+				category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-1").setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
 			}
-
-			category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-1").setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
+			
 		}
 	}
 

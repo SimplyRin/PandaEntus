@@ -112,11 +112,11 @@ public class PandaEntus {
 
 	public void run(String[] args) {
 		RinStream rinStream = new RinStream();
-		rinStream.setPrefix("yyyy/MM/dd (E) HH:mm:ss");
-		rinStream.enableError();
-		rinStream.setSaveLog(true);
-		rinStream.setEnableColor(true);
-		rinStream.setEnableTranslateColor(true);
+		rinStream.setPrefix("yyyy/MM/dd (E) HH:mm:ss")
+				.enableError()
+				.setSaveLog(true)
+				.setEnableColor(true)
+				.setEnableTranslateColor(true);
 		
 		if (Version.SHA.equals("")) {
 			System.out.println("あなたは現在開発者ビルドを使用しています。");

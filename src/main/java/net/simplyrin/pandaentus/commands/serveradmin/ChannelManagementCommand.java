@@ -13,9 +13,9 @@ import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 
 /**
- * Created by SimplyRin on 2021/11/01.
+ * Created by SimplyRin on 2022/02/09.
  *
- * Copyright (C) 2021 SimplyRin
+ * Copyright (C) 2022 SimplyRin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,23 +30,23 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class VoiceTimeLogCommand implements BaseCommand {
+public class ChannelManagementCommand implements BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!voicetimelog";
+		return "!channelmanagement";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return null;
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return null;
 	}
-	
+
 	@Override
 	public List<String> getAlias() {
 		return null;
@@ -69,14 +69,14 @@ public class VoiceTimeLogCommand implements BaseCommand {
 		
 		Configuration config = instance.getConfig();
 		
-		String path = "Server." + guild.getId() + ".NoSendLogTimeLog";
+		String path = "Server." + guild.getId() + ".DisableChannelManagement";
 		
 		boolean bool = config.getBoolean(path, false);
 		bool = !bool;
 
 		config.set(path, bool);
 		
-		event.reply("通話ログ表示を **" + (bool ? "無効" : "有効") + "** にしました。");
+		channel.sendMessage("通話チャンネル管理機能を **" + (bool ? "無効" : "有効") + "** にしました。").complete();
 	}
 
 }
