@@ -187,6 +187,9 @@ public class Listener extends ListenerAdapter {
 
 		Guild guild = event.getGuild();
 		Category category = this.instance.getVoiceChannelCategory(guild);
+		if (category == null) {
+			return;
+		}
 		Category parentCategory = event.getChannelLeft().getParent();
 
 		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getUser().getId());
