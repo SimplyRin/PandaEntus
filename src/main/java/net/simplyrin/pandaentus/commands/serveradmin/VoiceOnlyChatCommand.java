@@ -111,7 +111,13 @@ public class VoiceOnlyChatCommand implements BaseCommand {
 			return;
 		}
 		
-		channel.createPermissionOverride(member).setAllow(Permission.MESSAGE_WRITE).complete();
+		var override = channel.getPermissionOverride(member);
+		
+		if (override != null) {
+			override.getManager().setAllow(Permission.MESSAGE_WRITE).complete();
+		} else {
+			channel.createPermissionOverride(member).setAllow(Permission.MESSAGE_WRITE).complete();
+		}
 	}
 	
 	public void quit(PandaEntus instance, Member member) {
@@ -122,7 +128,13 @@ public class VoiceOnlyChatCommand implements BaseCommand {
 			return;
 		}
 		
-		channel.createPermissionOverride(member).setDeny(Permission.MESSAGE_WRITE).complete();
+		var override = channel.getPermissionOverride(member);
+		
+		if (override != null) {
+			override.getManager().setDeny(Permission.MESSAGE_WRITE).complete();
+		} else {
+			channel.createPermissionOverride(member).setDeny(Permission.MESSAGE_WRITE).complete();
+		}
 	}
 
 }
