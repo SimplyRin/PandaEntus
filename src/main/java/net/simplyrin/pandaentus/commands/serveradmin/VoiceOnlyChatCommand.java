@@ -68,7 +68,7 @@ public class VoiceOnlyChatCommand implements BaseCommand {
 		
 		if (args.length > 1) {
 			if (args[1].equalsIgnoreCase("create")) {
-				if (args.length > 3) {
+				if (args.length > 2) {
 					var channel = guild.createTextChannel(args[2]).complete();
 					
 					instance.getConfig().set("VoiceOnlyChat." + guild.getId() + ".ID", channel.getId());
