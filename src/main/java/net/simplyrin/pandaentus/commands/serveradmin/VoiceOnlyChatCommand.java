@@ -105,7 +105,12 @@ public class VoiceOnlyChatCommand implements BaseCommand {
 	
 	public void join(PandaEntus instance, Member member) {
 		var guild = member.getGuild();
-		var channel = guild.getTextChannelById(instance.getConfig().getString("VoiceOnlyChat." + guild.getId() + ".ID"));
+		var id = instance.getConfig().getString("VoiceOnlyChat." + guild.getId() + ".ID", null);
+		if (id == null) {
+			return;
+		}
+		
+		var channel = guild.getTextChannelById(id);
 		
 		if (channel == null) {
 			return;
@@ -122,7 +127,12 @@ public class VoiceOnlyChatCommand implements BaseCommand {
 	
 	public void quit(PandaEntus instance, Member member) {
 		var guild = member.getGuild();
-		var channel = guild.getTextChannelById(instance.getConfig().getString("VoiceOnlyChat." + guild.getId() + ".ID"));
+		var id = instance.getConfig().getString("VoiceOnlyChat." + guild.getId() + ".ID", null);
+		if (id == null) {
+			return;
+		}
+		
+		var channel = guild.getTextChannelById(id);
 		
 		if (channel == null) {
 			return;
