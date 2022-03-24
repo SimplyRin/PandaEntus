@@ -168,6 +168,8 @@ public class CommandExecutor extends ListenerAdapter {
 		}
 
 		System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + raw);
+		
+		event.getChannel().sendTyping().complete();
 		baseCommand.execute(this.instance, event, args);
 	}
 
