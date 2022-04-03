@@ -124,15 +124,8 @@ public class PlayedCommand implements BaseCommand {
 					
 					int hours = played / 60; // since both are ints, you get an int
 					int minutes = played % 60;
-					
-					String hhmm = "";
-					if (hours >= 1) {
-						hhmm = hours + "時間" + minutes + "分";
-					} else {
-						hhmm = minutes + "分";
-					}
 
-					embedBuilder.addField(game, instance.getUptime(calendar.getTime()) + " (" + hours + "時間)", false);
+					embedBuilder.addField(game, instance.getUptime(calendar.getTime()) + (hours >= 24 ? " (" + hours + "時間)" : ""), false);
 				}
 			}
 			
