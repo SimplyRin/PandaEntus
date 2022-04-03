@@ -213,7 +213,7 @@ public class PandaEntus {
 			e.printStackTrace();
 		}
 		this.jda.addEventListener(this.commandRegister);
-		// this.jda.addEventListener(this.eventListener = new Listener(this));
+		this.jda.addEventListener(this.eventListener = new Listener(this));
 		this.jda.addEventListener(new ReactionListener(this));
 		this.jda.addEventListener(new ActivityListener(this));
 

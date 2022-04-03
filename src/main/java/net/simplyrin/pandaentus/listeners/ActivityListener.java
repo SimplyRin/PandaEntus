@@ -34,7 +34,7 @@ public class ActivityListener extends ListenerAdapter {
 		var guild = event.getGuild();
 		var member = event.getMember();
 		
-		var activity = event.getNewActivity().asRichPresence();
+		var activity = event.getNewActivity();
 		
 		System.out.println("[ActivityListener] " + member.getEffectiveName() + ": " + activity.getName());
 	}
