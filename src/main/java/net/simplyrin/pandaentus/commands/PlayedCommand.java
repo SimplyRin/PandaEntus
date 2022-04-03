@@ -123,7 +123,6 @@ public class PlayedCommand implements BaseCommand {
 					calendar.add(Calendar.MINUTE, -played);
 					
 					int hours = played / 60; // since both are ints, you get an int
-					int minutes = played % 60;
 
 					embedBuilder.addField(game, instance.getUptime(calendar.getTime()) + (hours >= 24 ? " (" + hours + "時間)" : ""), false);
 				}
