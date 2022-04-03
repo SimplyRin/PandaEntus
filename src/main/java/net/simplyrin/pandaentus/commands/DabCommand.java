@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -43,7 +44,7 @@ public class DabCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("dab", this.getDescription());
+		return new CommandDataImpl("dab", this.getDescription());
 	}
 	
 	@Override

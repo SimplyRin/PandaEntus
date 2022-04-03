@@ -8,6 +8,7 @@ import com.google.common.reflect.ClassPath;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -46,7 +47,7 @@ public class YouTubeHelpCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("ythelp", this.getDescription());
+		return new CommandDataImpl("ythelp", this.getDescription());
 	}
 
 	@Override

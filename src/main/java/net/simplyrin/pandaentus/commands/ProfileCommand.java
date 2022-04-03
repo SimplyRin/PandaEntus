@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -47,7 +48,7 @@ public class ProfileCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("profile", this.getDescription())
+		return new CommandDataImpl("profile", this.getDescription())
 				.addOption(OptionType.USER, "ユーザー", "指定したユーザーのアカウント作成日を確認", false);
 	}
 	

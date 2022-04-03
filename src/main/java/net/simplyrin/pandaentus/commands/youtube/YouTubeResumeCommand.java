@@ -4,9 +4,10 @@ import java.util.List;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -46,7 +47,7 @@ public class YouTubeResumeCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("resume", this.getDescription());
+		return new CommandDataImpl("resume", this.getDescription());
 	}
 
 	@Override
@@ -69,7 +70,7 @@ public class YouTubeResumeCommand implements BaseCommand {
 		Guild guild = event.getGuild();
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 		
-		VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+		AudioChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 		if (voiceChannel == null) {
 			event.reply("ボイスチャンネルに接続してください。");
 			return;

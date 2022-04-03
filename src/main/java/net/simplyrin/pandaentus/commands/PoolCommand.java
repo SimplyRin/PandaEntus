@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -46,7 +47,7 @@ public class PoolCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("pool", this.getDescription())
+		return new CommandDataImpl("pool", this.getDescription())
 				.addOption(OptionType.STRING, "1", "1個目のアイテム", true)
 				.addOption(OptionType.STRING, "2", "2個目のアイテム", true)
 				.addOption(OptionType.STRING, "3", "3個目のアイテム")

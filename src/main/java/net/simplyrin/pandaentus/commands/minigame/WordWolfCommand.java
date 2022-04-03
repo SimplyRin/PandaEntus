@@ -6,6 +6,7 @@ import java.util.List;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.config.Config;
 import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.PandaEntus;
@@ -47,7 +48,7 @@ public class WordWolfCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("wordwolf", this.getDescription())
+		return new CommandDataImpl("wordwolf", this.getDescription())
 				.addOption(OptionType.INTEGER, "人狼の人数", "人狼の人数を入力", true)
 				.addOption(OptionType.STRING, "時間", "話し合いの時間を指定 (分:秒, HH:ss)", true)
 				.addOption(OptionType.STRING, "テーマ", "選ばれるお題のテーマを指定 (入力しなければランダム)");

@@ -119,9 +119,9 @@ public class VoiceOnlyChatCommand implements BaseCommand {
 		var override = channel.getPermissionOverride(member);
 		
 		if (override != null) {
-			override.getManager().setAllow(Permission.MESSAGE_WRITE).complete();
+			override.getManager().setAllow(Permission.MESSAGE_SEND).complete();
 		} else {
-			channel.createPermissionOverride(member).setAllow(Permission.MESSAGE_WRITE).complete();
+			channel.createPermissionOverride(member).setAllow(Permission.MESSAGE_SEND).complete();
 		}
 	}
 	
@@ -141,9 +141,9 @@ public class VoiceOnlyChatCommand implements BaseCommand {
 		var override = channel.getPermissionOverride(member);
 		
 		if (override != null) {
-			override.getManager().setDeny(Permission.MESSAGE_WRITE).complete();
+			override.getManager().setDeny(Permission.MESSAGE_SEND).complete();
 		} else {
-			channel.createPermissionOverride(member).setDeny(Permission.MESSAGE_WRITE).complete();
+			channel.createPermissionOverride(member).setDeny(Permission.MESSAGE_SEND).complete();
 		}
 	}
 

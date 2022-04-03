@@ -2,9 +2,10 @@ package net.simplyrin.pandaentus.commands.youtube;
 
 import java.util.List;
 
+import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -43,7 +44,7 @@ public class YouTubeDisconnectCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("disconnect", this.getDescription());
+		return new CommandDataImpl("disconnect", this.getDescription());
 	}
 
 	@Override
@@ -65,7 +66,7 @@ public class YouTubeDisconnectCommand implements BaseCommand {
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		Guild guild = event.getGuild();
 		
-		VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+		AudioChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 		if (voiceChannel == null) {
 			event.reply("ボイスチャンネルに接続してください。");
 			return;

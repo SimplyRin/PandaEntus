@@ -10,12 +10,13 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -56,7 +57,7 @@ public class YouTubePlayCommand implements BaseCommand {
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("play", this.getDescription())
+		return new CommandDataImpl("play", this.getDescription())
 				.addOption(OptionType.STRING, "url", "YouTube, Twitch, Bandcamp の URL を入力", true);
 	}
 	
@@ -102,7 +103,7 @@ public class YouTubePlayCommand implements BaseCommand {
 				return;
 			}
 			
-			VoiceChannel voiceChannel = event.getMember().getVoiceState().getChannel();
+			AudioChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 			if (voiceChannel == null) {
 				event.reply("ボイスチャンネルに接続してください。");
 				return;

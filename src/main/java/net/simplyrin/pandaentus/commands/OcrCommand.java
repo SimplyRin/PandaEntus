@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -45,7 +46,7 @@ public class OcrCommand implements BaseCommand {
 
 	@Override
 	public CommandData getCommandData() {
-		return new CommandData("ocr", this.getDescription())
+		return new CommandDataImpl("ocr", this.getDescription())
 				.addOption(OptionType.STRING, "言語", "jpn, eng");
 	}
 

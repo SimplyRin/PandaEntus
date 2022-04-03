@@ -67,7 +67,7 @@ public class Listener extends ListenerAdapter {
 		}
 		
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
-		Category parentCategory = event.getChannelJoined().getParent();
+		Category parentCategory = guild.getVoiceChannelById(event.getChannelJoined().getId()).getParentCategory();
 
 		System.out.println("[" + guild.getName() + "@" + guild.getId() + "] #" + event.getChannelJoined().getName() + " JOINED: " + this.getNickname(member) + "@" + member.getId());
 
@@ -126,7 +126,7 @@ public class Listener extends ListenerAdapter {
 			timeUtils.quit();
 			System.out.println("Quit @ " + this.getNickname(member));
 
-			this.quitMember(guild, category, null, member, event.getChannelLeft(), false);
+			this.quitMember(guild, category, null, member, guild.getVoiceChannelById(event.getChannelLeft().getId()), false);
 		}
 
 		this.check(event.getMember(), event.getGuild());
@@ -190,12 +190,12 @@ public class Listener extends ListenerAdapter {
 		if (category == null) {
 			return;
 		}
-		Category parentCategory = event.getChannelLeft().getParent();
+		Category parentCategory = guild.getVoiceChannelById(event.getChannelLeft().getId()).getParentCategory();
 
 		CallTime timeUtils = this.instance.getTimeUtils().get(guild.getId(), member.getUser().getId());
 		timeUtils.quit();
-
-		this.quitMember(guild, category, parentCategory, event.getMember(), event.getChannelLeft(), true);
+		
+		this.quitMember(guild, category, parentCategory, event.getMember(), guild.getVoiceChannelById(event.getChannelLeft().getId()), true);
 	}
 
 	public void quitMember(Guild guild, Category category, Category parentCategory, Member member, VoiceChannel channelLeft, boolean leaveEvent) {
