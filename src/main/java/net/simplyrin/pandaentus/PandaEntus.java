@@ -269,6 +269,11 @@ public class PandaEntus {
 		});
 	}
 	
+	public void saveActivityConfig() {
+		File activityData = new File("activity.yml");
+		Config.saveConfig(this.activityConfig, activityData);
+	}
+	
 	public Category getTextChannelCategory(Guild guild) {
 		List<Category> list = guild.getCategoriesByName("Text Channels", true);
 		if (list == null || list.isEmpty()) {
