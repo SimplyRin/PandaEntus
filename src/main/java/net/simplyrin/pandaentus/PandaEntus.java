@@ -86,6 +86,8 @@ public class PandaEntus {
 	}
 
 	private Configuration config;
+	private Configuration activityConfig;
+	
 	private TimeManager timeManager;
 	private PoolItems poolItems;
 	private JDA jda;
@@ -167,6 +169,17 @@ public class PandaEntus {
 
 		this.config = Config.getConfig(file);
 		
+		File activityData = new File("activity.yml");
+		if (!activityData.exists()) {
+			try {
+				activityData.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		this.activityConfig = Config.getConfig(activityData);
+		
 		// パス再設定
 		if (this.config.getString("Bot.Restart-Script", null) == null) {
 			this.config.set("Bot.Restart-Script", "start.sh");
@@ -194,13 +207,15 @@ public class PandaEntus {
 			JDABuilder jdaBuilder = JDABuilder.createDefault(token, list);
 			jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
 			jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
+			jdaBuilder.enableCache(CacheFlag.ACTIVITY);
 			this.jda = jdaBuilder.build().awaitReady();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		this.jda.addEventListener(this.commandRegister);
-		this.jda.addEventListener(this.eventListener = new Listener(this));
+		// this.jda.addEventListener(this.eventListener = new Listener(this));
 		this.jda.addEventListener(new ReactionListener(this));
+		this.jda.addEventListener(new ActivityListener(this));
 
 		// 自動登録
 		try {
@@ -246,6 +261,7 @@ public class PandaEntus {
 		this.addShutdownHook(() -> {
 			jda.shutdown();
 			Config.saveConfig(this.config, "config.yml");
+			Config.saveConfig(this.activityConfig, "activity.yml");
 			poolItems.save();
 			System.out.println("Config ファイルを保存しました。");
 
