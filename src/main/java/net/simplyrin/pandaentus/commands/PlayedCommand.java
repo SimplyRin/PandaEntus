@@ -19,6 +19,7 @@ import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.PandaMessageEvent;
+import net.simplyrin.pandaentus.tools.ImageColor;
 
 /**
  * Created by SimplyRin on 2022/04/03.
@@ -129,10 +130,16 @@ public class PlayedCommand implements BaseCommand {
 			}
 			
 			embedBuilder.setAuthor("の ゲーム記録", null, member.getUser().getAvatarUrl());
-			embedBuilder.setColor(Color.WHITE);
+			
+			var color = ImageColor.getColor(member.getUser().getAvatarUrl());
+			if (color != null) {
+				embedBuilder.setColor(color.getAsAwtColor());
+			} else {
+				embedBuilder.setColor(Color.WHITE);
+			}
+			
 			embedBuilder.setFooter("'" + args[0] + " disable' で記録をオフにできます。");
 			event.reply(embedBuilder);
-			
 			return;
 		}
 		
