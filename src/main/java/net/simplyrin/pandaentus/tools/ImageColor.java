@@ -101,8 +101,6 @@ public class ImageColor {
 		for (var value : list) {
 			var rgb = getRGBArr(value.getKey());
 			var ic = new ImageColor(rgb[0], rgb[1], rgb[2]);
-			
-			System.out.println(ic.getHexColor() + " - " + value.getValue());
 		}
 		
 		ImageColor ic = null;

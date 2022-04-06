@@ -68,7 +68,6 @@ public class ActivityListener extends ListenerAdapter {
 					}
 				}
 				
-				System.out.println("Saved activity.yml");
 				this.instance.saveActivityConfig();
 				
 				try {
