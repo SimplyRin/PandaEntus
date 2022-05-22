@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -41,6 +42,8 @@ import net.simplyrin.pandaentus.utils.Version;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 public class UpdateCommand implements BaseCommand {
+	
+	private String url = "https://ci.simplyrin.net";
 
 	@Override
 	public String getCommand() {
@@ -74,7 +77,6 @@ public class UpdateCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-		String url = "https://api.github.com/repos/SimplyRin/PandaEntus/commits/master";
 		String commitUrl = "https://github.com/SimplyRin/PandaEntus/commit/";
 		
 		try {
@@ -87,23 +89,19 @@ public class UpdateCommand implements BaseCommand {
 			String latestSha = jsonObject.get("sha").getAsString().substring(0, 7);
 			String currentSha = Version.SHA.length() == 0 ? "Development" : Version.SHA;
 			
-			if (latestSha.equalsIgnoreCase(currentSha)) {
+			var buildNumber = this.getStableBuildNumber();
+			
+			if (Version.JENKINS_BUILDER_NUMBER.equalsIgnoreCase(buildNumber)) {
 				event.reply("最新の PandaEntus 🐼 を利用しています。\n" + commitUrl + currentSha);
 			} else {
 				event.reply("アップデートを確認しました。PandaEntus 🐼 を更新しています...。\n"
 						+ "現在のバージョン: **" + currentSha + "** ( " + commitUrl + currentSha + " )\n"
 						+ "最新のバージョン: **" + latestSha + "** ( " + commitUrl + latestSha + " )");
-				
-				// https://github.com/SimplyRin/PandaEntus/releases/download/fd46e5b/PandaEntus-1.3-jar-with-dependencies.jar
-				String downloadUrl = "https://github.com/SimplyRin/PandaEntus/releases/download/" + latestSha + "/PandaEntus-1.3-jar-with-dependencies.jar";
-				
-				connection = (HttpsURLConnection) new URL(downloadUrl).openConnection();
-				connection.addRequestProperty("user-agent", instance.getBotUserAgent());
-				
-				File file = new File(latestSha + ".jar");
+
+				File file = new File(latestSha + "-v" + buildNumber + ".jar");
 				
 				Message message = event.reply("ファイルをダウンロードしています...。");
-				FileUtils.copyInputStreamToFile(connection.getInputStream(), file);
+				this.downloadJar(file);
 				message.editMessage("ファイルをダウンロードしました。").complete();
 				
 				File now = new File("PandaEntus-1.3-jar-with-dependencies.jar");
@@ -120,6 +118,36 @@ public class UpdateCommand implements BaseCommand {
 			e.printStackTrace();
 		}
 		event.reply("アップデートの確認に失敗しました。");
+	}
+	
+	public boolean downloadJar(File file) {
+		String url = this.url + "/job/PandaEntus/lastSuccessfulBuild/artifact/target/PandaEntus-1.3-jar-with-dependencies.jar";
+		try {
+			HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+			connection.addRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+			connection.connect();
+			FileUtils.copyInputStreamToFile(connection.getInputStream(), file);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public String getStableBuildNumber() {
+		String url = this.url + "/job/PandaEntus/lastStableBuild/buildNumber";
+		try {
+			HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+			connection.addRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+			connection.connect();
+			Scanner scanner = new Scanner(connection.getInputStream());
+			String buildNumber = scanner.nextLine();
+			scanner.close();
+			return buildNumber;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }
