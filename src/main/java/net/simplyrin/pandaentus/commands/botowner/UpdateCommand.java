@@ -2,17 +2,12 @@ package net.simplyrin.pandaentus.commands.botowner;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -77,28 +72,17 @@ public class UpdateCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-		String commitUrl = "https://github.com/SimplyRin/PandaEntus/commit/";
-		
 		try {
-			HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
-			connection.addRequestProperty("user-agent", instance.getBotUserAgent());
-			
-			String result = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
-			JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
-			
-			String latestSha = jsonObject.get("sha").getAsString().substring(0, 7);
-			String currentSha = Version.SHA.length() == 0 ? "Development" : Version.SHA;
-			
 			var buildNumber = this.getStableBuildNumber();
 			
 			if (Version.JENKINS_BUILDER_NUMBER.equalsIgnoreCase(buildNumber)) {
-				event.reply("最新の PandaEntus 🐼 を利用しています。\n" + commitUrl + currentSha);
+				event.reply("最新の PandaEntus 🐼 を利用しています。\nhttps://ci.simplyrin.net/job/PandaEntus/" + Version.JENKINS_BUILDER_NUMBER + "/");
 			} else {
 				event.reply("アップデートを確認しました。PandaEntus 🐼 を更新しています...。\n"
-						+ "現在のバージョン: **" + currentSha + "** ( " + commitUrl + currentSha + " )\n"
-						+ "最新のバージョン: **" + latestSha + "** ( " + commitUrl + latestSha + " )");
+						+ "現在のバージョン: **" + Version.JENKINS_BUILDER_NUMBER + "**\n"
+						+ "最新のバージョン: **" + buildNumber + "**");
 
-				File file = new File(latestSha + "-v" + buildNumber + ".jar");
+				File file = new File("PandaEntus-1.3-jar-with-dependencies-v" + buildNumber + ".jar");
 				
 				Message message = event.reply("ファイルをダウンロードしています...。");
 				this.downloadJar(file);
