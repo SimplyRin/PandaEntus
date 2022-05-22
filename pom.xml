@@ -103,6 +103,10 @@
               <token>@commitId@</token>
               <value>${SHA}</value>
             </replacement>
+            <replacement>
+              <token>@jenkinsBuildNumber@</token>
+              <value>${build.number}</value>
+            </replacement>
           </replacements>
         </configuration>
       </plugin>
