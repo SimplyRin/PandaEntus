@@ -38,7 +38,7 @@ import net.simplyrin.pandaentus.utils.Version;
  */
 public class UpdateCommand implements BaseCommand {
 	
-	private String url = "https://ci.simplyrin.net";
+	private String jenkins = "https://ci.simplyrin.net";
 
 	@Override
 	public String getCommand() {
@@ -105,7 +105,7 @@ public class UpdateCommand implements BaseCommand {
 	}
 	
 	public boolean downloadJar(File file) {
-		String url = this.url + "/job/PandaEntus/lastSuccessfulBuild/artifact/target/PandaEntus-1.3-jar-with-dependencies.jar";
+		String url = this.jenkins + "/job/PandaEntus/lastSuccessfulBuild/artifact/target/PandaEntus-1.3-jar-with-dependencies.jar";
 		try {
 			HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
 			connection.addRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
@@ -119,7 +119,7 @@ public class UpdateCommand implements BaseCommand {
 	}
 	
 	public String getStableBuildNumber() {
-		String url = this.url + "/job/PandaEntus/lastStableBuild/buildNumber";
+		String url = this.jenkins + "/job/PandaEntus/lastStableBuild/buildNumber";
 		try {
 			HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
 			connection.addRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
