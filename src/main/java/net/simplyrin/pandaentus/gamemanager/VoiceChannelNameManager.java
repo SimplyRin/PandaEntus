@@ -144,7 +144,9 @@ public class VoiceChannelNameManager {
 		if (sortList != null && sortList.size() >= 1) {
 			var item = sortList.get(0);
 			
-			member.getGuild().getVoiceChannelById(channel.getIdLong()).getManager().setName(item.getKey()).complete();
+			if (item != null) {
+				member.getGuild().getVoiceChannelById(channel.getIdLong()).getManager().setName(item.getKey()).complete();
+			}
 		} else {
 			// instance.getConfig().set("DefaultChannelName." + args[2] + ".Default", null);
 			member.getGuild().getVoiceChannelById(channel.getIdLong()).getManager().setName(defaultName).complete();
