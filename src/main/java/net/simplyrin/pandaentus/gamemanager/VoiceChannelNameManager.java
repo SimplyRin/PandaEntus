@@ -139,7 +139,7 @@ public class VoiceChannelNameManager {
 		// ゲーム割合
 		var sortList = this.sort(gameMap);
 		
-		System.out.println(channel.getIdLong() + ": " + defaultName);
+		System.out.println(channel.getIdLong() + "(" + size + "): " + defaultName);
 		
 		if (size >= 1 && sortList != null && sortList.size() >= 1) {
 			var item = sortList.get(0);
