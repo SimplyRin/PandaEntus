@@ -101,8 +101,8 @@ public class VoiceChannelNameManager {
 		}
 		
 		// 更新
-		// var members = channel.getMembers();
-		// var size = members.size();
+		var members = channel.getMembers();
+		var size = members.size();
 		
 		if (this.channelGameMap.get(channel.getIdLong()) == null) {
 			this.channelGameMap.put(channel.getIdLong(), new HashMap<>());
@@ -141,7 +141,7 @@ public class VoiceChannelNameManager {
 		
 		System.out.println(channel.getIdLong() + ": " + defaultName);
 		
-		if (sortList != null && sortList.size() >= 1) {
+		if (size >= 1 && sortList != null && sortList.size() >= 1) {
 			var item = sortList.get(0);
 			
 			if (item != null) {
