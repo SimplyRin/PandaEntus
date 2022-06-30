@@ -55,6 +55,8 @@ public class Listener extends ListenerAdapter {
 			return;
 		}
 		
+		this.instance.getVcNameManager().getJoinedChannel().put(member.getIdLong(), event.getChannelJoined().getIdLong());
+		
 		// 通話参加者専用チャンネル管理
 		var voc = (VoiceOnlyChatCommand) this.instance.getCommandRegister().getRegisteredCommand(VoiceOnlyChatCommand.class);
 		voc.join(this.instance, member);
@@ -94,8 +96,7 @@ public class Listener extends ListenerAdapter {
 			timeUtils.join();
 		}
 		System.out.println("Joined " + event.getChannelJoined().getName());
-		
-		this.instance.getVcNameManager().getJoinedChannel().put(member.getIdLong(), event.getChannelJoined().getIdLong());
+		;
 	}
 
 	@Override
