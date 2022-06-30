@@ -96,6 +96,8 @@ public class VoiceChannelNameManager {
 		map.remove(member.getIdLong());
 		if (activity != null) {
 			map.put(member.getIdLong(), activity.getName());
+		} else {
+			map.put(member.getIdLong(), null);
 		}
 		
 		// 更新
