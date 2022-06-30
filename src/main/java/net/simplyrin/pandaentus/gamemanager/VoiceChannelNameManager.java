@@ -99,8 +99,8 @@ public class VoiceChannelNameManager {
 		}
 		
 		// 更新
-		var members = channel.getMembers();
-		var size = members.size();
+		// var members = channel.getMembers();
+		// var size = members.size();
 		
 		if (this.channelGameMap.get(channel.getIdLong()) == null) {
 			this.channelGameMap.put(channel.getIdLong(), new HashMap<>());

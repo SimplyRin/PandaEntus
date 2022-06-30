@@ -100,7 +100,7 @@ public class ImageColor {
 		
 		for (var value : list) {
 			var rgb = getRGBArr(value.getKey());
-			var ic = new ImageColor(rgb[0], rgb[1], rgb[2]);
+			new ImageColor(rgb[0], rgb[1], rgb[2]);
 		}
 		
 		ImageColor ic = null;
@@ -124,7 +124,7 @@ public class ImageColor {
 	}
 
 	public static int[] getRGBArr(int pixel) {
-		int alpha = (pixel >> 24) & 0xff;
+		// int alpha = (pixel >> 24) & 0xff;
 		int red = (pixel >> 16) & 0xff;
 		int green = (pixel >> 8) & 0xff;
 		int blue = (pixel) & 0xff;

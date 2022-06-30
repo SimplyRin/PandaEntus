@@ -1,12 +1,19 @@
 package net.simplyrin.pandaentus.commands;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import org.apache.commons.io.FileUtils;
 
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
+import net.dv8tion.jda.internal.requests.Requester;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -94,21 +101,25 @@ public class OcrCommand implements BaseCommand {
 			ocr.mkdirs();
 			
 			File file = new File(ocr, UUID.randomUUID().toString().split("-")[0] + "." + extension);
-			attachment.downloadToFile(file).thenAccept(downloadedFile -> {
-				try {
-					// var image = ImageIO.read(downloadedFile);
-					
-					var tess = new Tesseract();
-					tess.setDatapath(new File("tessdata").getAbsolutePath());
-					tess.setLanguage("jpn");
-					
-					String value = tess.doOCR(downloadedFile);
-
-					event.reply("```" + value + "```");
-				} catch (Exception e) {
-					event.reply("解析に失敗しました。");
-				}
-			});
+			
+			try {
+				HttpsURLConnection connection = (HttpsURLConnection) new URL(attachment.getUrl()).openConnection();
+				connection.addRequestProperty("user-agent", Requester.USER_AGENT);
+				
+				InputStream is = connection.getInputStream();
+				
+				FileUtils.copyInputStreamToFile(is, file);
+				
+				var tess = new Tesseract();
+				tess.setDatapath(new File("tessdata").getAbsolutePath());
+				tess.setLanguage("jpn");
+				
+				String value = tess.doOCR(file);
+				
+				event.reply("```" + value + "```");
+			} catch (Exception e) {
+				event.reply("解析に失敗しました。");
+			}
 		}
 	}
 

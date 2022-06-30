@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.PandaEntus;
@@ -65,7 +64,7 @@ public class VoiceTextChannelCommand implements BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-		MessageChannel channel = event.getChannel();
+		//MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 		
 		Configuration config = instance.getConfig();
