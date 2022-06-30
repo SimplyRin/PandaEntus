@@ -95,7 +95,7 @@ public class Listener extends ListenerAdapter {
 		}
 		System.out.println("Joined " + event.getChannelJoined().getName());
 		
-		
+		this.instance.getVcNameManager().getJoinedChannel().put(member.getIdLong(), event.getChannelJoined().getIdLong());
 	}
 
 	@Override
@@ -105,6 +105,8 @@ public class Listener extends ListenerAdapter {
 		}
 		Member member = event.getMember();
 		Guild guild = event.getGuild();
+		
+		this.instance.getVcNameManager().getJoinedChannel().put(member.getIdLong(), event.getChannelJoined().getIdLong());
 
 		Category category = this.instance.getVoiceChannelCategory(guild);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();

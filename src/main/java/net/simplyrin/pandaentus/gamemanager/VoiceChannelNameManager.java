@@ -47,6 +47,9 @@ public class VoiceChannelNameManager {
 	
 	private HashMap<Long, HashMap<String, Integer>> channelGameMap = new HashMap<>();
 	
+	// Member ID -> Channel ID
+	private HashMap<Long, Long> joinedChannel = new HashMap<>();
+	
 	public void updateVoiceChannelName(Member member) {
 		var voiceState = member.getVoiceState();
 		if (voiceState == null) {
@@ -77,11 +80,8 @@ public class VoiceChannelNameManager {
 			return;
 		}
 		
-		var channel = voiceState.getChannel();
-		if (channel == null) {
-			return;
-		}
-		
+		var channel = member.getGuild().getVoiceChannelById(this.joinedChannel.get(member.getIdLong()));
+
 		var defaultName = instance.getConfig().getString("DefaultChannelName." + channel.getId() + ".Default", null);
 		if (defaultName == null) {
 			return;
