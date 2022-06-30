@@ -82,13 +82,14 @@ public class ActivityListener extends ListenerAdapter {
 	public void onUserActivityStart(UserActivityStartEvent event) {
 		var guild = event.getGuild();
 		var member = event.getMember();
+		var activity = event.getNewActivity();
+		
+		this.instance.getVcNameManager().updateVoiceChannelName(member);
 		
 		var enabled = this.instance.getConfig().getBoolean("Guild." + guild.getId() + "." + member.getId() + ".IsEnabledActivity", false);
 		if (!enabled) {
 			return;
 		}
-		
-		var activity = event.getNewActivity();
 		
 		if (this.map.get(guild.getId() + "-" + member.getId()) == null) {
 			this.map.put(guild.getId() + "-" + member.getId(), new ArrayList<>());
@@ -105,6 +106,8 @@ public class ActivityListener extends ListenerAdapter {
 	public void onUserActivityEnd(UserActivityEndEvent event) {
 		var guild = event.getGuild();
 		var member = event.getMember();
+		
+		this.instance.getVcNameManager().updateVoiceChannelName(member);
 		
 		var enabled = this.instance.getConfig().getBoolean("Guild." + guild.getId() + "." + member.getId() + ".IsEnabledActivity", false);
 		if (!enabled) {

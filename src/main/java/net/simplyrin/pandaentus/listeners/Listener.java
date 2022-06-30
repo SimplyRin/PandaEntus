@@ -184,6 +184,10 @@ public class Listener extends ListenerAdapter {
 		// 通話参加者専用チャンネル管理
 		var voc = (VoiceOnlyChatCommand) this.instance.getCommandRegister().getRegisteredCommand(VoiceOnlyChatCommand.class);
 		voc.quit(this.instance, member);
+		
+		// ちゃんねるめい
+		this.instance.getVcNameManager().updateVoiceChannelName(event.getMember(), null);
+		
 
 		Guild guild = event.getGuild();
 		Category category = this.instance.getVoiceChannelCategory(guild);

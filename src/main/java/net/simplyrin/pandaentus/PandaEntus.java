@@ -49,6 +49,7 @@ import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.ReactionMessage;
 import net.simplyrin.pandaentus.gamemanager.AkinatorManager;
+import net.simplyrin.pandaentus.gamemanager.VoiceChannelNameManager;
 import net.simplyrin.pandaentus.listeners.ActivityListener;
 import net.simplyrin.pandaentus.listeners.CommandExecutor;
 import net.simplyrin.pandaentus.listeners.Listener;
@@ -102,6 +103,7 @@ public class PandaEntus {
 
 	private AudioPlayerManager playerManager;
 	private Map<Long, GuildMusicManager> musicManagers;
+	private VoiceChannelNameManager vcNameManager;
 
 	private Date startupDate = new Date();
 	private Map<String, AkinatorManager> akiMap = new HashMap<>();
@@ -208,6 +210,7 @@ public class PandaEntus {
 			jdaBuilder.setMemberCachePolicy(MemberCachePolicy.ALL);
 			jdaBuilder.setChunkingFilter(ChunkingFilter.ALL);
 			jdaBuilder.enableCache(CacheFlag.ACTIVITY);
+			jdaBuilder.enableCache(CacheFlag.VOICE_STATE);
 			this.jda = jdaBuilder.build().awaitReady();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -255,6 +258,8 @@ public class PandaEntus {
 		this.playerManager.createPlayer();
 		AudioSourceManagers.registerRemoteSources(this.playerManager);
 		AudioSourceManagers.registerLocalSource(this.playerManager);
+		
+		this.vcNameManager = new VoiceChannelNameManager(this);
 
 		this.jda.getPresence().setActivity(Activity.playing("🐼"));
 
@@ -267,6 +272,10 @@ public class PandaEntus {
 
 			rinStream.close();
 		});
+	}
+	
+	public void saveConfig() {
+		Config.saveConfig(this.config, "config.yml");
 	}
 	
 	public void saveActivityConfig() {
