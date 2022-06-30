@@ -124,8 +124,8 @@ public class PandaEntus {
 		
 		if (Version.SHA.equals("")) {
 			System.out.println("あなたは現在開発者ビルドを使用しています。");
-			System.out.println("PandaEntus の公式ビルドは GitHub からダウンロードすることができます。");
-			System.out.println("GitHub: https://github.com/SimplyRin/PandaEntus");
+			System.out.println("PandaEntus の公式ビルドは Jenkins からダウンロードすることができます。");
+			System.out.println("Jenkins: https://ci.simplyrin.net");
 			
 			try {
 				Thread.sleep(1000);
