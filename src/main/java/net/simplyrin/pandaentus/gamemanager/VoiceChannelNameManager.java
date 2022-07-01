@@ -121,7 +121,7 @@ public class VoiceChannelNameManager {
 			
 			var sortList = this.sort(games);
 			
-			if (size >= 1 && sortList != null) {
+			if (size > 0 && sortList != null && sortList.size() > 0) {
 				var item = sortList.get(0);
 				
 				if (item != null) {
