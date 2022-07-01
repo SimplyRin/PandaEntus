@@ -115,14 +115,10 @@ public class VoiceChannelNameManager {
 			var sortList = this.sort(games);
 			
 			if (size >= 1 && sortList != null) {
-				if (sortList.size() == 1) {
-					var item = sortList.get(0);
-					
-					if (item != null) {
-						member.getGuild().getVoiceChannelById(channelId).getManager().setName(item.getKey()).complete();
-					}
-				} else {
-					member.getGuild().getVoiceChannelById(channelId).getManager().setName(defaultName + " 雑談？").complete();
+				var item = sortList.get(0);
+				
+				if (item != null) {
+					member.getGuild().getVoiceChannelById(channelId).getManager().setName((sortList.size() == 1 ? "" : "?") + item.getKey()).complete();
 				}
 			} else {
 				member.getGuild().getVoiceChannelById(channelId).getManager().setName(defaultName).complete();

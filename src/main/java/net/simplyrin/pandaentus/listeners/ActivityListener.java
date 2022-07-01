@@ -85,12 +85,7 @@ public class ActivityListener extends ListenerAdapter {
 		var activity = event.getNewActivity();
 		
 		this.instance.getVcNameManager().updateVoiceChannelName(member);
-		
-		var enabled = this.instance.getConfig().getBoolean("Guild." + guild.getId() + "." + member.getId() + ".IsEnabledActivity", false);
-		if (!enabled) {
-			return;
-		}
-		
+
 		if (this.map.get(guild.getId() + "-" + member.getId()) == null) {
 			this.map.put(guild.getId() + "-" + member.getId(), new ArrayList<>());
 		}
@@ -108,12 +103,7 @@ public class ActivityListener extends ListenerAdapter {
 		var member = event.getMember();
 		
 		this.instance.getVcNameManager().updateVoiceChannelName(member);
-		
-		var enabled = this.instance.getConfig().getBoolean("Guild." + guild.getId() + "." + member.getId() + ".IsEnabledActivity", false);
-		if (!enabled) {
-			return;
-		}
-		
+
 		var activity = event.getOldActivity();
 		
 		if (this.map.get(guild.getId() + "-" + member.getId()) == null) {
