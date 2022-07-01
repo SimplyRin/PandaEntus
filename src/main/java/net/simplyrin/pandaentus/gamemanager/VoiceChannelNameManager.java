@@ -75,12 +75,12 @@ public class VoiceChannelNameManager {
 		var channelId = this.joinedChannel.get(member.getIdLong());
 		
 		if (channelId != null) {
-			var channel = member.getGuild().getVoiceChannelById(this.joinedChannel.get(member.getIdLong()));
-
-			var defaultName = instance.getConfig().getString("DefaultChannelName." + channel.getId() + ".Default", null);
+			var defaultName = instance.getConfig().getString("DefaultChannelName." + channelId + ".Default", null);
 			if (defaultName == null) {
 				return;
 			}
+			
+			var channel = member.getGuild().getVoiceChannelById(channelId);
 			
 			var key = channel.getId() + "," + member.getId();
 			
