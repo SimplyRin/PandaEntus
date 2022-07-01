@@ -124,7 +124,7 @@ public class VoiceChannelNameManager {
 			if (size > 0 && sortList != null && sortList.size() > 0) {
 				var item = sortList.get(0);
 				
-				if (item != null) {
+				if (item != null && item.getValue() >= 2) {
 					member.getGuild().getVoiceChannelById(channelId).getManager().setName((sortList.size() == 1 ? "" : "?") + item.getKey()).complete();
 				}
 			} else {
