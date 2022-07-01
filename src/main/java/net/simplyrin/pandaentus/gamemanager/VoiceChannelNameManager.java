@@ -1,6 +1,7 @@
 package net.simplyrin.pandaentus.gamemanager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -42,7 +43,7 @@ public class VoiceChannelNameManager {
 	
 	private final PandaEntus instance;
 	
-	private HashMap<String, String> map = new HashMap<>();
+	private HashMap<String, List<String>> map = new HashMap<>();
 
 	// Member ID -> Channel ID
 	private HashMap<Long, Long> joinedChannel = new HashMap<>();
@@ -66,10 +67,16 @@ public class VoiceChannelNameManager {
 			}
 		}
 	}
-
+	
 	public void updateVoiceChannelName(Member member, Activity activity) {
-		String lastGame = activity != null ? activity.getName() : null;
-		
+		this.updateVoiceChannelName(member, activity != null ? activity.getName() : null);
+	}
+	
+	public void updateVoiceChannelName(Member member, String gameList) {
+		this.updateVoiceChannelName(member, Arrays.asList(gameList));
+	}
+
+	public void updateVoiceChannelName(Member member, List<String> lastGame) {
 		System.out.println(member.getEffectiveName() + ": Activity: " + lastGame);
 		
 		var channelId = this.joinedChannel.get(member.getIdLong());
@@ -98,13 +105,13 @@ public class VoiceChannelNameManager {
 			
 			for (var entry : this.map.entrySet()) {
 				if (entry.getKey().startsWith(String.valueOf(channelId))) {
-					var memberId = entry.getKey().split(",")[1];
-					
 					if (lastGame != null) {
-						if (games.get(lastGame) == null) {
-							games.put(lastGame, 1);
-						} else {
-							games.put(lastGame, games.get(lastGame) + 1);
+						for (String lG : lastGame) {
+							if (games.get(lG) == null) {
+								games.put(lG, 1);
+							} else {
+								games.put(lG, games.get(lG) + 1);
+							}
 						}
 					}
 				}

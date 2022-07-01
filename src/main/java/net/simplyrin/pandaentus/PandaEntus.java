@@ -114,6 +114,8 @@ public class PandaEntus {
 	private List<String> amongUsGuildList;
 
 	private Listener eventListener;
+	private ActivityListener activityListener;
+	
 	private String botUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36";
 
 	public void run(String[] args) {
@@ -218,7 +220,7 @@ public class PandaEntus {
 		this.jda.addEventListener(this.commandRegister);
 		this.jda.addEventListener(this.eventListener = new Listener(this));
 		this.jda.addEventListener(new ReactionListener(this));
-		this.jda.addEventListener(new ActivityListener(this));
+		this.jda.addEventListener(this.activityListener = new ActivityListener(this));
 
 		// 自動登録
 		try {

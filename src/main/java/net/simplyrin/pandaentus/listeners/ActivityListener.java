@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
 import net.dv8tion.jda.api.events.user.UserActivityEndEvent;
 import net.dv8tion.jda.api.events.user.UserActivityStartEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -28,6 +29,7 @@ import net.simplyrin.pandaentus.PandaEntus;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@Getter
 public class ActivityListener extends ListenerAdapter {
 	
 	private final PandaEntus instance;
@@ -84,7 +86,7 @@ public class ActivityListener extends ListenerAdapter {
 		var member = event.getMember();
 		var activity = event.getNewActivity();
 		
-		this.instance.getVcNameManager().updateVoiceChannelName(member);
+		this.instance.getVcNameManager().updateVoiceChannelName(member, activity);
 
 		if (this.map.get(guild.getId() + "-" + member.getId()) == null) {
 			this.map.put(guild.getId() + "-" + member.getId(), new ArrayList<>());

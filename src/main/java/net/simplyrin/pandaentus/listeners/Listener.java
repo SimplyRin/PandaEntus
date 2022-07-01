@@ -55,13 +55,20 @@ public class Listener extends ListenerAdapter {
 			return;
 		}
 		
+		Guild guild = event.getGuild();
+		
 		this.instance.getVcNameManager().getJoinedChannel().put(member.getIdLong(), event.getChannelJoined().getIdLong());
+		
+		// AcitivityListener からプレイ中のゲームを取得
+		var gameList = this.instance.getActivityListener().getMap().get(event.getGuild().getId() + "-" + member.getId());
+		if (gameList != null && gameList.size() >= 1) {
+			this.instance.getVcNameManager().updateVoiceChannelName(member, gameList);
+		}
 		
 		// 通話参加者専用チャンネル管理
 		var voc = (VoiceOnlyChatCommand) this.instance.getCommandRegister().getRegisteredCommand(VoiceOnlyChatCommand.class);
 		voc.join(this.instance, member);
 
-		Guild guild = event.getGuild();
 		Category category = this.instance.getVoiceChannelCategory(guild);
 		
 		if (category == null) {
@@ -96,7 +103,6 @@ public class Listener extends ListenerAdapter {
 			timeUtils.join();
 		}
 		System.out.println("Joined " + event.getChannelJoined().getName());
-		;
 	}
 
 	@Override
@@ -107,9 +113,8 @@ public class Listener extends ListenerAdapter {
 		Member member = event.getMember();
 		Guild guild = event.getGuild();
 		
+		this.instance.getVcNameManager().updateVoiceChannelName(event.getMember(), (List<String>) null);
 		this.instance.getVcNameManager().getJoinedChannel().put(member.getIdLong(), event.getChannelJoined().getIdLong());
-		
-		this.instance.getVcNameManager().updateVoiceChannelName(member);
 
 		Category category = this.instance.getVoiceChannelCategory(guild);
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
@@ -191,7 +196,7 @@ public class Listener extends ListenerAdapter {
 		voc.quit(this.instance, member);
 		
 		// ちゃんねるめい
-		this.instance.getVcNameManager().updateVoiceChannelName(event.getMember(), null);
+		this.instance.getVcNameManager().updateVoiceChannelName(event.getMember(), (List<String>) null);
 		
 		this.instance.getVcNameManager().getJoinedChannel().put(member.getIdLong(), null);
 
