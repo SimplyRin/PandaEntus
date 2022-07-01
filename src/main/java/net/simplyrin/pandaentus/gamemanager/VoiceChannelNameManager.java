@@ -42,11 +42,8 @@ public class VoiceChannelNameManager {
 	
 	private final PandaEntus instance;
 	
-	private HashMap<Long, String> map = new HashMap<>();
-	private HashMap<Long, HashMap<Long, String>> channelMap = new HashMap<>();
-	
-	private HashMap<Long, HashMap<String, Integer>> channelGameMap = new HashMap<>();
-	
+	private HashMap<String, String> map = new HashMap<>();
+
 	// Member ID -> Channel ID
 	private HashMap<Long, Long> joinedChannel = new HashMap<>();
 	
@@ -75,86 +72,66 @@ public class VoiceChannelNameManager {
 		
 		System.out.println(member.getEffectiveName() + ": Activity: " + lastGame);
 		
-		var voiceState = member.getVoiceState();
-		if (voiceState == null) {
-			return;
-		}
+		var channelId = this.joinedChannel.get(member.getIdLong());
 		
-		var channel = member.getGuild().getVoiceChannelById(this.joinedChannel.get(member.getIdLong()));
+		if (channelId != null) {
+			var channel = member.getGuild().getVoiceChannelById(this.joinedChannel.get(member.getIdLong()));
 
-		var defaultName = instance.getConfig().getString("DefaultChannelName." + channel.getId() + ".Default", null);
-		if (defaultName == null) {
-			return;
-		}
-		
-		if (this.channelMap.get(channel.getIdLong()) == null) {
-			this.channelMap.put(channel.getIdLong(), new HashMap<>());
-		}
-		
-		var map = this.channelMap.get(channel.getIdLong());
-		
-		map.remove(member.getIdLong());
-		if (activity != null) {
-			map.put(member.getIdLong(), activity.getName());
-		} else {
-			map.put(member.getIdLong(), null);
-		}
-		
-		// 更新
-		var members = channel.getMembers();
-		var size = members.size();
-		
-		if (this.channelGameMap.get(channel.getIdLong()) == null) {
-			this.channelGameMap.put(channel.getIdLong(), new HashMap<>());
-		}
-		
-		System.out.println(channel.getId() + ": " + map.values().toString());
-		
-		HashMap<String, Integer> gameMap = this.channelGameMap.get(channel.getIdLong());
-		
-		if (lastGame != null) {
-			if (gameMap.get(lastGame) == null) {
-				gameMap.put(lastGame, 1);
+			var defaultName = instance.getConfig().getString("DefaultChannelName." + channel.getId() + ".Default", null);
+			if (defaultName == null) {
+				return;
 			}
 			
-			gameMap.put(lastGame, gameMap.get(activity.getName()) + 1);
-		}
-		
-		if (activity == null) {
-			if (this.channelGameMap.get(channel.getIdLong()) != null) {
-				if (gameMap.get(lastGame) == null) {
-					gameMap.put(lastGame, 1);
-				}
-				
-				if (this.channelMap.get(channel.getIdLong()) != null) {
-					String name = this.channelMap.get(channel.getIdLong()).get(member.getIdLong());
-				
-					if (name != null) {
-						gameMap.put(name, gameMap.get(name) - 1);
+			var key = channel.getId() + "," + member.getId();
+			
+			this.map.put(key, lastGame);
+			
+			// 更新
+			var members = channel.getMembers();
+			var size = members.size();
+			
+			System.out.println(channel.getId() + ": " + this.map.values().toString());
+			
+			// ゲーム割合
+			// ゲーム名 -> プレイ人数
+			HashMap<String, Integer> games = new HashMap<>();
+			
+			for (var entry : this.map.entrySet()) {
+				if (entry.getKey().startsWith(String.valueOf(channelId))) {
+					var memberId = entry.getKey().split(",")[1];
+					
+					if (lastGame != null) {
+						if (games.get(lastGame) == null) {
+							games.put(lastGame, 1);
+						} else {
+							games.put(lastGame, games.get(lastGame) + 1);
+						}
 					}
 				}
 			}
-		}
-		
-		// ゲーム割合
-		var sortList = this.sort(gameMap);
-		
-		System.out.println(channel.getIdLong() + "(" + size + "): " + defaultName);
-		
-		if (size >= 1 && sortList != null && sortList.size() >= 1) {
-			var item = sortList.get(0);
 			
-			if (item != null) {
-				member.getGuild().getVoiceChannelById(channel.getIdLong()).getManager().setName(item.getKey()).complete();
+			System.out.println(channelId + "(" + size + "): " + defaultName);
+			
+			var sortList = this.sort(games);
+			
+			if (size >= 1 && sortList != null) {
+				if (sortList.size() == 1) {
+					var item = sortList.get(0);
+					
+					if (item != null) {
+						member.getGuild().getVoiceChannelById(channelId).getManager().setName(item.getKey()).complete();
+					}
+				} else {
+					member.getGuild().getVoiceChannelById(channelId).getManager().setName(defaultName + " 雑談？").complete();
+				}
+			} else {
+				member.getGuild().getVoiceChannelById(channelId).getManager().setName(defaultName).complete();
 			}
-		} else {
-			// instance.getConfig().set("DefaultChannelName." + args[2] + ".Default", null);
-			member.getGuild().getVoiceChannelById(channel.getIdLong()).getManager().setName(defaultName).complete();
 		}
 	}
 	
 	public List<Entry<String, Integer>> sort(HashMap<String, Integer> map) {
-		List<Entry<String, Integer>> list = new ArrayList<Entry<String, Integer>>(map.entrySet());
+		var list = new ArrayList<Entry<String, Integer>>(map.entrySet());
 		
 		Collections.sort(list, new Comparator<Entry<String, Integer>>() {
 			@Override
@@ -164,12 +141,6 @@ public class VoiceChannelNameManager {
 		});
 		
 		return list;
-	}
-	
-	public class GameList {
-		private long member;
-		private long channel;
-		private String gameName;
 	}
 
 }
