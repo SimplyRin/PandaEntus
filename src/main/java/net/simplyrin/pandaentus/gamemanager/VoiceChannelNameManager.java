@@ -121,11 +121,17 @@ public class VoiceChannelNameManager {
 			
 			var sortList = this.sort(games);
 			
+			for (var item : sortList) {
+				System.out.println(item.getKey() + ": " + item.getValue());
+			}
+			
 			if (size > 0 && sortList != null && sortList.size() > 0) {
 				var item = sortList.get(0);
 				
+				System.out.println(item.getKey() + ": " + item.getValue());
+				
 				if (item != null && item.getValue() >= 2) {
-					member.getGuild().getVoiceChannelById(channelId).getManager().setName((sortList.size() == 1 ? "" : "?") + item.getKey()).complete();
+					member.getGuild().getVoiceChannelById(channelId).getManager().setName((sortList.size() == 1 ? "" : "？") + item.getKey()).complete();
 				}
 			} else {
 				member.getGuild().getVoiceChannelById(channelId).getManager().setName(defaultName).complete();
