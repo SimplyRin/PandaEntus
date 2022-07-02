@@ -122,7 +122,7 @@ public class VoiceChannelNameManager {
 			var sortList = this.sort(games);
 			
 			for (var item : sortList) {
-				System.out.println(item.getKey() + ": " + item.getValue());
+				System.out.println("VoiceChannelNameManager: " + item.getKey() + ": " + item.getValue());
 			}
 			
 			if (size > 0 && sortList != null && sortList.size() > 0) {
