@@ -107,9 +107,12 @@ public class VoiceChannelNameManager {
 				if (entry.getKey().startsWith(String.valueOf(channelId))) {
 					for (String lG : entry.getValue()) {
 						if (games.get(lG) == null) {
+							System.out.println("[Game] " + lG + ": 1");
 							games.put(lG, 1);
 						} else {
-							games.put(lG, games.get(lG) + 1);
+							var count = games.get(lG) + 1;
+							System.out.println("[Game] " + lG + ": " + count);
+							games.put(lG, count);
 						}
 					}
 				}
