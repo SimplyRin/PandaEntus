@@ -105,13 +105,11 @@ public class VoiceChannelNameManager {
 			
 			for (var entry : this.map.entrySet()) {
 				if (entry.getKey().startsWith(String.valueOf(channelId))) {
-					if (lastGame != null) {
-						for (String lG : lastGame) {
-							if (games.get(lG) == null) {
-								games.put(lG, 1);
-							} else {
-								games.put(lG, games.get(lG) + 1);
-							}
+					for (String lG : entry.getValue()) {
+						if (games.get(lG) == null) {
+							games.put(lG, 1);
+						} else {
+							games.put(lG, games.get(lG) + 1);
 						}
 					}
 				}
