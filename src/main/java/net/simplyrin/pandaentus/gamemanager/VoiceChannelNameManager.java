@@ -105,6 +105,10 @@ public class VoiceChannelNameManager {
 			
 			for (var entry : this.map.entrySet()) {
 				if (entry.getKey().startsWith(String.valueOf(channelId))) {
+					if (entry.getValue() == null) {
+						continue;
+					}
+					
 					for (String lG : entry.getValue()) {
 						if (games.get(lG) == null) {
 							System.out.println("[Game] " + lG + ": 1");
