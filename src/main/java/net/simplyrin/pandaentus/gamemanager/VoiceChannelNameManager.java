@@ -131,10 +131,10 @@ public class VoiceChannelNameManager {
 				System.out.println(item.getKey() + ": " + item.getValue());
 				
 				if (item != null && item.getValue() >= 2) {
-					member.getGuild().getVoiceChannelById(channelId).getManager().setName((sortList.size() == 1 ? "" : "？") + item.getKey()).complete();
+					channel.getManager().setName((sortList.size() == 1 ? "" : "？") + item.getKey()).complete();
 				}
 			} else {
-				member.getGuild().getVoiceChannelById(channelId).getManager().setName(defaultName).complete();
+				channel.getManager().setName(defaultName).complete();
 			}
 		}
 	}
