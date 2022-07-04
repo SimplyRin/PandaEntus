@@ -128,7 +128,7 @@ public class UptimeCommand implements BaseCommand {
 			}
 
 			embedBuilder.setColor(Color.GREEN);
-			embedBuilder.setAuthor(instance.getNickname(event.getMember()), user.getAvatarUrl(), user.getAvatarUrl());
+			embedBuilder.setAuthor(event.getMember().getEffectiveName(), user.getAvatarUrl(), user.getAvatarUrl());
 			embedBuilder.addField("参加時間", timeManager.getJoinedTime(), true);
 			embedBuilder.addField("通話時間", timeManager.getCurrentTime(), true);
 

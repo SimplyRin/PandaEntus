@@ -203,7 +203,7 @@ public class WordWolfManager extends ListenerAdapter {
 				Member member = this.guild.getMemberById(id);
 				this.voteMap.put(i, member);
 				
-				members += i + ": " + this.instance.getNickname(member) + "\n";
+				members += i + ": " + member.getEffectiveName() + "\n";
 				i++;
 				
 				this.voteNeededPlayers.add(id);
@@ -308,7 +308,7 @@ public class WordWolfManager extends ListenerAdapter {
 		for (String id : this.wolfPlayers) {
 			try {
 				Member member = this.guild.getMemberById(id);
-				msg += this.instance.getNickname(member) + " (投票数: " + this.getVotedCount(member) + ")\n";
+				msg += member.getEffectiveName() + " (投票数: " + this.getVotedCount(member) + ")\n";
 			} catch (Exception e) {
 			}
 		}
@@ -317,7 +317,7 @@ public class WordWolfManager extends ListenerAdapter {
 		for (String id : this.generalPlayers) {
 			try {
 				Member member = this.guild.getMemberById(id);
-				msg += this.instance.getNickname(member) + " (投票数: " + this.getVotedCount(member) + ")\n";
+				msg += member.getEffectiveName() + " (投票数: " + this.getVotedCount(member) + ")\n";
 			} catch (Exception e) {
 			}
 		}

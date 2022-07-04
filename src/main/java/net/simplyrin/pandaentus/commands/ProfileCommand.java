@@ -90,7 +90,7 @@ public class ProfileCommand implements BaseCommand {
 
 		Date date = new Date(member.getUser().getTimeCreated().toInstant().toEpochMilli());
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd");
-		embedBuilder.addField("アカウント名", instance.getNickname(member), false);
+		embedBuilder.addField("アカウント名", member.getEffectiveName(), false);
 		embedBuilder.addField("アカウント作成日", simpleDateFormat.format(date), false);
 		
 		event.reply(embedBuilder.build());

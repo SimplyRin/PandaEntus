@@ -34,7 +34,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -591,13 +590,6 @@ public class PandaEntus {
 		return tempVideoId;
 	}
 
-	public String getNickname(Member member) {
-		if (member.getNickname() != null) {
-			return member.getNickname();
-		}
-		return member.getUser().getName();
-	}
-	
 	public List<String> getBotOwner() {
 		return this.getConfig().getStringList("BotOwnerList");
 	}

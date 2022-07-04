@@ -129,7 +129,7 @@ public class PlayedCommand implements BaseCommand {
 				}
 			}
 			
-			embedBuilder.setAuthor("の ゲーム記録", null, member.getUser().getAvatarUrl());
+			embedBuilder.setAuthor(member.getEffectiveName() + " のゲーム記録", null, member.getUser().getAvatarUrl());
 			
 			var color = ImageColor.getColor(member.getUser().getAvatarUrl());
 			if (color != null) {

@@ -337,7 +337,6 @@ public class Listener extends ListenerAdapter {
 	
 				category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-1").setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
 			}
-			
 		}
 	}
 
