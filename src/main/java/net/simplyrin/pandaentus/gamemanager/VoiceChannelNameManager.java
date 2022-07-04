@@ -90,8 +90,12 @@ public class VoiceChannelNameManager {
 			var channel = member.getGuild().getVoiceChannelById(channelId);
 			
 			var key = channel.getId() + "," + member.getId();
-			
-			this.map.put(key, lastGame);
+
+			if (lastGame != null) {
+				this.map.put(key, lastGame);
+			} else {
+				this.map.remove(key);
+			}
 			
 			// 更新
 			var members = channel.getMembers();
