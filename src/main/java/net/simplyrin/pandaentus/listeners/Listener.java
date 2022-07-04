@@ -112,7 +112,7 @@ public class Listener extends ListenerAdapter {
 		}
 		Member member = event.getMember();
 		Guild guild = event.getGuild();
-		
+
 		this.instance.getVcNameManager().updateVoiceChannelName(event.getMember(), (List<String>) null);
 		this.instance.getVcNameManager().getJoinedChannel().put(guild.getId() + "-" + member.getId(), event.getChannelJoined().getIdLong());
 

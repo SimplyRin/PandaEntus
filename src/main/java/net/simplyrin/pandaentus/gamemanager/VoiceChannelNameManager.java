@@ -137,10 +137,10 @@ public class VoiceChannelNameManager {
 				
 				if (item != null && item.getValue() >= 2) {
 					channel.getManager().setName((sortList.size() == 1 ? "" : "？") + item.getKey()).complete();
+					return;
 				}
-			} else {
-				channel.getManager().setName(defaultName).complete();
 			}
+			channel.getManager().setName(defaultName).complete();
 		}
 	}
 	
