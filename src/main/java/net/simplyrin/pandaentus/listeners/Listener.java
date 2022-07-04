@@ -70,7 +70,6 @@ public class Listener extends ListenerAdapter {
 		voc.join(this.instance, member);
 
 		Category category = this.instance.getVoiceChannelCategory(guild);
-		
 		if (category == null) {
 			return;
 		}
@@ -117,6 +116,9 @@ public class Listener extends ListenerAdapter {
 		this.instance.getVcNameManager().getJoinedChannel().put(guild.getId() + "-" + member.getId(), event.getChannelJoined().getIdLong());
 
 		Category category = this.instance.getVoiceChannelCategory(guild);
+		if (category == null) {
+			return;
+		}
 		List<VoiceChannel> voiceChannels = category.getVoiceChannels();
 
 		boolean hasMember = false;
