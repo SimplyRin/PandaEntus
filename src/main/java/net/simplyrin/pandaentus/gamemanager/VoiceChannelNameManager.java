@@ -154,7 +154,7 @@ public class VoiceChannelNameManager {
 		Collections.sort(list, new Comparator<Entry<String, Integer>>() {
 			@Override
 			public int compare(Entry<String, Integer> a, Entry<String, Integer> b) {
-				return a.getValue().compareTo(b.getValue());
+				return b.getValue().compareTo(a.getValue());
 			}
 		});
 		
