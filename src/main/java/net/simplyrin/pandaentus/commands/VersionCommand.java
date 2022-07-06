@@ -55,7 +55,7 @@ public class VersionCommand implements BaseCommand {
 	
 	@Override
 	public List<String> getAlias() {
-		return Arrays.asList("stats");
+		return Arrays.asList("!stats");
 	}
 
 	@Override
