@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.PrivateChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -115,7 +116,7 @@ public class WordWolfManager extends ListenerAdapter {
 	public WordWolfManager startRecruit(PandaMessageEvent event) {
 		this.recruitMessage = event.reply("ワードウルフのプレイヤー募集をします。\n"
 				+ "参加したいユーザーはリアクション 👌 を押して待機してください。 (" + this.gameId + ")");
-		this.recruitMessage.addReaction("👌").complete();
+		this.recruitMessage.addReaction(Emoji.fromFormatted("👌")).complete();
 
 		return this;
 	}

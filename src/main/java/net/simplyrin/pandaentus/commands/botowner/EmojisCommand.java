@@ -10,11 +10,11 @@ import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.FilenameUtils;
 
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Icon.IconType;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.CustomEmoji;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -130,8 +130,8 @@ public class EmojisCommand implements BaseCommand {
 							String extension = FilenameUtils.getExtension(args[4]);
 							
 							Icon icon = Icon.from(inputStream, IconType.fromExtension(extension));
-							g.createEmote(args[3], icon).complete();
-							
+							g.createEmoji(args[3], icon).complete();
+
 							channel.sendMessage("絵文字をアップロードしました。").complete();
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -151,7 +151,7 @@ public class EmojisCommand implements BaseCommand {
 	
 	public void printEmojis(PandaEntus instance, Guild guild, MessageChannel channel) {
 		String message = "";
-		for (Emote emote : guild.getEmotes()) {
+		for (CustomEmoji emote : guild.getEmojis()) {
 			message += emote.getName() + " -> " + emote.getId() + ", " + emote.getImageUrl() + "\n";
 		}
 		

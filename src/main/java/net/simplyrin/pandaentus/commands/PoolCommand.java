@@ -6,6 +6,7 @@ import java.util.List;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
@@ -129,9 +130,8 @@ public class PoolCommand implements BaseCommand {
 				String value = instance.getPoolItems().getReaction(integer);
 
 				System.out.println("Add: " + value);
-				
-				
-				message.addReaction(value).complete();
+
+				message.addReaction(Emoji.fromFormatted(value)).complete();
 			}
 			return;
 		}

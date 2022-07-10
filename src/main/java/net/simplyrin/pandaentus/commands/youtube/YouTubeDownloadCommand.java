@@ -3,7 +3,7 @@ package net.simplyrin.pandaentus.commands.youtube;
 import java.util.Arrays;
 import java.util.List;
 
-import net.dv8tion.jda.api.entities.Emote;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -80,8 +80,8 @@ public class YouTubeDownloadCommand implements BaseCommand {
 			return;
 		}
 		
-		Emote emote = null;
-		for (Emote temp : event.getGuild().getEmotes()) {
+		Emoji emote = null;
+		for (Emoji temp : event.getGuild().getEmojis()) {
 			if (emote == null) {
 				emote = temp;
 			}

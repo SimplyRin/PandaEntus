@@ -59,7 +59,7 @@ public class ReactionListener extends ListenerAdapter {
 		if (reactionMessage == null) {
 			return;
 		}
-		if (!event.getReactionEmote().getEmote().getName().equals(reactionMessage.getEmote().getName())) {
+		if (!event.getReaction().getEmoji().getName().equals(reactionMessage.getEmote().getName())) {
 			return;
 		}
 		Message message = reactionMessage.getMessage();

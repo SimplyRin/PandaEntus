@@ -2,8 +2,8 @@ package net.simplyrin.pandaentus.classes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 
 /**
  * Created by SimplyRin on 2021/11/01.
@@ -28,6 +28,6 @@ import net.dv8tion.jda.api.entities.Message;
 public class ReactionMessage {
 	
 	private Message message;
-	private Emote emote;
+	private Emoji emote;
 
 }
