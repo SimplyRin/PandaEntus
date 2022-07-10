@@ -140,11 +140,17 @@ public class VoiceChannelNameManager {
 				System.out.println(item.getKey() + ": " + item.getValue());
 				
 				if (item != null && item.getValue() >= 2) {
-					channel.getManager().setName((sortList.size() == 1 ? "" : "？") + item.getKey()).complete();
+					String name = (sortList.size() == 1 ? "" : "？") + item.getKey();
+					if (!channel.getName().equals(name)) {
+						channel.getManager().setName(name).complete();
+					}
 					return;
 				}
 			}
-			channel.getManager().setName(defaultName).complete();
+			
+			if (!channel.getName().equals(defaultName)) {
+				channel.getManager().setName(defaultName).complete();
+			}
 		}
 	}
 	
