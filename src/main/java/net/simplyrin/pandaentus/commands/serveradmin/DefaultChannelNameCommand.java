@@ -33,7 +33,7 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class DefaultChannelNameCommand implements BaseCommand {
+public class DefaultChannelNameCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

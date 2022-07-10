@@ -23,14 +23,33 @@ import net.simplyrin.pandaentus.PandaEntus;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public interface BaseCommand {
+public class BaseCommand {
 
-	public String getCommand();
-	public String getDescription();
-	public CommandData getCommandData();
-	public List<String> getAlias();
-	public CommandType getType();
-	public CommandPermission getPermission();
-	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args);
+	public String getCommand() {
+		return null;
+	}
+	
+	public String getDescription() {
+		return null;
+	}
+	
+	public CommandData getCommandData() {
+		return null;
+	}
+	
+	public List<String> getAlias() {
+		return null;
+	}
+	
+	public CommandType getType() {
+		return null;
+	}
+	
+	public CommandPermission getPermission() {
+		return null;
+	}
+	
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
+	}
 
 }

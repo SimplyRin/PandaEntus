@@ -36,7 +36,7 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-public class SetGameCommand implements BaseCommand {
+public class SetGameCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

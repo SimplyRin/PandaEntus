@@ -31,7 +31,7 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class DiskCommand implements BaseCommand {
+public class DiskCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

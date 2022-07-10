@@ -39,7 +39,7 @@ import net.simplyrin.pandaentus.tools.ImageColor;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class PlayedCommand implements BaseCommand {
+public class PlayedCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

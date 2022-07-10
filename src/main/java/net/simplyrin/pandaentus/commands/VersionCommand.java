@@ -36,7 +36,7 @@ import net.simplyrin.pandaentus.utils.Version;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class VersionCommand implements BaseCommand {
+public class VersionCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

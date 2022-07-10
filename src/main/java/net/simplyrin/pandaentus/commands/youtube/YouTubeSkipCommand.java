@@ -28,7 +28,7 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class YouTubeSkipCommand implements BaseCommand {
+public class YouTubeSkipCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

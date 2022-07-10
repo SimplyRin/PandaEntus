@@ -36,7 +36,7 @@ import net.simplyrin.pandaentus.utils.Version;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class UpdateCommand implements BaseCommand {
+public class UpdateCommand extends BaseCommand {
 	
 	private String jenkins = "https://ci.simplyrin.net";
 

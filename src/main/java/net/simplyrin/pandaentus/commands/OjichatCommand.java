@@ -33,7 +33,7 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class OjichatCommand implements BaseCommand {
+public class OjichatCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

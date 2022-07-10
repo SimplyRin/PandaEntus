@@ -34,7 +34,7 @@ import net.simplyrin.pandaentus.gamemanager.wordwolf.WordWolfManager;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class WordWolfCommand implements BaseCommand {
+public class WordWolfCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

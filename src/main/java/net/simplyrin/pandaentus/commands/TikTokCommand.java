@@ -37,7 +37,7 @@ import net.simplyrin.processmanager.ProcessManager;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class TikTokCommand implements BaseCommand {
+public class TikTokCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {

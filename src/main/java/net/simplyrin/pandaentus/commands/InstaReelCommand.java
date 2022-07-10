@@ -32,7 +32,7 @@ import net.simplyrin.processmanager.ProcessManager;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class InstaReelCommand implements BaseCommand {
+public class InstaReelCommand extends BaseCommand {
 
 	public static void main(String[] args) {
 		new InstaReelCommand().execute(null, null, new String[] { "https://www.instagram.com/reel/CbxCszjp4WL/" }); // ←かわいい
