@@ -57,6 +57,11 @@ public class InstaReelCommand extends BaseCommand {
 	public String getCommand() {
 		return "https://www.instagram.com/reel/";
 	}
+	
+	@Override
+	public boolean sendTyping() {
+		return false;
+	}
 
 	@Override
 	public CommandType getType() {

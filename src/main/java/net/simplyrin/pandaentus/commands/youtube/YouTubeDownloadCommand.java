@@ -51,6 +51,10 @@ public class YouTubeDownloadCommand extends BaseCommand {
 	public List<String> getAlias() {
 		return Arrays.asList("https://youtu.be/", "https://soundcloud.com/");
 	}
+	
+	public boolean sendTyping() {
+		return false;
+	}
 
 	@Override
 	public CommandType getType() {
