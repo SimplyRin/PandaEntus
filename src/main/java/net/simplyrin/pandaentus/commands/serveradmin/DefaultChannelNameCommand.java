@@ -3,7 +3,6 @@ package net.simplyrin.pandaentus.commands.serveradmin;
 import java.util.Arrays;
 import java.util.List;
 
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -38,16 +37,6 @@ public class DefaultChannelNameCommand extends BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!defaultchannelname";
-	}
-
-	@Override
-	public String getDescription() {
-		return null;
-	}
-
-	@Override
-	public CommandData getCommandData() {
-		return null;
 	}
 
 	@Override

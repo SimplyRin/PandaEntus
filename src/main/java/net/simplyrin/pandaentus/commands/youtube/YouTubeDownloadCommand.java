@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -36,17 +35,7 @@ public class YouTubeDownloadCommand extends BaseCommand {
 	public String getCommand() {
 		return "https://www.youtube.com/watch?v=";
 	}
-	
-	@Override
-	public String getDescription() {
-		return null;
-	}
-	
-	@Override
-	public CommandData getCommandData() {
-		return null;
-	}
-	
+
 	@Override
 	public List<String> getAlias() {
 		return Arrays.asList("https://youtu.be/", "https://soundcloud.com/");

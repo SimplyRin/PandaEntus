@@ -1,7 +1,5 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
-import java.util.List;
-
 import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -45,11 +43,6 @@ public class YouTubeDisconnectCommand extends BaseCommand {
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("disconnect", this.getDescription());
-	}
-
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

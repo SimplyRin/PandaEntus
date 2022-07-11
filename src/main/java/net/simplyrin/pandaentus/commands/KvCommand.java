@@ -2,7 +2,6 @@ package net.simplyrin.pandaentus.commands;
 
 import java.awt.Color;
 import java.io.File;
-import java.util.List;
 import java.util.UUID;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
@@ -15,7 +14,6 @@ import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
@@ -49,21 +47,6 @@ public class KvCommand extends BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!kv";
-	}
-	
-	@Override
-	public String getDescription() {
-		return null;
-	}
-
-	@Override
-	public CommandData getCommandData() {
-		return null;
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

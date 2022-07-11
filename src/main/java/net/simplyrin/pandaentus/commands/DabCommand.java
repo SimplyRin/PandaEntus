@@ -1,7 +1,5 @@
 package net.simplyrin.pandaentus.commands;
 
-import java.util.List;
-
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
@@ -45,11 +43,6 @@ public class DabCommand extends BaseCommand {
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("dab", this.getDescription());
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

@@ -1,7 +1,5 @@
 package net.simplyrin.pandaentus.commands;
 
-import java.util.List;
-
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -47,11 +45,6 @@ public class IconCommand extends BaseCommand {
 	public CommandData getCommandData() {
 		return new CommandDataImpl("icon", this.getDescription())
 				.addOption(OptionType.USER, "ユーザー", "指定したユーザーのアイコンを表示", true);
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

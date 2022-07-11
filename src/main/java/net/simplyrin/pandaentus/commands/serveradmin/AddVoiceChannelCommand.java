@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -37,21 +36,6 @@ public class AddVoiceChannelCommand extends BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!add-vc";
-	}
-	
-	@Override
-	public String getDescription() {
-		return null;
-	}
-	
-	@Override
-	public CommandData getCommandData() {
-		return null;
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

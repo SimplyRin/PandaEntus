@@ -1,7 +1,5 @@
 package net.simplyrin.pandaentus.commands.minigame;
 
-import java.util.List;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -49,11 +47,6 @@ public class AkinatorCommand extends BaseCommand {
 		return new CommandDataImpl("akinator", this.getDescription());
 	}
 	
-	@Override
-	public List<String> getAlias() {
-		return null;
-	}
-
 	@Override
 	public CommandType getType() {
 		return CommandType.EqualsIgnoreCase;

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -15,7 +14,6 @@ import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Icon.IconType;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.CustomEmoji;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -46,21 +44,6 @@ public class EmojisCommand extends BaseCommand {
 	@Override
 	public String getCommand() {
 		return "!emojis";
-	}
-	
-	@Override
-	public String getDescription() {
-		return null;
-	}
-	
-	@Override
-	public CommandData getCommandData() {
-		return null;
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

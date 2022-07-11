@@ -2,7 +2,6 @@ package net.simplyrin.pandaentus.commands.botowner;
 
 import java.io.File;
 import java.net.URL;
-import java.util.List;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -10,7 +9,6 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.io.FileUtils;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -48,16 +46,6 @@ public class UpdateCommand extends BaseCommand {
 	@Override
 	public String getDescription() {
 		return "PandaEntus のアップデート確認し、最新バージョンにアップデートします。";
-	}
-
-	@Override
-	public CommandData getCommandData() {
-		return null;
-	}
-
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

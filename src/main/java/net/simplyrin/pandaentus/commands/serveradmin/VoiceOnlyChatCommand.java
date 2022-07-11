@@ -1,11 +1,7 @@
 package net.simplyrin.pandaentus.commands.serveradmin;
 
-import java.util.Arrays;
-import java.util.List;
-
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -40,16 +36,6 @@ public class VoiceOnlyChatCommand extends BaseCommand {
 	@Override
 	public String getDescription() {
 		return "通話に参加しているユーザーのみが送信することのできる専用のテキストチャンネルを作成します。";
-	}
-
-	@Override
-	public CommandData getCommandData() {
-		return null;
-	}
-
-	@Override
-	public List<String> getAlias() {
-		return Arrays.asList("!voc");
 	}
 
 	@Override
