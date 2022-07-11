@@ -58,11 +58,6 @@ public class UptimeCommand extends BaseCommand {
 	}
 	
 	@Override
-	public List<String> getAlias() {
-		return null;
-	}
-
-	@Override
 	public CommandType getType() {
 		return CommandType.EqualsIgnoreCase;
 	}

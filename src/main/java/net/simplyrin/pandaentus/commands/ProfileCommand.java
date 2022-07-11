@@ -3,7 +3,6 @@ package net.simplyrin.pandaentus.commands;
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -50,11 +49,6 @@ public class ProfileCommand extends BaseCommand {
 	public CommandData getCommandData() {
 		return new CommandDataImpl("profile", this.getDescription())
 				.addOption(OptionType.USER, "ユーザー", "指定したユーザーのアカウント作成日を確認", false);
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

@@ -3,7 +3,6 @@ package net.simplyrin.pandaentus.commands;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.List;
 import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -55,11 +54,6 @@ public class OcrCommand extends BaseCommand {
 	public CommandData getCommandData() {
 		return new CommandDataImpl("ocr", this.getDescription())
 				.addOption(OptionType.STRING, "言語", "jpn, eng");
-	}
-
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

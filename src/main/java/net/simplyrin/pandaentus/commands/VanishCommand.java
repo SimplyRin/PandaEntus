@@ -1,7 +1,6 @@
 package net.simplyrin.pandaentus.commands;
 
 import java.awt.Color;
-import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
@@ -48,11 +47,6 @@ public class VanishCommand extends BaseCommand {
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("vanish", this.getDescription());
-	}
-
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package net.simplyrin.pandaentus.commands;
 
 import java.io.File;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonObject;
@@ -9,7 +8,6 @@ import com.google.gson.JsonParser;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -44,21 +42,6 @@ public class TikTokCommand extends BaseCommand {
 		return "https://vt.tiktok.com/";
 	}
 	
-	@Override
-	public String getDescription() {
-		return null;
-	}
-	
-	@Override
-	public CommandData getCommandData() {
-		return null;
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
-	}
-
 	@Override
 	public CommandType getType() {
 		return CommandType.StartsWith;

@@ -1,12 +1,10 @@
 package net.simplyrin.pandaentus.commands.botowner;
 
 import java.awt.Color;
-import java.util.List;
 import java.util.Scanner;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -36,21 +34,6 @@ public class CalcCommand extends BaseCommand {
 	@Override
 	public String getCommand() {
 		return "=";
-	}
-	
-	@Override
-	public String getDescription() {
-		return null;
-	}
-	
-	@Override
-	public CommandData getCommandData() {
-		return null;
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override

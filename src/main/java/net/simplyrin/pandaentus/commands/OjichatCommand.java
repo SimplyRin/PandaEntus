@@ -1,7 +1,6 @@
 package net.simplyrin.pandaentus.commands;
 
 import java.awt.Color;
-import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -49,11 +48,6 @@ public class OjichatCommand extends BaseCommand {
 	public CommandData getCommandData() {
 		return new CommandDataImpl("ojichat", this.getDescription())
 				.addOption(OptionType.STRING, "名前", "指定した名前でおじさん構文を生成します。");
-	}
-	
-	@Override
-	public List<String> getAlias() {
-		return null;
 	}
 
 	@Override
