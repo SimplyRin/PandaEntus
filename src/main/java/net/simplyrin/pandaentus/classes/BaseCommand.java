@@ -33,6 +33,10 @@ public class BaseCommand {
 		return null;
 	}
 	
+	public boolean sendTyping() {
+		return true;
+	}
+	
 	public CommandData getCommandData() {
 		return null;
 	}
