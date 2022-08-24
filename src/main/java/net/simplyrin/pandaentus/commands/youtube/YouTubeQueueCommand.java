@@ -80,12 +80,12 @@ public class YouTubeQueueCommand extends BaseCommand {
 		BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 		BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
 		BaseCommand loopCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeLoopCommand.class);
-		
+
 		AudioTrack at = instance.getLoopMap().get(guild.getIdLong());
 		if (at != null) {
 			embedBuilder.setColor(Color.CYAN);
-			embedBuilder.setAuthor("🎵 ループ再生が有効になっています。");
-			embedBuilder.setDescription("🔁 ループ再生中の音楽: " + at.getInfo().title);
+			embedBuilder.setAuthor("🔁 ループ再生が有効になっています。");
+			embedBuilder.setDescription("🎵 再生中の音楽: " + at.getInfo().title);
 			embedBuilder.setFooter("詳細: !nowplaying, ループ無効: " + loopCommand.getCommand());
 
 			event.reply(embedBuilder.build());

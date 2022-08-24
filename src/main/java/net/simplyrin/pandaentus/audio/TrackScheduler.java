@@ -71,16 +71,18 @@ public class TrackScheduler extends AudioEventAdapter {
 				for (Member member : vc.getMembers()) {
 					User user = member.getUser();
 					User selfUser = this.instance.getJda().getSelfUser();
-					
+
 					if (user.getId().equals(selfUser.getId())) {
 						voiceChannel = vc;
 					}
 				}
 			}
 			
+			System.out.println("onTrackEnd -> voiceChannel : " + voiceChannel);
+			
 			if (voiceChannel != null) {
-				if (voiceChannel.getMembers().size() >= 2) {
-					this.instance.play(this.guild, this.instance.getGuildAudioPlayer(this.guild), track.makeClone());
+				if (voiceChannel.getMembers().size() >= 1) {
+					player.startTrack(track.makeClone(), false);
 					return;
 				}
 			}

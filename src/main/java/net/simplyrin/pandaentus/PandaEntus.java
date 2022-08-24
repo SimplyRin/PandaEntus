@@ -106,7 +106,7 @@ public class PandaEntus {
 
 	private Date startupDate = new Date();
 	private Map<String, AkinatorManager> akiMap = new HashMap<>();
-
+	
 	@Setter
 	private AudioPlaylist audioPlaylist;
 
