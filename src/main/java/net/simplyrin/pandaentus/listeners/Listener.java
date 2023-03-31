@@ -6,15 +6,13 @@ import java.util.Date;
 import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.commands.serveradmin.VoiceOnlyChatCommand;
@@ -46,9 +44,19 @@ public class Listener extends ListenerAdapter {
 	public Listener(PandaEntus instance) {
 		this.instance = instance;
 	}
-
+	
 	@Override
-	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
+	public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
+		if (event.getChannelJoined() != null && event.getChannelLeft() != null) {
+			this.onPandaGuildVoiceMove(event);
+		} else if(event.getChannelJoined() != null) {
+			this.onPandaGuildVoiceJoin(event);
+		} else {
+			this.onPandaGuildVoiceLeave(event);
+		}
+	}
+
+	public void onPandaGuildVoiceJoin(GuildVoiceUpdateEvent event) {
 		var member = event.getMember();
 		
 		if (member.getUser().isBot()) {
@@ -104,8 +112,7 @@ public class Listener extends ListenerAdapter {
 		System.out.println("Joined " + event.getChannelJoined().getName());
 	}
 
-	@Override
-	public void onGuildVoiceMove(GuildVoiceMoveEvent event) {
+	public void onPandaGuildVoiceMove(GuildVoiceUpdateEvent event) {
 		if (event.getMember().getUser().isBot()) {
 			return;
 		}
@@ -185,8 +192,7 @@ public class Listener extends ListenerAdapter {
 		}
 	}
 
-	@Override
-	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
+	public void onPandaGuildVoiceLeave(GuildVoiceUpdateEvent event) {
 		var member = event.getMember();
 		
 		if (event.getMember().getUser().isBot()) {

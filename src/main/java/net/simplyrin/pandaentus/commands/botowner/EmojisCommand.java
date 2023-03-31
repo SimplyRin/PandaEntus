@@ -12,8 +12,9 @@ import org.apache.commons.io.FilenameUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Icon;
 import net.dv8tion.jda.api.entities.Icon.IconType;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.emoji.CustomEmoji;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -143,7 +144,7 @@ public class EmojisCommand extends BaseCommand {
 			ThreadPool.run(() -> {
 				File temp = instance.stringToTempFile(fm);
 				
-				channel.sendFile(temp).complete();
+				channel.sendFiles(FileUpload.fromData(temp)).complete();
 				
 				try {
 					Thread.sleep(5000);

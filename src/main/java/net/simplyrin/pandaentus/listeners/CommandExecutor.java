@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -97,7 +97,7 @@ public class CommandExecutor extends ListenerAdapter {
 			return;
 		}
 		
-		String raw = event.getCommandPath();
+		String raw = this.getCommandPath(event);
 		String[] args = raw.split("[\\/]");
 		
 		args[0] = "!" + args[0];
@@ -174,6 +174,17 @@ public class CommandExecutor extends ListenerAdapter {
 		}
 		
 		baseCommand.execute(this.instance, event, args);
+	}
+	
+	public String getCommandPath(SlashCommandInteractionEvent event) {
+		StringBuilder builder = new StringBuilder(event.getName());
+		if (event.getSubcommandGroup() != null) {
+			builder.append('/').append(event.getSubcommandGroup());
+		}
+		if (event.getSubcommandName() != null) {
+			builder.append('/').append(event.getSubcommandName());
+		}
+		return builder.toString();
 	}
 
 }

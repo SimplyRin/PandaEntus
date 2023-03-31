@@ -8,10 +8,11 @@ import java.util.Date;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.ReactionMessage;
 import net.simplyrin.pandaentus.utils.ThreadPool;
@@ -103,7 +104,7 @@ public class ReactionListener extends ListenerAdapter {
 				embedBuilder.setAuthor("ファイルが準備できました。");
 				embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
 				embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
-				Message tempMessage = channel.sendFile(mp3).setEmbeds(embedBuilder.build()).complete();
+				Message tempMessage = channel.sendFiles(FileUpload.fromData(mp3)).setEmbeds(embedBuilder.build()).complete();
 
 				try {
 					Thread.sleep(1000 * 60 * 60 * 48);
@@ -194,7 +195,7 @@ public class ReactionListener extends ListenerAdapter {
 							
 							embedBuilder.addField("タイトル", instance.getConfig().getString("YouTube." + videoId + ".Title"), true);
 							embedBuilder.addField("長さ", instance.getConfig().getString("YouTube." + videoId + ".Duration"), true);
-							channel.sendFile(mp3).setEmbeds(embedBuilder.build()).complete();
+							channel.sendFiles(FileUpload.fromData(mp3)).setEmbeds(embedBuilder.build()).complete();
 							phase.delete().complete();
 
 						}
