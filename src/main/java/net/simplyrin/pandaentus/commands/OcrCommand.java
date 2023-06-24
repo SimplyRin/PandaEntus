@@ -12,7 +12,6 @@ import org.apache.commons.io.FileUtils;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
-import net.dv8tion.jda.internal.requests.Requester;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -98,7 +97,7 @@ public class OcrCommand extends BaseCommand {
 			
 			try {
 				HttpsURLConnection connection = (HttpsURLConnection) new URL(attachment.getUrl()).openConnection();
-				connection.addRequestProperty("user-agent", Requester.USER_AGENT);
+				connection.addRequestProperty("user-agent", instance.getBotUserAgent());
 				
 				InputStream is = connection.getInputStream();
 				
