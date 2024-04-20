@@ -45,7 +45,7 @@ public class YouTubeVolumeCommand extends BaseCommand {
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("volume", this.getDescription())
-				.addOption(OptionType.INTEGER, "音量", "20-100 で音量を調節", true);
+				.addOption(OptionType.INTEGER, "音量", "1-100 で音量を調節", true);
 	}
 	
 	@Override
@@ -76,7 +76,7 @@ public class YouTubeVolumeCommand extends BaseCommand {
 		if (args.length > 1) {
 			try {
 				int volume = Integer.valueOf(args[1]);
-				if (volume >= 20 && volume <= 100) {
+				if (volume >= 1 && volume <= 100) {
 					instance.getConfig().set("Guild." + event.getGuild().getId() + ".Voice-Volume", volume);
 					GuildMusicManager musicManager = instance.getGuildAudioPlayer(event.getGuild());
 					musicManager.getPlayer().setVolume(volume);
@@ -87,7 +87,7 @@ public class YouTubeVolumeCommand extends BaseCommand {
 			}
 		}
 
-		event.reply("使用方法: " + this.getCommand() + " <20-100>");
+		event.reply("使用方法: " + this.getCommand() + " <1-100>");
 	}
 
 }
