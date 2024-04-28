@@ -85,6 +85,12 @@ public class TrackScheduler extends AudioEventAdapter {
 					player.startTrack(track.makeClone(), false);
 					return;
 				}
+				
+				else if (this.instance.getForceLoopMap().get(this.guild.getIdLong()) != null) {
+					var forceLoopTrack = this.instance.getForceLoopMap().get(this.guild.getIdLong());
+					
+					player.startTrack(forceLoopTrack.makeClone(), false);
+				}
 			}
 		} else if (endReason.mayStartNext) {
 			this.nextTrack();

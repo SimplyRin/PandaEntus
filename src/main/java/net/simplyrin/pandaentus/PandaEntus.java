@@ -99,6 +99,8 @@ public class PandaEntus {
 	private CommandExecutor commandRegister;
 
 	private Map<Long, AudioTrack> loopMap;
+	private Map<Long, AudioTrack> forceLoopMap;
+	
 	private Map<Long, AudioTrack> previousTrack;
 
 	private AudioPlayerManager playerManager;

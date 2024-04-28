@@ -1,6 +1,10 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
+import java.awt.Color;
+
 import lombok.Getter;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -40,7 +44,22 @@ public class YouTubeForceLoopCommand extends BaseCommand {
 	
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-		
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+
+		Guild guild = event.getGuild();
+
+		if (instance.getForceLoopMap().get(guild.getIdLong()) != null) {
+			embedBuilder.setColor(Color.RED);
+			embedBuilder.setDescription("🔁 強制ループ再生を無効にしました。");
+			instance.getForceLoopMap().remove(guild.getIdLong());
+			instance.getPreviousTrack().remove(guild.getIdLong());
+		} else {
+			embedBuilder.setColor(Color.GREEN);
+			embedBuilder.setDescription("🔁 強制ループ再生を有効にしました。");
+			instance.getForceLoopMap().put(guild.getIdLong(), instance.getPreviousTrack().get(guild.getIdLong()));
+		}
+
+		event.reply(embedBuilder.build());
 	}
 
 }
