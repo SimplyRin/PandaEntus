@@ -59,8 +59,28 @@ public class TrackScheduler extends AudioEventAdapter {
 	public void nextTrack() {
 		// Start the next track, regardless of if something is already playing or not. In case queue was empty, we are
 		// giving null to startTrack, which is a valid argument and will simply stop the player.
-		this.player.startTrack(this.queue.poll(), false);
-	}
+		var track = this.queue.poll();
+
+		this.player.startTrack(track, false);
+		
+        if (track != null) {
+			VoiceChannel voiceChannel = null;
+			for (VoiceChannel vc : this.guild.getVoiceChannels()) {
+				for (Member member : vc.getMembers()) {
+					User user = member.getUser();
+					User selfUser = this.instance.getJda().getSelfUser();
+
+					if (user.getId().equals(selfUser.getId())) {
+						voiceChannel = vc;
+					}
+				}
+			}
+
+            if (voiceChannel != null) {
+                voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
+            }
+        }
+    }
 
 	/**
 	 * Clear playlist
