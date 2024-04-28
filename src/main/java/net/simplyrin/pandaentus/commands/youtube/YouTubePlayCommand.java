@@ -123,29 +123,6 @@ public class YouTubePlayCommand extends BaseCommand {
 					}
 				}, false);
 				
-				MultiProcess mp = new MultiProcess();
-				
-				mp.addProcess(() -> {
-					
-				});
-				
-				mp.start();
-				
-				List<String> finished = new ArrayList<>();
-				
-				mp.setFinishedTask(() -> {
-					finished.add("");
-				});
-				
-				while (finished.isEmpty()) {
-					try {
-						TimeUnit.SECONDS.sleep(1);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				
-				
 			
 			} else {
 				urls.add(url);
