@@ -138,9 +138,9 @@ public class YouTubePlayCommand extends BaseCommand {
 				audioManager.setAutoReconnect(false);
 
 				GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
-				
+
 				List<MessageEmbed> messages = new ArrayList<>();
-				
+
 				for (String url_ : urls) {
 					instance.getPlayerManager().loadItemOrdered(musicManager, url_, new AudioLoadResultHandler() {
 						@Override
@@ -153,18 +153,11 @@ public class YouTubePlayCommand extends BaseCommand {
 							BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
 							BaseCommand yt = instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
 							embedBuilder.setFooter("詳細: " + nowPlaying.getCommand() + ", コマンド一覧: " + yt.getCommand());
-							messages.add(embedBuilder.build());
 							instance.getPreviousTrack().put(guild.getIdLong(), track);
 							instance.play(guild, musicManager, track);
-							
-							if (messages.size() >= urls.size()) {
-								MessageEmbed[] l = new MessageEmbed[messages.size()];
-								
-								for (int i = 0; i < messages.size(); i++) {
-									l[i] = messages.get(i);
-								}
-								
-								message.editMessageEmbeds(l).complete();
+
+							if (messages.size() == 1) {
+								event.reply(messages.get(0));
 							}
 						}
 
