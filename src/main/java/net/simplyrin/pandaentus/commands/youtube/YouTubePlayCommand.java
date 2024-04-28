@@ -1,8 +1,10 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -12,11 +14,13 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
+import net.simplyrin.multiprocess.MultiProcess;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
 import net.simplyrin.pandaentus.classes.BaseCommand;
@@ -24,6 +28,8 @@ import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
 import net.simplyrin.pandaentus.classes.PandaMessageEvent;
 import net.simplyrin.pandaentus.utils.ThreadPool;
+import net.simplyrin.processmanager.Callback;
+import net.simplyrin.processmanager.ProcessManager;
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -103,6 +109,47 @@ public class YouTubePlayCommand extends BaseCommand {
 				event.reply("ボイスチャンネルに接続してください。");
 				return;
 			}
+			
+			List<String> urls = new ArrayList<>();
+
+			if (url.contains("playlist") || url.contains("list")) {
+				
+				ProcessManager.runCommand(new String[] { "/usr/local/bin", "--flat-playlist", "--print", "id", url }, new Callback() {
+					@Override
+					public void line(String response) {
+						if (response.length() >= 15) {
+							urls.add("https://www.youtube.com/watch?v=" + response);
+                        }
+					}
+				}, false);
+				
+				MultiProcess mp = new MultiProcess();
+				
+				mp.addProcess(() -> {
+					
+				});
+				
+				mp.start();
+				
+				List<String> finished = new ArrayList<>();
+				
+				mp.setFinishedTask(() -> {
+					finished.add("");
+				});
+				
+				while (finished.isEmpty()) {
+					try {
+						TimeUnit.SECONDS.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				
+			
+			} else {
+				urls.add(url);
+			}
 
 			embedBuilder.setColor(Color.RED);
 			embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
@@ -115,47 +162,63 @@ public class YouTubePlayCommand extends BaseCommand {
 				audioManager.setAutoReconnect(false);
 
 				GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
-
-				instance.getPlayerManager().loadItemOrdered(musicManager, url, new AudioLoadResultHandler() {
-					@Override
-					public void trackLoaded(AudioTrack track) {
-						embedBuilder.setAuthor(null);
-						embedBuilder.clearFields();
-						embedBuilder.addField("🎵 タイトル", track.getInfo().title, true);
-						embedBuilder.addField("💿 アーティスト", track.getInfo().author, true);
-						
-						BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
-						BaseCommand yt = instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
-						embedBuilder.setFooter("詳細: " + nowPlaying.getCommand() + ", コマンド一覧: " + yt.getCommand());
-						message.editMessageEmbeds(embedBuilder.build()).complete();
-						instance.getPreviousTrack().put(guild.getIdLong(), track);
-						instance.play(guild, musicManager, track);
-					}
-
-					@Override
-					public void playlistLoaded(AudioPlaylist playlist) {
-						instance.setAudioPlaylist(playlist);
-						AudioTrack firstTrack = playlist.getSelectedTrack();
-
-						if (firstTrack == null) {
-							firstTrack = playlist.getTracks().get(0);
+				
+				List<MessageEmbed> messages = new ArrayList<>();
+				
+				for (String url_ : urls) {
+					instance.getPlayerManager().loadItemOrdered(musicManager, url_, new AudioLoadResultHandler() {
+						@Override
+						public void trackLoaded(AudioTrack track) {
+							embedBuilder.setAuthor(null);
+							embedBuilder.clearFields();
+							embedBuilder.addField("🎵 タイトル", track.getInfo().title, true);
+							embedBuilder.addField("💿 アーティスト", track.getInfo().author, true);
+							
+							BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
+							BaseCommand yt = instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
+							embedBuilder.setFooter("詳細: " + nowPlaying.getCommand() + ", コマンド一覧: " + yt.getCommand());
+							messages.add(embedBuilder.build());
+							instance.getPreviousTrack().put(guild.getIdLong(), track);
+							instance.play(guild, musicManager, track);
+							
+							if (messages.size() >= urls.size()) {
+								MessageEmbed[] l = new MessageEmbed[messages.size()];
+								
+								for (int i = 0; i < messages.size(); i++) {
+									l[i] = messages.get(i);
+								}
+								
+								message.editMessageEmbeds(l).complete();
+							}
 						}
 
-						if (instance.getLoopMap().get(guild.getIdLong()) == null) {
-							instance.play(guild, musicManager, firstTrack);
+						@Override
+						public void playlistLoaded(AudioPlaylist playlist) {
+							instance.setAudioPlaylist(playlist);
+							AudioTrack firstTrack = playlist.getSelectedTrack();
+
+							if (firstTrack == null) {
+								firstTrack = playlist.getTracks().get(0);
+							}
+
+							if (instance.getLoopMap().get(guild.getIdLong()) == null) {
+								instance.play(guild, musicManager, firstTrack);
+							}
 						}
-					}
 
-					@Override
-					public void noMatches() {
-						message.editMessage("曲が見つかりませんでした。").complete();
-					}
+						@Override
+						public void noMatches() {
+							message.editMessage("曲が見つかりませんでした。").complete();
+						}
 
-					@Override
-					public void loadFailed(FriendlyException e) {
-						message.editMessage("曲を読み込めませんでした。\n" + e.getMessage()).complete();
-					}
-				});
+						@Override
+						public void loadFailed(FriendlyException e) {
+							message.editMessage("曲を読み込めませんでした。\n" + e.getMessage()).complete();
+						}
+					});
+				}
+
+				
 			});
 			return;
 		}
