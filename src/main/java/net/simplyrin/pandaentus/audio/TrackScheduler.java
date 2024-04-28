@@ -90,6 +90,7 @@ public class TrackScheduler extends AudioEventAdapter {
 			if (voiceChannel != null) {
 				if (voiceChannel.getMembers().size() >= 1) {
 					player.startTrack(track.makeClone(), false);
+					voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
 					return;
 				}
 				
@@ -97,6 +98,7 @@ public class TrackScheduler extends AudioEventAdapter {
 					var forceLoopTrack = this.instance.getForceLoopMap().get(this.guild.getIdLong());
 					
 					player.startTrack(forceLoopTrack.makeClone(), false);
+					voiceChannel.modifyStatus("🎵 " + forceLoopTrack.getInfo().title).complete();
 				}
 			}
 		} else if (endReason.mayStartNext) {
