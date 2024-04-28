@@ -115,6 +115,8 @@ public class YouTubePlayCommand extends BaseCommand {
 				ProcessManager.runCommand(new String[] { "/usr/local/bin/yt-dlp", "--flat-playlist", "--print", "id", url }, new Callback() {
 					@Override
 					public void line(String response) {
+						System.out.println("[YouTubePlayCommand.java] yt-dlp: " + response);
+
 						if (response.length() <= 15) {
 							urls.add("https://www.youtube.com/watch?v=" + response);
                         }
