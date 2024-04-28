@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -155,10 +156,13 @@ public class YouTubePlayCommand extends BaseCommand {
 							embedBuilder.setFooter("詳細: " + nowPlaying.getCommand() + ", コマンド一覧: " + yt.getCommand());
 							instance.getPreviousTrack().put(guild.getIdLong(), track);
 							instance.play(guild, musicManager, track);
-
+							
 							if (messages.size() == 1) {
 								event.reply(messages.get(0));
 							}
+
+							VoiceChannel vc = (VoiceChannel) voiceChannel;
+							vc.modifyStatus("🎵 " + track.getInfo().title).complete();
 						}
 
 						@Override
