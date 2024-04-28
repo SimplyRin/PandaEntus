@@ -92,11 +92,6 @@ public class YouTubePlayCommand extends BaseCommand {
 
 		if (args.length > 1) {
 			String url = args[1];
-
-			if (url.contains("playlist") || url.contains("list")) {
-				event.reply("現在プレイリストには対応していません。");
-				return;
-			}
 			
 			if (!url.startsWith("http")) {
 				event.reply("検索機能を使用することはできません。URL を入力してください。");
@@ -153,11 +148,12 @@ public class YouTubePlayCommand extends BaseCommand {
 
 					@Override
 					public void noMatches() {
+						message.editMessage("曲が見つかりませんでした。").complete();
 					}
 
 					@Override
-					public void loadFailed(FriendlyException exception) {
-						event.reply("Could not play: " + exception.getMessage());
+					public void loadFailed(FriendlyException e) {
+						message.editMessage("曲を読み込めませんでした。\n" + e.getMessage()).complete();
 					}
 				});
 			});
