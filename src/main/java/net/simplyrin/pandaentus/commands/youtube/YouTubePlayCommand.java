@@ -156,13 +156,10 @@ public class YouTubePlayCommand extends BaseCommand {
 							embedBuilder.setFooter("詳細: " + nowPlaying.getCommand() + ", コマンド一覧: " + yt.getCommand());
 							instance.getPreviousTrack().put(guild.getIdLong(), track);
 							instance.play(guild, musicManager, track);
-							
+
 							if (messages.size() == 1) {
 								event.reply(messages.get(0));
 							}
-
-							VoiceChannel vc = (VoiceChannel) voiceChannel;
-							vc.modifyStatus("🎵 " + track.getInfo().title).complete();
 						}
 
 						@Override
