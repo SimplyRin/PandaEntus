@@ -112,7 +112,7 @@ public class YouTubePlayCommand extends BaseCommand {
 
 			if (url.contains("playlist") || url.contains("list")) {
 				
-				ProcessManager.runCommand(new String[] { "/usr/local/bin", "--flat-playlist", "--print", "id", url }, new Callback() {
+				ProcessManager.runCommand(new String[] { "/usr/local/bin/yt-dlp", "--flat-playlist", "--print", "id", url }, new Callback() {
 					@Override
 					public void line(String response) {
 						if (response.length() >= 15) {
