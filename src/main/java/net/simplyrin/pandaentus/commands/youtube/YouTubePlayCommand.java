@@ -115,13 +115,12 @@ public class YouTubePlayCommand extends BaseCommand {
 				ProcessManager.runCommand(new String[] { "/usr/local/bin/yt-dlp", "--flat-playlist", "--print", "id", url }, new Callback() {
 					@Override
 					public void line(String response) {
-						if (response.length() >= 15) {
+						if (response.length() <= 15) {
 							urls.add("https://www.youtube.com/watch?v=" + response);
                         }
 					}
 				}, false);
-				
-			
+
 			} else {
 				urls.add(url);
 			}
