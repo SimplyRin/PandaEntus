@@ -633,7 +633,7 @@ public class PandaEntus {
 	}
 
 	public void play(Guild guild, GuildMusicManager musicManager, AudioTrack track) {
-		int volume = this.config.getInt("Guild." + guild.getId() + ".Voice-Volume", 20);
+		int volume = this.config.getInt("Guild." + guild.getId() + ".Voice-Volume", 1);
 		musicManager.getPlayer().setVolume(volume);
 		musicManager.getScheduler().queue(track);
 	}
