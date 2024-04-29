@@ -143,6 +143,7 @@ public class YouTubePlayCommand extends BaseCommand {
 				AudioManager audioManager = guild.getAudioManager();
 				audioManager.openAudioConnection(voiceChannel);
 				audioManager.setAutoReconnect(false);
+				audioManager.setSelfDeafened(true);
 
 				GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 
