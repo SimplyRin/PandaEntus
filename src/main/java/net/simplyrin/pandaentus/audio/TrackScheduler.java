@@ -81,7 +81,26 @@ public class TrackScheduler extends AudioEventAdapter {
         this.updateVoiceStatus(track);
     }
 
+	public enum TrackStatus {
+		PLAY, PAUSE
+	}
+
 	public void updateVoiceStatus(AudioTrack track) {
+		this.updateVoiceStatus(track, TrackStatus.PLAY);
+	}
+
+	public void updateVoiceStatus(AudioTrack track, TrackStatus status) {
+		String emoji = "";
+
+		switch (status) {
+            case PLAY -> {
+				emoji = "▶";
+            }
+            case PAUSE -> {
+				emoji = "⏸";
+            }
+        }
+
 		if (track != null) {
 			VoiceChannel voiceChannel = null;
 			for (VoiceChannel vc : this.guild.getVoiceChannels()) {
@@ -96,7 +115,7 @@ public class TrackScheduler extends AudioEventAdapter {
 			}
 
 			if (voiceChannel != null) {
-				voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
+				voiceChannel.modifyStatus(emoji + track.getInfo().title).complete();
 			}
 		}
 
@@ -114,7 +133,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 		if (voiceChannel != null) {
 			if (track != null) {
-				voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
+				voiceChannel.modifyStatus(emoji + track.getInfo().title).complete();
 			} else {
 				voiceChannel.modifyStatus("").complete();
 			}
