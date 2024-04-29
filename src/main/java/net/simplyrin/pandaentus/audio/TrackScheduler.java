@@ -96,7 +96,7 @@ public class TrackScheduler extends AudioEventAdapter {
 			}
 
 			if (voiceChannel != null) {
-				voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
+				voiceChannel.modifyStatus("🎵　" + track.getInfo().title).complete();
 			}
 		}
 

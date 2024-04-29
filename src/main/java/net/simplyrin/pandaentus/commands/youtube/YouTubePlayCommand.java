@@ -129,7 +129,7 @@ public class YouTubePlayCommand extends BaseCommand {
 			}
 
 			embedBuilder.setColor(Color.RED);
-			embedBuilder.setAuthor("ファイルを準備しています...", null, "https://static.simplyrin.net/gif/loading.gif?id=1");
+			embedBuilder.setAuthor("準備しています...");
 			Message message = event.reply(embedBuilder.build());
 
 			ThreadPool.run(() -> {
@@ -150,6 +150,7 @@ public class YouTubePlayCommand extends BaseCommand {
 							embedBuilder.clearFields();
 							embedBuilder.addField("🎵 タイトル", track.getInfo().title, true);
 							embedBuilder.addField("💿 アーティスト", track.getInfo().author, true);
+							messages.add(embedBuilder.build());
 							
 							BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
 							BaseCommand yt = instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
