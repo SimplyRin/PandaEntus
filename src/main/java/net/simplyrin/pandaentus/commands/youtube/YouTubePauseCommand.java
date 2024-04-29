@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
+import net.simplyrin.pandaentus.audio.TrackScheduler;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
 import net.simplyrin.pandaentus.classes.CommandType;
@@ -88,7 +89,7 @@ public class YouTubePauseCommand extends BaseCommand {
 		
 		musicManager.getPlayer().setPaused(true);
 		channel.sendMessage("曲を一時停止しました。").complete();
-		musicManager.getScheduler().updateVoiceStatus(null);
+		musicManager.getScheduler().updateVoiceStatus(audioTrack, TrackScheduler.TrackStatus.PAUSE);
 	}
 
 }
