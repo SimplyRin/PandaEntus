@@ -85,6 +85,7 @@ public class YouTubeResumeCommand extends BaseCommand {
 		
 		musicManager.getPlayer().setPaused(false);
 		event.reply("一時停止している曲を再生します。");
+		musicManager.getScheduler().updateVoiceStatus(audioTrack);
 	}
 
 }

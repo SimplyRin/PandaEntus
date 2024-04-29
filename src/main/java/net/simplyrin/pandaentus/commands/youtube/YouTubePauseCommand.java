@@ -88,6 +88,7 @@ public class YouTubePauseCommand extends BaseCommand {
 		
 		musicManager.getPlayer().setPaused(true);
 		channel.sendMessage("曲を一時停止しました。").complete();
+		musicManager.getScheduler().updateVoiceStatus(null);
 	}
 
 }
