@@ -121,7 +121,7 @@ public class YouTubeQueueCommand extends BaseCommand {
 		}
 		embedBuilder.setDescription(message);
 		embedBuilder.setColor(Color.CYAN);
-		embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand(), ", シャッフル: " + shuffleCommand.getCommand());
+		embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand() + ", シャッフル: " + shuffleCommand.getCommand());
 
 		event.reply(embedBuilder.build());
 	}
