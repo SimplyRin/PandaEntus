@@ -101,24 +101,6 @@ public class TrackScheduler extends AudioEventAdapter {
             }
         }
 
-		if (track != null) {
-			VoiceChannel voiceChannel = null;
-			for (VoiceChannel vc : this.guild.getVoiceChannels()) {
-				for (Member member : vc.getMembers()) {
-					User user = member.getUser();
-					User selfUser = this.instance.getJda().getSelfUser();
-
-					if (user.getId().equals(selfUser.getId())) {
-						voiceChannel = vc;
-					}
-				}
-			}
-
-			if (voiceChannel != null) {
-				voiceChannel.modifyStatus(emoji + track.getInfo().title).complete();
-			}
-		}
-
 		VoiceChannel voiceChannel = null;
 		for (VoiceChannel vc : this.guild.getVoiceChannels()) {
 			for (Member member : vc.getMembers()) {
@@ -133,7 +115,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
 		if (voiceChannel != null) {
 			if (track != null) {
-				voiceChannel.modifyStatus(emoji + track.getInfo().title).complete();
+				voiceChannel.modifyStatus(emoji + " " + track.getInfo().title).complete();
 			} else {
 				voiceChannel.modifyStatus("").complete();
 			}
@@ -168,15 +150,12 @@ public class TrackScheduler extends AudioEventAdapter {
 			if (voiceChannel != null) {
 				if (voiceChannel.getMembers().size() >= 1) {
 					player.startTrack(track.makeClone(), false);
-					voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
-					return;
 				}
 				
 				else if (this.instance.getForceLoopMap().get(this.guild.getIdLong()) != null) {
 					var forceLoopTrack = this.instance.getForceLoopMap().get(this.guild.getIdLong());
 					
 					player.startTrack(forceLoopTrack.makeClone(), false);
-					voiceChannel.modifyStatus("🎵 " + forceLoopTrack.getInfo().title).complete();
 				}
 			}
 		} else if (endReason.mayStartNext) {
