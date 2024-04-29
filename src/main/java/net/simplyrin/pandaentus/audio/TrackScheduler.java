@@ -94,10 +94,10 @@ public class TrackScheduler extends AudioEventAdapter {
 
 		switch (status) {
             case PLAY -> {
-				emoji = "▶";
+				emoji = ":arrow_forward:";
             }
             case PAUSE -> {
-				emoji = "⏸";
+				emoji = ":pause_button:";
             }
         }
 
