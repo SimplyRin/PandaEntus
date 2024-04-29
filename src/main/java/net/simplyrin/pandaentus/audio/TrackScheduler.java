@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.audio;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -51,7 +53,19 @@ public class TrackScheduler extends AudioEventAdapter {
 		// track goes to the queue instead.
 		if (!this.player.startTrack(track, true)) {
 			this.queue.offer(track);
+		} else {
+			this.updateVoiceStatus(track);
 		}
+	}
+
+	public void shuffle() {
+		AudioTrack[] array = this.queue.toArray(new AudioTrack[0]);
+		Collections.shuffle(Arrays.asList(array));
+
+		// クリア
+		this.clearPlaylist();
+
+		Collections.addAll(this.queue, array);
 	}
 
 	/**
@@ -64,7 +78,11 @@ public class TrackScheduler extends AudioEventAdapter {
 
 		this.player.startTrack(track, false);
 
-        if (track != null) {
+        this.updateVoiceStatus(track);
+    }
+
+	public void updateVoiceStatus(AudioTrack track) {
+		if (track != null) {
 			VoiceChannel voiceChannel = null;
 			for (VoiceChannel vc : this.guild.getVoiceChannels()) {
 				for (Member member : vc.getMembers()) {
@@ -77,11 +95,31 @@ public class TrackScheduler extends AudioEventAdapter {
 				}
 			}
 
-            if (voiceChannel != null) {
-                voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
-            }
-        }
-    }
+			if (voiceChannel != null) {
+				voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
+			}
+		}
+
+		VoiceChannel voiceChannel = null;
+		for (VoiceChannel vc : this.guild.getVoiceChannels()) {
+			for (Member member : vc.getMembers()) {
+				User user = member.getUser();
+				User selfUser = this.instance.getJda().getSelfUser();
+
+				if (user.getId().equals(selfUser.getId())) {
+					voiceChannel = vc;
+				}
+			}
+		}
+
+		if (voiceChannel != null) {
+			if (track != null) {
+				voiceChannel.modifyStatus("🎵 " + track.getInfo().title).complete();
+			} else {
+				voiceChannel.modifyStatus("").complete();
+			}
+		}
+	}
 
 	/**
 	 * Clear playlist
@@ -124,6 +162,8 @@ public class TrackScheduler extends AudioEventAdapter {
 			}
 		} else if (endReason.mayStartNext) {
 			this.nextTrack();
+		} else {
+			this.updateVoiceStatus(null);
 		}
 	}
 
