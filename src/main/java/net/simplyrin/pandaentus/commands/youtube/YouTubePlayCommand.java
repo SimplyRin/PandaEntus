@@ -137,6 +137,8 @@ public class YouTubePlayCommand extends BaseCommand {
 				BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 				BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
 				BaseCommand shuffleCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeShuffleCommand.class);
+
+				String footer = "追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand() + ", シャッフル: " + shuffleCommand.getCommand();
 				
 				AudioManager audioManager = guild.getAudioManager();
 				audioManager.openAudioConnection(voiceChannel);
@@ -154,7 +156,7 @@ public class YouTubePlayCommand extends BaseCommand {
 							embedBuilder.clearFields();
 							embedBuilder.addField("🎵 タイトル", track.getInfo().title, true);
 							embedBuilder.addField("💿 アーティスト", track.getInfo().author, true);
-							embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand(), ", シャッフル: " + shuffleCommand.getCommand());
+							embedBuilder.setFooter(footer);
 							messages.add(embedBuilder.build());
 							
 							BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
