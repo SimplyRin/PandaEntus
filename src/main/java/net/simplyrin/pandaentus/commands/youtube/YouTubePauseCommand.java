@@ -1,5 +1,6 @@
 package net.simplyrin.pandaentus.commands.youtube;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -53,7 +54,7 @@ public class YouTubePauseCommand extends BaseCommand {
 
 	@Override
 	public List<String> getAlias() {
-		return null;
+		return Arrays.asList("!stop");
 	}
 
 	@Override
