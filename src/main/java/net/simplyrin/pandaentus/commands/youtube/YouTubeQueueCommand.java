@@ -80,6 +80,7 @@ public class YouTubeQueueCommand extends BaseCommand {
 		BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 		BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
 		BaseCommand loopCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeLoopCommand.class);
+		BaseCommand shuffleCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeShuffleCommand.class);
 
 		AudioTrack at = instance.getLoopMap().get(guild.getIdLong());
 		if (at != null) {
@@ -120,7 +121,7 @@ public class YouTubeQueueCommand extends BaseCommand {
 		}
 		embedBuilder.setDescription(message);
 		embedBuilder.setColor(Color.CYAN);
-		embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand());
+		embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand(), ", シャッフル: " + shuffleCommand.getCommand());
 
 		event.reply(embedBuilder.build());
 	}

@@ -133,6 +133,10 @@ public class YouTubePlayCommand extends BaseCommand {
 			Message message = event.reply(embedBuilder.build());
 
 			ThreadPool.run(() -> {
+
+				BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
+				BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
+				BaseCommand shuffleCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeShuffleCommand.class);
 				
 				AudioManager audioManager = guild.getAudioManager();
 				audioManager.openAudioConnection(voiceChannel);
@@ -150,6 +154,7 @@ public class YouTubePlayCommand extends BaseCommand {
 							embedBuilder.clearFields();
 							embedBuilder.addField("🎵 タイトル", track.getInfo().title, true);
 							embedBuilder.addField("💿 アーティスト", track.getInfo().author, true);
+							embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand(), ", シャッフル: " + shuffleCommand.getCommand());
 							messages.add(embedBuilder.build());
 							
 							BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
@@ -159,7 +164,7 @@ public class YouTubePlayCommand extends BaseCommand {
 							instance.play(guild, musicManager, track);
 
 							if (messages.size() == 1) {
-								event.reply(messages.get(0));
+								message.editMessageEmbeds(messages.get(0)).complete();
 							}
 						}
 
