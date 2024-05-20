@@ -201,6 +201,8 @@ public class AkinatorManager extends ListenerAdapter {
 		case "８":
 			textChannel.sendMessage(":pray:").complete();
 
+			this.isGameEnd = true;
+
 			this.akiWrapper = null;
 			this.guild.getJDA().removeEventListener(this);
 			return null;
