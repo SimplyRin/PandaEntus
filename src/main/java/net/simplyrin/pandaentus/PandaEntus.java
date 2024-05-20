@@ -46,6 +46,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.simplyrin.config.Config;
 import net.simplyrin.config.Configuration;
 import net.simplyrin.pandaentus.audio.GuildMusicManager;
+import net.simplyrin.pandaentus.audio.TrackScheduler;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.ReactionMessage;
 import net.simplyrin.pandaentus.gamemanager.AkinatorManager;
@@ -640,6 +641,11 @@ public class PandaEntus {
 
 		if (musicManager.getPlayer().isPaused()) {
 			musicManager.getPlayer().setPaused(false);
+
+			var nowPlaying = musicManager.getPlayer().getPlayingTrack();
+			if (nowPlaying != null) {
+				musicManager.getScheduler().updateVoiceStatus(nowPlaying, TrackScheduler.TrackStatus.PLAY);
+			}
 		}
 
 		musicManager.getScheduler().queue(track);
