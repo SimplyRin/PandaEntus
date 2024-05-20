@@ -82,7 +82,7 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
 	public enum TrackStatus {
-		PLAY, PAUSE
+		PLAY, PAUSE, END
 	}
 
 	public void updateVoiceStatus(AudioTrack track) {

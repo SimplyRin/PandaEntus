@@ -123,7 +123,7 @@ public class PandaEntus {
 	public void run(String[] args) {
 		RinStream rinStream = new RinStream();
 		rinStream.setPrefix("yyyy/MM/dd (E) HH:mm:ss")
-				.enableError()
+				// .enableError()
 				.setSaveLog(true)
 				.setEnableColor(true)
 				.setEnableTranslateColor(true);
@@ -637,6 +637,11 @@ public class PandaEntus {
 	public void play(Guild guild, GuildMusicManager musicManager, AudioTrack track) {
 		int volume = this.config.getInt("Guild." + guild.getId() + ".Voice-Volume", 1);
 		musicManager.getPlayer().setVolume(volume);
+
+		if (musicManager.getPlayer().isPaused()) {
+			musicManager.getPlayer().setPaused(false);
+		}
+
 		musicManager.getScheduler().queue(track);
 	}
 

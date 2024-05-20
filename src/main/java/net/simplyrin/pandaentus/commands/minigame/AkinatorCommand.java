@@ -69,8 +69,7 @@ public class AkinatorCommand extends BaseCommand {
 			instance.getAkiMap().put(channel.getId(), new AkinatorManager(event.getGuild(), channel.getId()));
 			AkinatorManager am = instance.getAkiMap().get(channel.getId());
 
-			EmbedBuilder embedBuilder = new EmbedBuilder();
-			am.setEmbed(embedBuilder);
+			EmbedBuilder embedBuilder = am.setEmbed(am.getQuestion());
 			String latestId = channel.sendMessageEmbeds(embedBuilder.build()).complete().getId();
 			am.setLatestMessageId(latestId);
 		});

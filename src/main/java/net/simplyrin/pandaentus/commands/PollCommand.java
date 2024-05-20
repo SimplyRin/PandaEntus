@@ -34,11 +34,11 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class PoolCommand extends BaseCommand {
+public class PollCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!pool";
+		return "!poll";
 	}
 	
 	@Override
@@ -54,7 +54,21 @@ public class PoolCommand extends BaseCommand {
 				.addOption(OptionType.STRING, "3", "3個目のアイテム")
 				.addOption(OptionType.STRING, "4", "4個目のアイテム")
 				.addOption(OptionType.STRING, "5", "5個目のアイテム")
-				.addOption(OptionType.STRING, "6", "6個目のアイテム");
+				.addOption(OptionType.STRING, "6", "6個目のアイテム")
+				.addOption(OptionType.STRING, "7", "7個目のアイテム")
+				.addOption(OptionType.STRING, "8", "8個目のアイテム")
+				.addOption(OptionType.STRING, "9", "9個目のアイテム")
+				.addOption(OptionType.STRING, "10", "10個目のアイテム")
+				.addOption(OptionType.STRING, "11", "11個目のアイテム")
+				.addOption(OptionType.STRING, "12", "12個目のアイテム")
+				.addOption(OptionType.STRING, "13", "13個目のアイテム")
+				.addOption(OptionType.STRING, "14", "14個目のアイテム")
+				.addOption(OptionType.STRING, "15", "15個目のアイテム")
+				.addOption(OptionType.STRING, "16", "16個目のアイテム")
+				.addOption(OptionType.STRING, "17", "17個目のアイテム")
+				.addOption(OptionType.STRING, "18", "18個目のアイテム")
+				.addOption(OptionType.STRING, "19", "19個目のアイテム")
+				.addOption(OptionType.STRING, "20", "20個目のアイテム");
 	}
 	
 	@Override
@@ -79,7 +93,7 @@ public class PoolCommand extends BaseCommand {
 		if (event.isSlashCommand()) {
 			var s = event.getSlashCommandEvent();
 			
-			args = new String[7];
+			args = new String[21];
 			args[0] = this.getCommand();
 			args[1] = s.getOption("1").getAsString();
 			args[2] = s.getOption("2").getAsString();
@@ -87,6 +101,21 @@ public class PoolCommand extends BaseCommand {
 			args[4] = s.getOption("4") != null ? s.getOption("4").getAsString() : null;
 			args[5] = s.getOption("5") != null ? s.getOption("5").getAsString() : null;
 			args[6] = s.getOption("6") != null ? s.getOption("6").getAsString() : null;
+			args[7] = s.getOption("7") != null ? s.getOption("7").getAsString() : null;
+			args[8] = s.getOption("8") != null ? s.getOption("8").getAsString() : null;
+			args[9] = s.getOption("9") != null ? s.getOption("9").getAsString() : null;
+			args[10] = s.getOption("10") != null ? s.getOption("10").getAsString() : null;
+
+			args[11] = s.getOption("11") != null ? s.getOption("11").getAsString() : null;
+			args[12] = s.getOption("12") != null ? s.getOption("12").getAsString() : null;
+			args[13] = s.getOption("13") != null ? s.getOption("13").getAsString() : null;
+			args[14] = s.getOption("14") != null ? s.getOption("14").getAsString() : null;
+			args[15] = s.getOption("15") != null ? s.getOption("15").getAsString() : null;
+			args[16] = s.getOption("16") != null ? s.getOption("16").getAsString() : null;
+			args[17] = s.getOption("17") != null ? s.getOption("17").getAsString() : null;
+			args[18] = s.getOption("18") != null ? s.getOption("18").getAsString() : null;
+			args[19] = s.getOption("19") != null ? s.getOption("19").getAsString() : null;
+			args[20] = s.getOption("20") != null ? s.getOption("20").getAsString() : null;
 		}
 
 		User user = event.getAuthor();

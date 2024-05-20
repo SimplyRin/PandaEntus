@@ -1,14 +1,7 @@
 package net.simplyrin.pandaentus.gamemanager;
 
 import java.util.List;
-
-import com.markozajc.akiwrapper.Akiwrapper;
-import com.markozajc.akiwrapper.Akiwrapper.Answer;
-import com.markozajc.akiwrapper.AkiwrapperBuilder;
-import com.markozajc.akiwrapper.core.entities.Guess;
-import com.markozajc.akiwrapper.core.entities.Question;
-import com.markozajc.akiwrapper.core.entities.Server.Language;
-import com.markozajc.akiwrapper.core.exceptions.ServerNotFoundException;
+import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +13,11 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.simplyrin.pandaentus.utils.ThreadPool;
+import org.eu.zajc.akiwrapper.Akiwrapper;
+import org.eu.zajc.akiwrapper.AkiwrapperBuilder;
+import org.eu.zajc.akiwrapper.core.entities.Guess;
+import org.eu.zajc.akiwrapper.core.entities.Query;
+import org.eu.zajc.akiwrapper.core.entities.Question;
 
 /**
  * Created by SimplyRin on 2020/03/18.
@@ -51,48 +49,115 @@ public class AkinatorManager extends ListenerAdapter {
 
 	private String lastChannel;
 
+	private boolean isGameEnd = false;
+
+	private Query query;
+
+	private boolean isReceivingQuestion;
+	private Question question;
+
+	private Guess guess;
+
 	public AkinatorManager(Guild guild, String channelId) {
 		this.guild = guild;
 		this.channelId = channelId;
 
-		try {
-			this.akiWrapper = new AkiwrapperBuilder()
-					.setFilterProfanity(false)
-					.setLanguage(Language.JAPANESE)
-					.build();
-		} catch (ServerNotFoundException e) {
-			e.printStackTrace();
-		}
+		this.akiWrapper = new AkiwrapperBuilder()
+				.setFilterProfanity(false)
+				.setLanguage(Akiwrapper.Language.JAPANESE)
+				.build();
 
 		guild.getJDA().addEventListener(this);
+
+		TextChannel channel = guild.getTextChannelById(this.channelId);
+
+		this.query = this.akiWrapper.getCurrentQuery();
+
+		while (this.query != null) {
+			if (this.isGameEnd) {
+				break;
+			}
+
+			EmbedBuilder embedBuilder = new EmbedBuilder();
+
+			if (this.query instanceof Question question) {
+				// onMessageReceived を有効にして、結果を送る
+
+				this.isReceivingQuestion = true;
+				this.question = question;
+
+				embedBuilder = this.setEmbed(this.question);
+
+				channel.sendMessageEmbeds(embedBuilder.build()).complete();
+
+				while (this.isReceivingQuestion) {
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+
+			}
+
+			else if (this.query instanceof Guess guess) {
+				this.guess = guess;
+
+				embedBuilder.setAuthor("あなたが想像しているのは...");
+				embedBuilder.setDescription(guess.getName() + " (" + guess.getDescription() + ")");
+				embedBuilder.setImage(guess.getImage().toExternalForm());
+				embedBuilder.addField("正解！", "1", true);
+				embedBuilder.addField("違うので続ける...", "2", true);
+
+				this.isReceivingQuestion = true;
+				this.checkEnd = true;
+				channel.sendMessageEmbeds(embedBuilder.build()).complete();
+
+				if (guess.getDescription() != null && !guess.getDescription().equals("---")) {
+					System.out.println(guess.getDescription());
+				}
+
+				while (this.checkEnd) {
+					try {
+						TimeUnit.SECONDS.sleep(1);
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		}
+
+		System.out.println("Bravo!");
 	}
 
 	private boolean checkEnd = false;
 
-	public Answer parseAnswer(String value) {
+	public Akiwrapper.Answer parseAnswer(String value) {
 		TextChannel textChannel = this.guild.getTextChannelById(this.channelId);
 
 		if (this.checkEnd) {
 			switch (value.toLowerCase()) {
 			case "1":
 			case "１":
-				textChannel.sendMessage("お疲れさまでした。").complete();
+				textChannel.sendMessage("おち").complete();
+
+				this.isGameEnd = true;
+
+				this.isReceivingQuestion = false;
+				this.checkEnd = false;
+				this.guess.confirm();
 
 				this.akiWrapper = null;
 				this.guild.getJDA().removeEventListener(this);
 				return null;
 			case "2":
 			case "２":
+				this.isReceivingQuestion = false;
 				this.checkEnd = false;
+
+				this.query = this.guess.reject();
 			}
-
-			
-			textChannel.sendTyping().complete();
-
-			EmbedBuilder embedBuilder = new EmbedBuilder();
-			this.setEmbed(embedBuilder);
-
-			// textChannel.sendMessage(embedBuilder.build()).complete();
 
 			return null;
 		}
@@ -102,35 +167,34 @@ public class AkinatorManager extends ListenerAdapter {
 		case "はい":
 		case "1":
 		case "１":
-			return Answer.YES;
+			return Akiwrapper.Answer.YES;
 		case "いいえ":
 		case "2":
 		case "２":
-			return Answer.NO;
+			return Akiwrapper.Answer.NO;
 		case "わからない":
 		case "分からない":
 		case "3":
 		case "３":
-			return Answer.DONT_KNOW;
+			return Akiwrapper.Answer.DONT_KNOW;
 		case "たぶんそう":
 		case "部分的にそう":
 		case "4":
 		case "４":
-			return Answer.PROBABLY;
+			return Akiwrapper.Answer.PROBABLY;
 		case "たぶん違う":
 		case "そうでもない":
 		case "5":
 		case "５":
-			return Answer.PROBABLY_NOT;
+			return Akiwrapper.Answer.PROBABLY_NOT;
 		case "もどる":
 		case "戻る":
 		case "7":
 		case "７":
 			textChannel.sendTyping().complete();
 
-			this.akiWrapper.undoAnswer();
+			this.query = this.question.undoAnswer();
 
-			textChannel.sendMessageEmbeds(this.setEmbed(null).build()).complete();
 			return null;
 		case "やめる":
 		case "8":
@@ -144,12 +208,9 @@ public class AkinatorManager extends ListenerAdapter {
 		return null;
 	}
 
-	public EmbedBuilder setEmbed(EmbedBuilder embedBuilder) {
-		if (embedBuilder == null) {
-			embedBuilder = new EmbedBuilder();
-		}
-		Question question = this.akiWrapper.getCurrentQuestion();
-		embedBuilder.setDescription("**" + question.getQuestion() + "**");
+	public EmbedBuilder setEmbed(Question question) {
+		EmbedBuilder embedBuilder = new EmbedBuilder();
+		embedBuilder.setDescription("**" + question.getText() + "**");
 		embedBuilder.setAuthor("進行度: " + question.getProgression() + "% (" + (question.getStep() + 1) + ")");
 		embedBuilder.addField("はい", "1", true);
 		embedBuilder.addField("いいえ", "2", true);
@@ -182,42 +243,22 @@ public class AkinatorManager extends ListenerAdapter {
 			return;
 		}
 
+		if (!this.isReceivingQuestion) {
+			return;
+		}
+
 		String message = event.getMessage().getContentRaw().trim();
 
 		ThreadPool.run(() -> {
-			Answer answer = this.parseAnswer(message);
+			Akiwrapper.Answer answer = this.parseAnswer(message);
+
 			if (answer != null) {
 				channel.sendTyping().complete();
 
-				EmbedBuilder embedBuilder = new EmbedBuilder();
-
-				List<Guess> guesses = this.akiWrapper.getGuessesAboveProbability(0.85);
-				for (Guess guess : guesses) {
-					if (!guess.getDescription().equals("---")) {
-						embedBuilder.setAuthor("あなたが想像しているのは...");
-						embedBuilder.setDescription(guess.getName() + " (" + guess.getDescription() + ")");
-						embedBuilder.setImage(guess.getImage().toExternalForm());
-						embedBuilder.addField("正解！", "1", true);
-						embedBuilder.addField("違うので続ける...", "2", true);
-
-						this.checkEnd = true;
-						channel.sendMessageEmbeds(embedBuilder.build()).complete();
-					}
-				}
-
-				for (Guess guess : this.akiWrapper.getGuesses()) {
-					if (guess.getDescription() != null && !guess.getDescription().equals("---")) {
-						System.out.println(guess.getDescription());
-					}
-				}
-
-				if (!this.checkEnd) {
-					this.akiWrapper.answerCurrentQuestion(answer);
-
-					this.setEmbed(embedBuilder);
-					channel.sendMessageEmbeds(embedBuilder.build()).complete();
-				}
+				this.query = this.question.answer(answer);
 			}
+
+			this.isReceivingQuestion = false;
 		});
 	}
 

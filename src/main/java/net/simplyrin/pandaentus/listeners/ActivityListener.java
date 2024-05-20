@@ -85,6 +85,10 @@ public class ActivityListener extends ListenerAdapter {
 		var guild = event.getGuild();
 		var member = event.getMember();
 		var activity = event.getNewActivity();
+
+		if (member.getUser().isBot()) {
+			return;
+		}
 		
 		this.instance.getVcNameManager().updateVoiceChannelName(member, activity);
 
@@ -95,7 +99,7 @@ public class ActivityListener extends ListenerAdapter {
 		if (!this.map.get(guild.getId() + "-" + member.getId()).contains(activity.getName())) {
 			this.map.get(guild.getId() + "-" + member.getId()).add(activity.getName());
 		}
-		
+
 		System.out.println("[ActivityListener-START] " + member.getEffectiveName() + "@" + guild.getId() + ": " + activity.getName());
 	}
 	
@@ -103,6 +107,10 @@ public class ActivityListener extends ListenerAdapter {
 	public void onUserActivityEnd(UserActivityEndEvent event) {
 		var guild = event.getGuild();
 		var member = event.getMember();
+
+		if (member.getUser().isBot()) {
+			return;
+		}
 		
 		this.instance.getVcNameManager().updateVoiceChannelName(member);
 
