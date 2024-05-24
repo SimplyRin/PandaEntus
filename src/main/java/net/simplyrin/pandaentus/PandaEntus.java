@@ -22,14 +22,12 @@ import java.util.UUID;
 import com.google.common.reflect.ClassPath;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.youtube2.YoutubeAudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.youtube2.clients.skeleton.Client;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
