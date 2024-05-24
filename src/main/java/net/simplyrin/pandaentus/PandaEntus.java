@@ -23,6 +23,10 @@ import com.google.common.reflect.ClassPath;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.youtube2.YoutubeAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.youtube2.clients.skeleton.Client;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
@@ -261,9 +265,14 @@ public class PandaEntus {
 		this.musicManagers = new HashMap<>();
 		this.playerManager = new DefaultAudioPlayerManager();
 		this.playerManager.createPlayer();
-		AudioSourceManagers.registerRemoteSources(this.playerManager);
-		AudioSourceManagers.registerLocalSource(this.playerManager);
-		
+		// AudioSourceManagers.registerRemoteSources(this.playerManager);
+		// AudioSourceManagers.registerLocalSource(this.playerManager);
+		this.playerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
+		this.playerManager.registerSourceManager(new BandcampAudioSourceManager());
+
+		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(/*allowSearch:*/ false);
+		this.playerManager.registerSourceManager(youtube);
+
 		this.vcNameManager = new VoiceChannelNameManager(this);
 
 		this.jda.getPresence().setActivity(Activity.playing("🐼"));
