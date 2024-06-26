@@ -12,7 +12,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'microsoft'
-        java-version: '21'
+        java-version: '17'
     - name: Set outputs
       id: vars
       run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
