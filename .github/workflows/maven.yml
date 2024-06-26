@@ -7,12 +7,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 16
-      uses: actions/setup-java@v1
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
       with:
-        distribution: 'adopt'
-        java-version: '16'
+        distribution: 'microsoft'
+        java-version: '21'
     - name: Set outputs
       id: vars
       run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
@@ -25,4 +25,3 @@ jobs:
       with:
         name: PandaEntus Artifacts
         path: target/PandaEntus-*.jar
-
