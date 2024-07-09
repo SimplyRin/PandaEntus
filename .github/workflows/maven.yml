@@ -67,8 +67,8 @@ jobs:
           set -x
           export PANDAENTUS=$(md5sum ./target/PandaEntus-1.3.jar | cut -d ' ' -f 1)
           export PANDAENTUS_WITH_DEPENDENCIES=$(md5sum ./target/PandaEntus-1.3-jar-with-dependencies.jar | cut -d ' ' -f 1)
-          echo ::set-output name=pandaentus::"PANDAENTUS"
-          echo ::set-output name=pandaentus_with_dependencies::"PANDAENTUS_WITH_DEPENDENCIES"
+          echo ::set-output name=pandaentus::"$PANDAENTUS"
+          echo ::set-output name=pandaentus_with_dependencies::"$PANDAENTUS_WITH_DEPENDENCIES"
           set +x
       - name: Update Release
         uses: irongut/EditRelease@v1.2.0
