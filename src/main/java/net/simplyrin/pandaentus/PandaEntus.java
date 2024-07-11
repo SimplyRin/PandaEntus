@@ -28,6 +28,10 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import dev.lavalink.youtube.clients.Android;
+import dev.lavalink.youtube.clients.Music;
+import dev.lavalink.youtube.clients.TvHtml5Embedded;
+import dev.lavalink.youtube.clients.Web;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -268,7 +272,7 @@ public class PandaEntus {
 		this.playerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		this.playerManager.registerSourceManager(new BandcampAudioSourceManager());
 
-		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(/*allowSearch:*/ false);
+		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(/*allowSearch:*/ false, new Music(), new Web(), new Android(), new TvHtml5Embedded());
 		this.playerManager.registerSourceManager(youtube);
 
 		this.vcNameManager = new VoiceChannelNameManager(this);
