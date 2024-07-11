@@ -277,10 +277,10 @@ public class PandaEntus {
 		this.playerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		this.playerManager.registerSourceManager(new BandcampAudioSourceManager());
 
-		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(/*allowSearch:*/ false, new AndroidTestsuite());
+		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(/*allowSearch:*/ false, new Music(), new Web(), new Android(), new TvHtml5Embedded());
 
 		ArrayList<IpBlock> ipBlocks = new ArrayList<>();
-		RotatingIpRoutePlanner planner = new RotatingIpRoutePlanner(ipBlocks);
+		AbstractRoutePlanner planner = new RotatingIpRoutePlanner(ipBlocks);
 		YoutubeIpRotatorSetup rotator = new YoutubeIpRotatorSetup(planner);
 
 		rotator.forConfiguration(youtube.getHttpInterfaceManager(), false)
