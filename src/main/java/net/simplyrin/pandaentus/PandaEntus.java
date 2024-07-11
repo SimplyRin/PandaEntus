@@ -27,8 +27,13 @@ import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceM
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import com.sedmelluq.lava.extensions.youtuberotator.YoutubeIpRotatorSetup;
+import com.sedmelluq.lava.extensions.youtuberotator.planner.AbstractRoutePlanner;
+import com.sedmelluq.lava.extensions.youtuberotator.planner.RotatingIpRoutePlanner;
+import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.IpBlock;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.clients.Android;
+import dev.lavalink.youtube.clients.AndroidTestsuite;
 import dev.lavalink.youtube.clients.Music;
 import dev.lavalink.youtube.clients.TvHtml5Embedded;
 import dev.lavalink.youtube.clients.Web;
@@ -272,7 +277,16 @@ public class PandaEntus {
 		this.playerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		this.playerManager.registerSourceManager(new BandcampAudioSourceManager());
 
-		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(/*allowSearch:*/ false, new Music(), new Web(), new Android(), new TvHtml5Embedded());
+		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(/*allowSearch:*/ false, new AndroidTestsuite());
+
+		ArrayList<IpBlock> ipBlocks = new ArrayList<>();
+		RotatingIpRoutePlanner planner = new RotatingIpRoutePlanner(ipBlocks);
+		YoutubeIpRotatorSetup rotator = new YoutubeIpRotatorSetup(planner);
+
+		rotator.forConfiguration(youtube.getHttpInterfaceManager(), false)
+				.withMainDelegateFilter(null) // This is important, otherwise you may get NullPointerExceptions.
+				.setup();
+
 		this.playerManager.registerSourceManager(youtube);
 
 		this.vcNameManager = new VoiceChannelNameManager(this);
