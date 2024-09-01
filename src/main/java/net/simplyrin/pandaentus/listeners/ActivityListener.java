@@ -111,8 +111,13 @@ public class ActivityListener extends ListenerAdapter {
 		if (member.getUser().isBot()) {
 			return;
 		}
-		
-		this.instance.getVcNameManager().updateVoiceChannelName(member);
+
+		try {
+			// this.instance.getVcNameManager().updateVoiceChannelName(member);
+		} catch (Exception e) {
+
+		}
+
 
 		var activity = event.getOldActivity();
 		
