@@ -90,7 +90,7 @@ public class ActivityListener extends ListenerAdapter {
 			return;
 		}
 		
-		this.instance.getVcNameManager().updateVoiceChannelName(member, activity);
+		// this.instance.getVcNameManager().updateVoiceChannelName(member, activity);
 
 		if (this.map.get(guild.getId() + "-" + member.getId()) == null) {
 			this.map.put(guild.getId() + "-" + member.getId(), new ArrayList<>());
