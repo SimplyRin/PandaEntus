@@ -267,6 +267,7 @@ public class PandaEntus {
 		}
 
 		this.loopMap = new HashMap<>();
+		this.forceLoopMap = new HashMap<>();
 		this.previousTrack = new HashMap<>();
 
 		this.musicManagers = new HashMap<>();
