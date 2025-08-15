@@ -58,7 +58,7 @@ public class OutenCommand extends BaseCommand {
     @Override
     public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
         int min = 1;
-        int max = 3;
+        int max = instance.getDataConfig().getInt("OutenMaster", 3);
 
         int random = new Random().nextInt(min, max + 1);
 
