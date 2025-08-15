@@ -34,7 +34,7 @@ jobs:
         run: mvn clean package -DSHA=${{ env.SHA_SHORT }} -Dbuild.type=github -Dbuild.number=${{ github.run_number }}
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Module Artifacts
           path: "target/**.jar"
