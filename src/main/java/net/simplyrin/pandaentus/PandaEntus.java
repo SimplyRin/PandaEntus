@@ -98,6 +98,7 @@ public class PandaEntus {
 	}
 
 	private Configuration config;
+	private Configuration dataConfig;
 	private Configuration activityConfig;
 	
 	private TimeManager timeManager;
@@ -185,6 +186,22 @@ public class PandaEntus {
 		}
 
 		this.config = Config.getConfig(file);
+
+		File dataFile = new File("data.yml");
+		if (!dataFile.exists()) {
+			try {
+				dataFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			Configuration dataConfig = Config.getConfig(dataFile);
+			dataConfig.set("OutenMaster", 3);
+            
+			Config.saveConfig(dataConfig, dataFile);
+		}
+		
+		this.dataConfig = Config.getConfig(dataFile);
 		
 		File activityData = new File("activity.yml");
 		if (!activityData.exists()) {
@@ -296,6 +313,7 @@ public class PandaEntus {
 		this.addShutdownHook(() -> {
 			jda.shutdown();
 			Config.saveConfig(this.config, "config.yml");
+            Config.saveConfig(this.dataConfig, "data.yml");
 			Config.saveConfig(this.activityConfig, "activity.yml");
 			poolItems.save();
 			System.out.println("Config ファイルを保存しました。");
@@ -307,6 +325,10 @@ public class PandaEntus {
 	public void saveConfig() {
 		Config.saveConfig(this.config, "config.yml");
 	}
+
+    public void saveDataConfig() {
+        Config.saveConfig(this.dataConfig, "data.yml");
+    }
 	
 	public void saveActivityConfig() {
 		File activityData = new File("activity.yml");
