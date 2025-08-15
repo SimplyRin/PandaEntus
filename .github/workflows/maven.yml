@@ -1,10 +1,19 @@
 name: Java CI
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version for artifacts'
+        required: false
+        default: '1.3'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.release_version || '1.3' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -57,8 +66,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/PandaEntus-1.3.jar
-          asset_name: PandaEntus-1.3.jar
+          asset_path: ./target/PandaEntus-${{ env.RELEASE_VERSION }}.jar
+          asset_name: PandaEntus-${{ env.RELEASE_VERSION }}.jar
           asset_content_type: application/java-archive
 
       - name: Upload Release Asset - PandaEntus-1.3-jar-with-dependencies.jar
@@ -67,15 +76,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/PandaEntus-1.3-jar-with-dependencies.jar
-          asset_name: PandaEntus-1.3-jar-with-dependencies.jar
+          asset_path: ./target/PandaEntus-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar
+          asset_name: PandaEntus-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar
           asset_content_type: application/java-archive
 
       - name: Check Hash
         id: md5
         run: |
-          export PANDAENTUS=$(md5sum ./target/PandaEntus-1.3.jar | cut -d ' ' -f 1)
-          export PANDAENTUS_WITH_DEPENDENCIES=$(md5sum ./target/PandaEntus-1.3-jar-with-dependencies.jar | cut -d ' ' -f 1)
+          export PANDAENTUS=$(md5sum ./target/PandaEntus-${RELEASE_VERSION}.jar | cut -d ' ' -f 1)
+          export PANDAENTUS_WITH_DEPENDENCIES=$(md5sum ./target/PandaEntus-${RELEASE_VERSION}-jar-with-dependencies.jar | cut -d ' ' -f 1)
           echo "PANDAENTUS=$PANDAENTUS" >> $GITHUB_ENV
           echo "PANDAENTUS_WITH_DEPENDENCIES=$PANDAENTUS_WITH_DEPENDENCIES" >> $GITHUB_ENV
 
@@ -87,6 +96,5 @@ jobs:
           body: |
             | Filename  | MD5 Hash |
             | ------------- | ------------- |
-            | [PandaEntus-1.3.jar](https://github.com/SimplyRin/PandaEntus/releases/download/v${{ github.run_number }}/PandaEntus-1.3.jar)  | ${{ env.PANDAENTUS }} |
-            | [PandaEntus-1.3-jar-with-dependencies.jar](https://github.com/PandaEntus/BungeeCord/releases/download/v${{ github.run_number }}/PandaEntus-1.3-jar-with-dependencies.jar)  | ${{ env.PANDAENTUS_WITH_DEPENDENCIES }} |
-
+            | [PandaEntus-${{ env.RELEASE_VERSION }}.jar](https://github.com/SimplyRin/PandaEntus/releases/download/v${{ github.run_number }}/PandaEntus-${{ env.RELEASE_VERSION }}.jar)  | ${{ env.PANDAENTUS }} |
+            | [PandaEntus-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar](https://github.com/PandaEntus/BungeeCord/releases/download/v${{ github.run_number }}/PandaEntus-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar)  | ${{ env.PANDAENTUS_WITH_DEPENDENCIES }} |
