@@ -1,0 +1,5 @@
+{
+    "java.jdt.ls.vmargs": "-javaagent:/Users/rin/.m2/repository/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar -Xbootclasspath/a:/Users/rin/.m2/repository/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "interactive"
+}
