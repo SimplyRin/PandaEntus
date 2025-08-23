@@ -26,21 +26,21 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class SameCommand extends BaseCommand {
+public class YoshiCommand extends BaseCommand {
 
 	@Override
 	public String getCommand() {
-		return "!same";
+		return "!yoshi";
 	}
 	
 	@Override
 	public String getDescription() {
-		return "驚かせましょう！";
+		return "ヨシ！";
 	}
 	
 	@Override
 	public CommandData getCommandData() {
-		return new CommandDataImpl("same", this.getDescription());
+		return new CommandDataImpl("yoshi", this.getDescription());
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class SameCommand extends BaseCommand {
 
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-		event.reply("https://api.rin.pink/pandaentus/same.jpg");
+		event.reply("https://api.rin.pink/pandaentus/yoshi.png");
 	}
 
 }
