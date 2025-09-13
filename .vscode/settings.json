@@ -3,5 +3,8 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "java.configuration.updateBuildConfiguration": "interactive",
     "editor.tabSize": 4,
-    "editor.insertSpaces": true
+    "editor.insertSpaces": false,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "redhat.java",
+    "java.format.enabled": true
 }

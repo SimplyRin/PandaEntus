@@ -20,18 +20,18 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  *
  * Copyright (C) 2020 SimplyRin
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 public class OjichatCommand extends BaseCommand {
 
@@ -39,16 +39,18 @@ public class OjichatCommand extends BaseCommand {
 	public String getCommand() {
 		return "!ojichat";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "おじさん構文を生成";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("ojichat", this.getDescription())
-				.addOption(OptionType.STRING, "名前", "指定した名前でおじさん構文を生成します。");
+				.addOption(OptionType.STRING, "名前", "指定した名前でおじさん構文を生成します。")
+				.addOption(OptionType.NUMBER, "絵文字数", "絵文字数を指定。デフォルト: 4")
+				.addOption(OptionType.NUMBER, "句読点レベル", "句読点レベルを指定。デフォルト: 0");
 	}
 
 	@Override
@@ -64,13 +66,15 @@ public class OjichatCommand extends BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
-		
+
 		if (event.isSlashCommand()) {
 			var s = event.getSlashCommandEvent();
-			
-			args = new String[2];
+
+			args = new String[4];
 			args[0] = this.getCommand();
 			args[1] = s.getOption("名前") != null ? s.getOption("名前").getAsString() : "";
+			args[2] = s.getOption("絵文字数") != null ? String.valueOf(s.getOption("絵文字数").getAsInt()) : "4";
+			args[3] = s.getOption("句読点レベル") != null ? String.valueOf(s.getOption("句読点レベル").getAsInt()) : "0";
 		}
 
 		MessageChannel channel = event.getChannel();
@@ -92,12 +96,12 @@ public class OjichatCommand extends BaseCommand {
 
 		String result;
 		try {
-            OjichatConfig config = new OjichatConfig();
-            config.setTargetName(name);  // 名前を指定
-            config.setEmojiNum(4);        // 絵文字数を指定
-            config.setPunctuationLevel(0); // 句読点レベルを指定
-        
-            result = OjichatGenerator.start(config);
+			OjichatConfig config = new OjichatConfig();
+			config.setTargetName(name); // 名前を指定
+			config.setEmojiNum(Integer.parseInt(args[2])); // 絵文字数を指定
+			config.setPunctuationLevel(Integer.parseInt(args[3])); // 句読点レベルを指定
+
+			result = OjichatGenerator.start(config);
 		} catch (Exception e) {
 			return;
 		}
