@@ -7,7 +7,8 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.internal.interactions.CommandDataImpl;
-import net.simplyrin.httpclient.HttpClient;
+import net.simplyrin.ojichat.generator.OjichatConfig;
+import net.simplyrin.ojichat.generator.OjichatGenerator;
 import net.simplyrin.pandaentus.PandaEntus;
 import net.simplyrin.pandaentus.classes.BaseCommand;
 import net.simplyrin.pandaentus.classes.CommandPermission;
@@ -83,28 +84,20 @@ public class OjichatCommand extends BaseCommand {
 
 		name = name.trim();
 
-		// テキトー！！
 		if (name.contains("-normal") || name.contains("-n")) {
 			normalText = true;
 			name = name.replace("-normal", "");
 			name = name.replace("-n", "");
 		}
 
-		name = name.trim();
-
-		HttpClient httpClient = new HttpClient("https://ojichat.appspot.com/post");
-		httpClient.setData("name=" + name + "&emoji_level=4&punctuation_level=0");
-
-		httpClient.setUserAgent(instance.getBotUserAgent());
-
-		httpClient.addHeader("Accept", "application/json, text/plain, */*");
-		httpClient.addHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
-		httpClient.addHeader("Origin", "https://oji.netlify.com");
-		httpClient.addHeader("Referer", "https://oji.netlify.com/");
-
 		String result;
 		try {
-			result = httpClient.getAsJsonObject().get("message").getAsString();
+            OjichatConfig config = new OjichatConfig();
+            config.setTargetName(name);  // 名前を指定
+            config.setEmojiNum(4);        // 絵文字数を指定
+            config.setPunctuationLevel(0); // 句読点レベルを指定
+        
+            result = OjichatGenerator.start(config);
 		} catch (Exception e) {
 			return;
 		}
@@ -121,7 +114,6 @@ public class OjichatCommand extends BaseCommand {
 				channel.sendMessageEmbeds(embedBuilder.build()).complete();
 			}
 		}
-		return;
 	}
 
 }
