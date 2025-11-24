@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -30,38 +32,43 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent;
  */
 public class OutenCommand extends BaseCommand {
 
-    @Override
-    public String getCommand() {
-        return "!outen";
-    }
-    
-    @Override
-    public String getDescription() {
-        return "おうてん";
-    }
-    
-    @Override
-    public CommandData getCommandData() {
-        return new CommandDataImpl("outen", this.getDescription());
-    }
+	@Override
+	public String getCommand() {
+		return "横転";
+	}
 
-    @Override
-    public CommandType getType() {
-        return CommandType.EqualsIgnoreCase;
-    }
+	@Override
+	public List<String> getAlias() {
+		return Arrays.asList("!outen");
+	}
 
-    @Override
-    public CommandPermission getPermission() {
-        return CommandPermission.Everyone;
-    }
+	@Override
+	public String getDescription() {
+		return "おうてん";
+	}
 
-    @Override
-    public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-        int min = 1;
-        int max = instance.getDataConfig().getInt("OutenMaster", 3);
+	@Override
+	public CommandData getCommandData() {
+		return new CommandDataImpl("outen", this.getDescription());
+	}
 
-        int random = new Random().nextInt(min, max + 1);
+	@Override
+	public CommandType getType() {
+		return CommandType.EqualsIgnoreCase;
+	}
 
-        event.reply("https://api.rin.pink/pandaentus/" + random + ".jpg");
-    }
+	@Override
+	public CommandPermission getPermission() {
+		return CommandPermission.Everyone;
+	}
+
+	@Override
+	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
+		int min = 1;
+		int max = instance.getDataConfig().getInt("OutenMaster", 3);
+
+		int random = new Random().nextInt(min, max + 1);
+
+		event.reply("https://api.rin.pink/pandaentus/" + random + ".jpg");
+	}
 }
