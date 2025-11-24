@@ -47,14 +47,14 @@ public class YouTubePauseCommand extends BaseCommand {
 	public String getDescription() {
 		return "再生中の曲を一時停止";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("pause", this.getDescription());
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!stop");
 	}
 
@@ -73,20 +73,20 @@ public class YouTubePauseCommand extends BaseCommand {
 		MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
-		
+
 		AudioChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 		if (voiceChannel == null) {
 			channel.sendMessage("ボイスチャンネルに接続してください。").complete();
 			return;
 		}
-		
+
 		AudioTrack audioTrack = musicManager.getPlayer().getPlayingTrack();
 		if (audioTrack == null) {
 			BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 			channel.sendMessage("現在何も再生していません。\n" + playCommand.getCommand() + " コマンドを利用して音楽を再生することができます。").complete();
 			return;
 		}
-		
+
 		musicManager.getPlayer().setPaused(true);
 		channel.sendMessage("曲を一時停止しました。").complete();
 		musicManager.getScheduler().updateVoiceStatus(audioTrack, TrackScheduler.TrackStatus.PAUSE);

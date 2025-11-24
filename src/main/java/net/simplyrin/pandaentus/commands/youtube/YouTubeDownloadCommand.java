@@ -37,10 +37,10 @@ public class YouTubeDownloadCommand extends BaseCommand {
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("https://youtu.be/", "https://soundcloud.com/");
 	}
-	
+
 	public boolean sendTyping() {
 		return false;
 	}
@@ -62,17 +62,18 @@ public class YouTubeDownloadCommand extends BaseCommand {
 			message += args[i] + " ";
 		}
 		message = message.trim();
-		
+
 		System.out.println(message.split("[\\/]").length);
-		
+
 		if (message.startsWith("https://soundcloud.com/")) {
 			System.out.println(message.split("[\\/]").length);
 		}
-		
-		if (message.startsWith("https://soundcloud.com/") && !message.contains("-") && message.split("[\\/]").length <= 4) {
+
+		if (message.startsWith("https://soundcloud.com/") && !message.contains("-")
+				&& message.split("[\\/]").length <= 4) {
 			return;
 		}
-		
+
 		Emoji emote = null;
 		for (Emoji temp : event.getGuild().getEmojis()) {
 			if (emote == null) {

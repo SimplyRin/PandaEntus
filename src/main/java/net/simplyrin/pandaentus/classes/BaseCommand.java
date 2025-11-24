@@ -28,31 +28,31 @@ public class BaseCommand {
 	public String getCommand() {
 		return null;
 	}
-	
+
 	public String getDescription() {
 		return null;
 	}
-	
+
 	public boolean sendTyping() {
 		return true;
 	}
-	
+
 	public CommandData getCommandData() {
 		return null;
 	}
-	
-	public List<String> getAlias() {
+
+	public List<String> getAliases() {
 		return null;
 	}
-	
+
 	public CommandType getType() {
 		return null;
 	}
-	
+
 	public CommandPermission getPermission() {
 		return null;
 	}
-	
+
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 	}
 

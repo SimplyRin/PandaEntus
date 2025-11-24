@@ -37,19 +37,19 @@ public class YouTubeLoopCommand extends BaseCommand {
 	public String getCommand() {
 		return "!loop";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "再生中の曲をループ";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("loop", this.getDescription());
 	}
-	
+
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return null;
 	}
 

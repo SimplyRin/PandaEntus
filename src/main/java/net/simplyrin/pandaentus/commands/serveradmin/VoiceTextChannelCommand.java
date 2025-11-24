@@ -37,7 +37,7 @@ public class VoiceTextChannelCommand extends BaseCommand {
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!vtc");
 	}
 
@@ -55,16 +55,16 @@ public class VoiceTextChannelCommand extends BaseCommand {
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		//MessageChannel channel = event.getChannel();
 		Guild guild = event.getGuild();
-		
+
 		Configuration config = instance.getConfig();
-		
+
 		String path = "Server." + guild.getId() + ".EnableVoiceTextChannel";
-		
+
 		boolean bool = config.getBoolean(path, false);
 		bool = !bool;
 
 		config.set(path, bool);
-		
+
 		event.reply("通話者用通話チャンネルを **" + (bool ? "無効" : "有効") + "** にしました。");
 	}
 

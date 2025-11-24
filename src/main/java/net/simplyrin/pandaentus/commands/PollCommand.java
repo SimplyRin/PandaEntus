@@ -40,12 +40,12 @@ public class PollCommand extends BaseCommand {
 	public String getCommand() {
 		return "!poll";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "投票用プールメッセージを作成";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("pool", this.getDescription())
@@ -70,9 +70,9 @@ public class PollCommand extends BaseCommand {
 				.addOption(OptionType.STRING, "19", "19個目のアイテム")
 				.addOption(OptionType.STRING, "20", "20個目のアイテム");
 	}
-	
+
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return null;
 	}
 
@@ -89,10 +89,10 @@ public class PollCommand extends BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
-		
+
 		if (event.isSlashCommand()) {
 			var s = event.getSlashCommandEvent();
-			
+
 			args = new String[21];
 			args[0] = this.getCommand();
 			args[1] = s.getOption("1").getAsString();
@@ -133,7 +133,7 @@ public class PollCommand extends BaseCommand {
 
 				embedBuilder.setColor(Color.GREEN);
 				embedBuilder.setDescription("`" + key + "` を `" + game + "` として覚えました。");
-				
+
 				event.reply(embedBuilder.build());
 				return;
 			}

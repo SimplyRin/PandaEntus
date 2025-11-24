@@ -57,9 +57,9 @@ public class CommandExecutor extends ListenerAdapter {
 			System.out.println("[Command:Register|Slash] " + command);
 			commands.addCommands(baseCommand.getCommandData());
 		}
-		
-		if (baseCommand.getAlias() != null && !baseCommand.getAlias().isEmpty()) {
-			for (String alias : baseCommand.getAlias()) {
+
+		if (baseCommand.getAliases() != null && !baseCommand.getAliases().isEmpty()) {
+			for (String alias : baseCommand.getAliases()) {
 				System.out.println("[Command:Register-Alias] - " + alias);
 			}
 		}
@@ -73,7 +73,7 @@ public class CommandExecutor extends ListenerAdapter {
 	public BaseCommand getCommand(String command) {
 		return this.map.get(command);
 	}
-	
+
 	public BaseCommand getRegisteredCommand(Class<?> clazz) {
 		BaseCommand command = null;
 		for (BaseCommand baseCommand : this.map.values()) {
@@ -83,26 +83,27 @@ public class CommandExecutor extends ListenerAdapter {
 		}
 		return command;
 	}
-	
+
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		Guild guild = event.getGuild();
 		if (guild == null) {
 			return;
 		}
-		
+
 		Member member = event.getMember();
 		User user = event.getUser();
 		if (user.isBot()) {
 			return;
 		}
-		
+
 		String raw = this.getCommandPath(event);
 		String[] args = raw.split("[\\/]");
-		
+
 		args[0] = "!" + args[0];
-		
-		System.out.println(guild.getName() + "@" + guild.getIdLong() + ", " + user.getName() + ": " + raw + " (" + args[0] + ")");
+
+		System.out.println(
+				guild.getName() + "@" + guild.getIdLong() + ", " + user.getName() + ": " + raw + " (" + args[0] + ")");
 
 		if (args.length > 0) {
 			this.check(args, user, member, PandaMessageEvent.get(event), raw);
@@ -127,16 +128,16 @@ public class CommandExecutor extends ListenerAdapter {
 			this.check(args, user, member, PandaMessageEvent.get(event), raw);
 		}
 	}
-	
+
 	public void check(String[] args, User user, Member member, PandaMessageEvent event, String raw) {
 		for (BaseCommand baseCommand : this.map.values()) {
 			List<String> commands = new ArrayList<>();
-			
+
 			commands.add(baseCommand.getCommand());
-			if (baseCommand.getAlias() != null && baseCommand.getAlias().size() >= 1) {
-				commands.addAll(baseCommand.getAlias());
+			if (baseCommand.getAliases() != null && baseCommand.getAliases().size() >= 1) {
+				commands.addAll(baseCommand.getAliases());
 			}
-			
+
 			switch (baseCommand.getType()) {
 			case EqualsIgnoreCase:
 				for (String command : commands) {
@@ -157,25 +158,27 @@ public class CommandExecutor extends ListenerAdapter {
 			}
 		}
 	}
-	
-	public void execute(BaseCommand baseCommand, User user, Member member, PandaMessageEvent event, String raw, String[] args) {
+
+	public void execute(BaseCommand baseCommand, User user, Member member, PandaMessageEvent event, String raw,
+			String[] args) {
 		if (baseCommand.getPermission().equals(CommandPermission.BotOwner) && !this.instance.isBotOwner(user)) {
 			return;
 		}
-		
-		if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator) && !member.hasPermission(Permission.MANAGE_SERVER)) {
+
+		if (baseCommand.getPermission().equals(CommandPermission.ServerAdministrator)
+				&& !member.hasPermission(Permission.MANAGE_SERVER)) {
 			return;
 		}
 
 		System.out.println(user.getName() + " (" + user.getId() + "), Executed: " + raw);
-		
+
 		if (baseCommand.sendTyping()) {
 			event.getChannel().sendTyping().complete();
 		}
-		
+
 		baseCommand.execute(this.instance, event, args);
 	}
-	
+
 	public String getCommandPath(SlashCommandInteractionEvent event) {
 		StringBuilder builder = new StringBuilder(event.getName());
 		if (event.getSubcommandGroup() != null) {

@@ -39,19 +39,19 @@ public class YouTubeHelpCommand extends BaseCommand {
 	public String getCommand() {
 		return "!ythelp";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "Music Bot のヘルプを表示";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("ythelp", this.getDescription());
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!youtube");
 	}
 
@@ -69,27 +69,28 @@ public class YouTubeHelpCommand extends BaseCommand {
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		event.reply(this.getHelpEmbed(instance).build());
 	}
-	
+
 	public String getHelpMessage() {
 		return "🎵 Music Bot 機能コマンド一覧 / ヘルプ";
 	}
-	
+
 	public EmbedBuilder getHelpEmbed(PandaEntus instance) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
-		
+
 		embedBuilder.setAuthor(this.getHelpMessage());
 		embedBuilder.setColor(Color.CYAN);
-		
+
 		try {
 			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			for (final ClassPath.ClassInfo classInfo : ClassPath.from(classLoader).getTopLevelClasses()) {
 				if (classInfo.getName().startsWith(YouTubeHelpCommand.class.getPackageName())) {
-					BaseCommand command = instance.getCommandRegister().getRegisteredCommand(Class.forName(classInfo.getName()));
+					BaseCommand command = instance.getCommandRegister()
+							.getRegisteredCommand(Class.forName(classInfo.getName()));
 
 					if (command.getDescription() != null) {
 						String aliases = null;
-						if (command.getAlias() != null) {
-							for (String alias : command.getAlias()) {
+						if (command.getAliases() != null) {
+							for (String alias : command.getAliases()) {
 								if (aliases == null) {
 									aliases = "";
 								}
@@ -99,7 +100,8 @@ public class YouTubeHelpCommand extends BaseCommand {
 						if (aliases != null) {
 							aliases = aliases.substring(0, aliases.length() - 2);
 						}
-						embedBuilder.addField(command.getCommand() + (aliases != null ? " (" + aliases + ")" : ""), command.getDescription(), true);
+						embedBuilder.addField(command.getCommand() + (aliases != null ? " (" + aliases + ")" : ""),
+								command.getDescription(), true);
 					}
 				}
 			}

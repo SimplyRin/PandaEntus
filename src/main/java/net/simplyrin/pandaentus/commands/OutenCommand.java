@@ -38,7 +38,7 @@ public class OutenCommand extends BaseCommand {
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!outen");
 	}
 

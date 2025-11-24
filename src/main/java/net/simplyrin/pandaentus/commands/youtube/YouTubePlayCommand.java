@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -54,20 +53,20 @@ public class YouTubePlayCommand extends BaseCommand {
 	public String getCommand() {
 		return "!play";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "曲を追加/再生";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("play", this.getDescription())
 				.addOption(OptionType.STRING, "url", "YouTube, Twitch, Bandcamp の URL を入力", true);
 	}
-	
+
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!p");
 	}
 
@@ -84,10 +83,10 @@ public class YouTubePlayCommand extends BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
-		
+
 		if (event.isSlashCommand()) {
 			var s = event.getSlashCommandEvent();
-			
+
 			args = new String[2];
 			args[0] = this.getCommand();
 			args[1] = s.getOption("url").getAsString();
@@ -97,32 +96,34 @@ public class YouTubePlayCommand extends BaseCommand {
 
 		if (args.length > 1) {
 			String url = args[1];
-			
+
 			if (!url.startsWith("http")) {
 				event.reply("検索機能を使用することはできません。URL を入力してください。");
 				return;
 			}
-			
+
 			AudioChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 			if (voiceChannel == null) {
 				event.reply("ボイスチャンネルに接続してください。");
 				return;
 			}
-			
+
 			List<String> urls = new ArrayList<>();
 
 			if (url.contains("playlist") || url.contains("list")) {
-				
-				ProcessManager.runCommand(new String[] { "/usr/local/bin/yt-dlp", "--flat-playlist", "--print", "id", url }, new Callback() {
-					@Override
-					public void line(String response) {
-						System.out.println("[YouTubePlayCommand.java] yt-dlp: " + response);
 
-						if (response.length() <= 15) {
-							urls.add("https://www.youtube.com/watch?v=" + response);
-                        }
-					}
-				}, false);
+				ProcessManager.runCommand(
+						new String[] { "/usr/local/bin/yt-dlp", "--flat-playlist", "--print", "id", url },
+						new Callback() {
+							@Override
+							public void line(String response) {
+								System.out.println("[YouTubePlayCommand.java] yt-dlp: " + response);
+
+								if (response.length() <= 15) {
+									urls.add("https://www.youtube.com/watch?v=" + response);
+								}
+							}
+						}, false);
 
 			} else {
 				urls.add(url);
@@ -136,10 +137,12 @@ public class YouTubePlayCommand extends BaseCommand {
 
 				BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 				BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
-				BaseCommand shuffleCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeShuffleCommand.class);
+				BaseCommand shuffleCommand = instance.getCommandRegister()
+						.getRegisteredCommand(YouTubeShuffleCommand.class);
 
-				String footer = "追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand() + ", シャッフル: " + shuffleCommand.getCommand();
-				
+				String footer = "追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand() + ", シャッフル: "
+						+ shuffleCommand.getCommand();
+
 				AudioManager audioManager = guild.getAudioManager();
 				audioManager.openAudioConnection(voiceChannel);
 				audioManager.setAutoReconnect(false);
@@ -159,9 +162,11 @@ public class YouTubePlayCommand extends BaseCommand {
 							embedBuilder.addField("💿 アーティスト", track.getInfo().author, true);
 							embedBuilder.setFooter(footer);
 							messages.add(embedBuilder.build());
-							
-							BaseCommand nowPlaying = instance.getCommandRegister().getRegisteredCommand(YouTubeNowPlayingCommand.class);
-							BaseCommand yt = instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
+
+							BaseCommand nowPlaying = instance.getCommandRegister()
+									.getRegisteredCommand(YouTubeNowPlayingCommand.class);
+							BaseCommand yt = instance.getCommandRegister()
+									.getRegisteredCommand(YouTubeHelpCommand.class);
 							embedBuilder.setFooter("詳細: " + nowPlaying.getCommand() + ", コマンド一覧: " + yt.getCommand());
 							instance.getPreviousTrack().put(guild.getIdLong(), track);
 							instance.play(guild, musicManager, track);
@@ -197,18 +202,18 @@ public class YouTubePlayCommand extends BaseCommand {
 					});
 				}
 
-				
 			});
 			return;
 		}
-		
-		YouTubeHelpCommand help = (YouTubeHelpCommand) instance.getCommandRegister().getRegisteredCommand(YouTubeHelpCommand.class);
+
+		YouTubeHelpCommand help = (YouTubeHelpCommand) instance.getCommandRegister()
+				.getRegisteredCommand(YouTubeHelpCommand.class);
 
 		EmbedBuilder helpEmbed = help.getHelpEmbed(instance);
 		helpEmbed.setColor(Color.RED);
 		helpEmbed.setAuthor("使用方法: " + args[0] + " <YouTube, Twitch, Bandcamp>");
 		helpEmbed.setDescription(help.getHelpMessage());
-		
+
 		event.reply(helpEmbed.build());
 		return;
 	}

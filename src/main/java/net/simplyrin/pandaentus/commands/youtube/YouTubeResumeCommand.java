@@ -44,14 +44,14 @@ public class YouTubeResumeCommand extends BaseCommand {
 	public String getDescription() {
 		return "一時停止してる曲を再生";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("resume", this.getDescription());
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return null;
 	}
 
@@ -69,20 +69,20 @@ public class YouTubeResumeCommand extends BaseCommand {
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		Guild guild = event.getGuild();
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
-		
+
 		AudioChannel voiceChannel = event.getMember().getVoiceState().getChannel();
 		if (voiceChannel == null) {
 			event.reply("ボイスチャンネルに接続してください。");
 			return;
 		}
-		
+
 		AudioTrack audioTrack = musicManager.getPlayer().getPlayingTrack();
 		if (audioTrack == null) {
 			BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 			event.reply("現在何も再生していません。\n" + playCommand.getCommand() + " コマンドを利用して音楽を再生することができます。");
 			return;
 		}
-		
+
 		musicManager.getPlayer().setPaused(false);
 		event.reply("一時停止している曲を再生します。");
 		musicManager.getScheduler().updateVoiceStatus(audioTrack);

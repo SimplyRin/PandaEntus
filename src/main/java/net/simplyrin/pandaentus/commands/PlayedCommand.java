@@ -57,7 +57,7 @@ public class PlayedCommand extends BaseCommand {
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("t!played");
 	}
 
@@ -74,78 +74,80 @@ public class PlayedCommand extends BaseCommand {
 	@Override
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		EmbedBuilder embedBuilder = new EmbedBuilder();
-		
+
 		var guild = event.getGuild();
 		var member = event.getMember();
-		
+
 		if (args.length > 1) {
 			if (args[1].equalsIgnoreCase("enable")) {
 				instance.getConfig().set("Guild." + guild.getId() + "." + member.getId() + ".IsEnabledActivity", true);
-				
+
 				event.reply("ゲームプレイ記録を **有効** にしました。");
 				return;
 			}
-			
+
 			if (args[1].equalsIgnoreCase("disable")) {
 				instance.getConfig().set("Guild." + guild.getId() + "." + member.getId() + ".IsEnabledActivity", false);
-				
+
 				event.reply("ゲームプレイ記録を **無効** にしました。");
 				return;
 			}
 		}
-		
-		var enabled = instance.getConfig().getBoolean("Guild." + guild.getId() + "." + member.getId() + ".IsEnabledActivity", false);
-		
+
+		var enabled = instance.getConfig()
+				.getBoolean("Guild." + guild.getId() + "." + member.getId() + ".IsEnabledActivity", false);
+
 		// 記録表示
 		if (enabled) {
 			HashMap<String, Integer> games = new HashMap<>();
-			
+
 			var baseKey = "Guild." + guild.getId() + "." + member.getId() + ".Game";
 			for (String gameName : instance.getActivityConfig().getSection(baseKey).getKeys()) {
 				int played = instance.getActivityConfig().getInt(baseKey + "." + gameName);
-				
+
 				games.put(gameName, played);
 			}
-			
-			List<Map.Entry<String,Integer>> entries = new ArrayList<Map.Entry<String,Integer>>(games.entrySet());
-			Collections.sort(entries, new Comparator<Map.Entry<String,Integer>>() {
+
+			List<Map.Entry<String, Integer>> entries = new ArrayList<Map.Entry<String, Integer>>(games.entrySet());
+			Collections.sort(entries, new Comparator<Map.Entry<String, Integer>>() {
 				@Override
 				public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
 					return ((Integer) o2.getValue()).compareTo((Integer) o1.getValue());
 				}
 			});
-			
+
 			for (int i = 0; i < 5; i++) {
 				if (entries.size() > i) {
 					var game = entries.get(i).getKey();
 					var played = entries.get(i).getValue();
-					
+
 					var calendar = Calendar.getInstance();
 					calendar.add(Calendar.MINUTE, -played);
-					
+
 					int hours = played / 60; // since both are ints, you get an int
 
-					embedBuilder.addField(game, instance.getUptime(calendar.getTime()) + (hours >= 24 ? " (" + hours + "時間)" : ""), false);
+					embedBuilder.addField(game,
+							instance.getUptime(calendar.getTime()) + (hours >= 24 ? " (" + hours + "時間)" : ""), false);
 				}
 			}
-			
+
 			embedBuilder.setAuthor(member.getEffectiveName() + " のゲーム記録", null, member.getUser().getAvatarUrl());
-			
+
 			var color = ImageColor.getColor(member.getUser().getAvatarUrl());
 			if (color != null) {
 				embedBuilder.setColor(color.getAsAwtColor());
 			} else {
 				embedBuilder.setColor(Color.WHITE);
 			}
-			
+
 			embedBuilder.setFooter("'" + args[0] + " disable' で記録をオフにできます。");
 			event.reply(embedBuilder);
 			return;
 		}
-		
+
 		embedBuilder.setColor(Color.RED);
 		embedBuilder.setDescription("あなたのゲームプレイ記録は現在無効に設定されています。有効にするには、`" + args[0] + " enable` と入力してください。");
-		
+
 		event.reply(embedBuilder);
 	}
 

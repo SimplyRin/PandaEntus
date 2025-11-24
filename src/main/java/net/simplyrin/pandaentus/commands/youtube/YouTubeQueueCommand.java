@@ -42,19 +42,19 @@ public class YouTubeQueueCommand extends BaseCommand {
 	public String getCommand() {
 		return "!queue";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "次に再生される曲を確認";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("queue", this.getDescription());
 	}
-	
+
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!playlist");
 	}
 
@@ -76,7 +76,7 @@ public class YouTubeQueueCommand extends BaseCommand {
 
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
 		BlockingQueue<AudioTrack> queue = musicManager.getScheduler().getQueue();
-		
+
 		BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 		BaseCommand skipCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeSkipCommand.class);
 		BaseCommand loopCommand = instance.getCommandRegister().getRegisteredCommand(YouTubeLoopCommand.class);
@@ -121,7 +121,8 @@ public class YouTubeQueueCommand extends BaseCommand {
 		}
 		embedBuilder.setDescription(message);
 		embedBuilder.setColor(Color.CYAN);
-		embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand() + ", シャッフル: " + shuffleCommand.getCommand());
+		embedBuilder.setFooter("追加: " + playCommand.getCommand() + ", スキップ: " + skipCommand.getCommand() + ", シャッフル: "
+				+ shuffleCommand.getCommand());
 
 		event.reply(embedBuilder.build());
 	}

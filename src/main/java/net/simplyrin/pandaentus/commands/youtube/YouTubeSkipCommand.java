@@ -34,19 +34,19 @@ public class YouTubeSkipCommand extends BaseCommand {
 	public String getCommand() {
 		return "!skip";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "再生中の曲をスキップ";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("skip", this.getDescription());
 	}
-	
+
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return null;
 	}
 

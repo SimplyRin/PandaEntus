@@ -42,19 +42,19 @@ public class VersionCommand extends BaseCommand {
 	public String getCommand() {
 		return "!version";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "Bot の詳細情報を表示";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("version", this.getDescription());
 	}
-	
+
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!stats");
 	}
 
@@ -79,16 +79,18 @@ public class VersionCommand extends BaseCommand {
 		String message = "```";
 		message += "PandaEntus 起動日: " + startup + "\n";
 		message += "PandaEntus 稼働日: " + instance.getUptime(date) + "\n\n";
-		
-		VersionLegacyCommand vlc = (VersionLegacyCommand) instance.getCommandRegister().getRegisteredCommand(VersionLegacyCommand.class);
-		
+
+		VersionLegacyCommand vlc = (VersionLegacyCommand) instance.getCommandRegister()
+				.getRegisteredCommand(VersionLegacyCommand.class);
+
 		message += "サーバー起動日: " + vlc.getUptime(instance) + "\n";
 		message += "利用可能コア数: " + runtime.availableProcessors() + "\n\n";
 
 		message += "メモリ空き状態:\n";
 		message += "  空き状態: " + instance.formatSize(runtime.freeMemory()) + "\n";
 		message += "  使用容量: " + instance.formatSize(runtime.totalMemory()) + "\n";
-		message += "  最大容量: " + (runtime.maxMemory() == Long.MAX_VALUE ? "無制限" : instance.formatSize(runtime.maxMemory())) + "\n\n";
+		message += "  最大容量: "
+				+ (runtime.maxMemory() == Long.MAX_VALUE ? "無制限" : instance.formatSize(runtime.maxMemory())) + "\n\n";
 
 		message += "サーバー情報:\n";
 		message += "  サーバー数: " + jda.getGuilds().size() + "\n";
@@ -98,10 +100,11 @@ public class VersionCommand extends BaseCommand {
 
 		message += "バージョン情報:\n";
 		message += "  Java: " + System.getProperty("java.version") + "\n";
-		message += "  PandaEntus: " + Version.POMVERSION + ", Bulid Time: " + Version.BUILD_TIME + ", Git: " + (Version.SHA.equals("") ? "unknown" : Version.SHA) + "\n";
+		message += "  PandaEntus: " + Version.POMVERSION + ", Bulid Time: " + Version.BUILD_TIME + ", Git: "
+				+ (Version.SHA.equals("") ? "unknown" : Version.SHA) + "\n";
 		message += "  JDA: " + JDAInfo.VERSION + "\n";
 		message += "  LavaPlayer: " + PlayerLibrary.VERSION;
-		
+
 		message += "```";
 
 		event.reply(message);

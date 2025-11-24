@@ -43,19 +43,19 @@ public class YouTubeNowPlayingCommand extends BaseCommand {
 	public String getCommand() {
 		return "!nowplaying";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "現在再生中の曲を確認";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("nowplaying", this.getDescription());
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!np");
 	}
 
@@ -73,42 +73,43 @@ public class YouTubeNowPlayingCommand extends BaseCommand {
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		Guild guild = event.getGuild();
 		GuildMusicManager musicManager = instance.getGuildAudioPlayer(guild);
-		
+
 		AudioTrack audioTrack = musicManager.getPlayer().getPlayingTrack();
 		if (audioTrack == null) {
 			BaseCommand playCommand = instance.getCommandRegister().getRegisteredCommand(YouTubePlayCommand.class);
 			event.reply("現在何も再生していません。\n" + playCommand.getCommand() + " コマンドを利用して音楽を再生することができます。");
 			return;
 		}
-		
+
 		double position = audioTrack.getPosition() / 1000.0;
 		double duration = audioTrack.getDuration() / 1000.0;
-		
+
 		BigDecimal bigDecimal = new BigDecimal((position / duration) * 100).setScale(2, RoundingMode.FLOOR);
 		double progress = bigDecimal.doubleValue();
 		String percent = progress + "%";
-		
+
 		String bar = "";
 		while (bar.length() < 20) {
 			bar += "　";
 		}
-		
+
 		int barPos = (int) (progress / 5);
 		char[] _char = bar.toCharArray();
 		_char[barPos] = '●';
 		bar = new String(_char);
 
-		System.out.println("▶︎ " + bar + " :" + position + " / " + duration  + " = " + percent);
-		
+		System.out.println("▶︎ " + bar + " :" + position + " / " + duration + " = " + percent);
+
 		EmbedBuilder embedBuilder = new EmbedBuilder();
 		embedBuilder.setColor(Color.GREEN);
-		
+
 		String prefix = instance.getLoopMap().get(guild.getIdLong()) != null ? "🔁" : "▶";
 		if (musicManager.getPlayer().isPaused()) {
 			prefix = "⏸";
 		}
-		
-		embedBuilder.setDescription(prefix + " " + instance.formatMillis(audioTrack.getPosition())  + " / " + instance.formatMillis(audioTrack.getDuration()) + ": ~~" + bar + "~~");
+
+		embedBuilder.setDescription(prefix + " " + instance.formatMillis(audioTrack.getPosition()) + " / "
+				+ instance.formatMillis(audioTrack.getDuration()) + ": ~~" + bar + "~~");
 		embedBuilder.addField("🎵 再生中の音楽", audioTrack.getInfo().title, false);
 		embedBuilder.addField("💿 アーティスト/チャンネル", audioTrack.getInfo().author, false);
 		embedBuilder.addField("🔗 リンク", audioTrack.getInfo().uri, false);

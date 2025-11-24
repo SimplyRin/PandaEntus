@@ -36,20 +36,20 @@ public class YouTubeVolumeCommand extends BaseCommand {
 	public String getCommand() {
 		return "!volume";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "ボリュームを調節";
 	}
-	
+
 	@Override
 	public CommandData getCommandData() {
 		return new CommandDataImpl("volume", this.getDescription())
 				.addOption(OptionType.INTEGER, "音量", "1-100 で音量を調節", true);
 	}
-	
+
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return null;
 	}
 
@@ -67,12 +67,12 @@ public class YouTubeVolumeCommand extends BaseCommand {
 	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
 		if (event.isSlashCommand()) {
 			var s = event.getSlashCommandEvent();
-			
+
 			args = new String[s.getOptions().size() + 1];
 			args[0] = this.getCommand();
 			args[1] = s.getOption("音量").getAsString();
 		}
-		
+
 		if (args.length > 1) {
 			try {
 				int volume = Integer.valueOf(args[1]);

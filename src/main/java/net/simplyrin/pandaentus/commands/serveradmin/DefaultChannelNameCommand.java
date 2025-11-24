@@ -40,7 +40,7 @@ public class DefaultChannelNameCommand extends BaseCommand {
 	}
 
 	@Override
-	public List<String> getAlias() {
+	public List<String> getAliases() {
 		return Arrays.asList("!dcn");
 	}
 
@@ -60,7 +60,7 @@ public class DefaultChannelNameCommand extends BaseCommand {
 		Guild guild = event.getGuild();
 		
 		Configuration config = instance.getConfig(); */
-		
+
 		if (args.length > 1) {
 			if (args[1].equalsIgnoreCase("set")) {
 				if (args.length > 3) {
@@ -71,31 +71,31 @@ public class DefaultChannelNameCommand extends BaseCommand {
 						defaultName += args[i] + " ";
 					}
 					defaultName = defaultName.trim();
-					
+
 					instance.getConfig().set("DefaultChannelName." + channelName + ".Default", defaultName);
 					instance.saveConfig();
 
 					event.reply(channelName + " -> \"" + defaultName + "\"");
 					return;
 				}
-				
+
 				event.reply("使用方法: " + this.getCommand() + " set <チャンネルID> <デフォルトチャンネル名>");
 				return;
 			}
-			
+
 			if (args[1].equalsIgnoreCase("delete")) {
 				if (args.length > 2) {
 					instance.getConfig().set("DefaultChannelName." + args[2] + ".Default", null);
-					
+
 					event.reply("削除しました: " + args[2]);
 					return;
 				}
-				
+
 				event.reply("使用方法: " + this.getCommand() + " delete <チャンネルID>");
 				return;
 			}
 		}
-		
+
 		event.reply("使用方法: " + this.getCommand() + " <set|delete> <チャンネルID> <チャンネル名>");
 		return;
 	}
