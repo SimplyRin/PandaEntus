@@ -54,7 +54,7 @@ public class OutenCommand extends BaseCommand {
 
 	@Override
 	public CommandType getType() {
-		return CommandType.EqualsIgnoreCase;
+		return CommandType.Contains;
 	}
 
 	@Override
