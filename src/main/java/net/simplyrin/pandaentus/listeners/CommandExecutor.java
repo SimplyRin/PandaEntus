@@ -153,6 +153,13 @@ public class CommandExecutor extends ListenerAdapter {
 					}
 				}
 				break;
+			case Contains:
+				for (String command : commands) {
+					if (args[0].toLowerCase().contains(command.toLowerCase())) {
+						this.execute(baseCommand, user, member, event, raw, args);
+					}
+				}
+				break;
 			default:
 				break;
 			}

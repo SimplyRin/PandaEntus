@@ -20,6 +20,6 @@ package net.simplyrin.pandaentus.classes;
  */
 public enum CommandType {
 
-	EqualsIgnoreCase, StartsWith;
+	EqualsIgnoreCase, StartsWith, Contains;
 
 }
