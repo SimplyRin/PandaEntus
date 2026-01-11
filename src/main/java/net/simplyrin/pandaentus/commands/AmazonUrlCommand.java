@@ -33,7 +33,7 @@ public class AmazonUrlCommand extends BaseCommand {
 	public String getCommand() {
 		return "https://www.amazon.co.jp/";
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return null;
@@ -54,17 +54,17 @@ public class AmazonUrlCommand extends BaseCommand {
 		String url = args[0];
 
 		String result = null;
-		
+
 		List<String> list = Arrays.asList("/dp/", "/ASIN/", "/product/");
-		
+
 		for (String a : list) {
 			if (url.contains(a)) {
 				String id = url.split(a)[1].split("/")[0].split("[?]")[0];
-				result = "https://www.amazon.co.jp/dp/" + id;
+				result = "https://www.amazon.co.jp/dp/" + id + "?tag=pndesports-22 (アフィリエイトリンク)";
 				break;
 			}
 		}
-		
+
 		if (result != null) {
 			try {
 				event.getMessage().delete();
@@ -76,7 +76,8 @@ public class AmazonUrlCommand extends BaseCommand {
 
 	public static void main(String[] args) {
 		AmazonUrlCommand auc = new AmazonUrlCommand();
-		auc.execute(null, null, new String[] { "https://www.amazon.co.jp/Echo-Dot-%E3%82%A8%E3%82%B3%E3%83%BC%E3%83%89%E3%83%83%E3%83%88-%E7%AC%AC3%E4%B8%96%E4%BB%A3-with-Alexa-%E3%82%B9%E3%83%9E%E3%83%BC%E3%83%88%E3%82%B9%E3%83%94%E3%83%BC%E3%82%AB%E3%83%BC-%E3%83%98%E3%82%B6%E3%83%BC%E3%82%B0%E3%83%AC%E3%83%BC/dp/B07PFFMQ64/ref=sr_1_1?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&dchild=1&keywords=Echo+Dot&qid=1607696162&sr=8-1" });
+		auc.execute(null, null, new String[] {
+				"https://www.amazon.co.jp/Echo-Dot-%E3%82%A8%E3%82%B3%E3%83%BC%E3%83%89%E3%83%83%E3%83%88-%E7%AC%AC3%E4%B8%96%E4%BB%A3-with-Alexa-%E3%82%B9%E3%83%9E%E3%83%BC%E3%83%88%E3%82%B9%E3%83%94%E3%83%BC%E3%82%AB%E3%83%BC-%E3%83%98%E3%82%B6%E3%83%BC%E3%82%B0%E3%83%AC%E3%83%BC/dp/B07PFFMQ64/ref=sr_1_1?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&dchild=1&keywords=Echo+Dot&qid=1607696162&sr=8-1" });
 	}
 
 }
