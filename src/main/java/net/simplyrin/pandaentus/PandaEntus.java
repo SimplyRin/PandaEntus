@@ -24,6 +24,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.lava.extensions.youtuberotator.YoutubeIpRotatorSetup;
@@ -31,11 +32,6 @@ import com.sedmelluq.lava.extensions.youtuberotator.planner.AbstractRoutePlanner
 import com.sedmelluq.lava.extensions.youtuberotator.planner.RotatingIpRoutePlanner;
 import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.IpBlock;
 
-import dev.lavalink.youtube.YoutubeAudioSourceManager;
-import dev.lavalink.youtube.clients.Android;
-import dev.lavalink.youtube.clients.Music;
-import dev.lavalink.youtube.clients.TvHtml5Embedded;
-import dev.lavalink.youtube.clients.Web;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -100,19 +96,19 @@ public class PandaEntus {
 	private Configuration config;
 	private Configuration dataConfig;
 	private Configuration activityConfig;
-	
+
 	private TimeManager timeManager;
 	private PoolItems poolItems;
 	private JDA jda;
 	private TimeUtils timeUtils;
 	private String voiceTextApiKey;
-	private List<ReactionMessage> messages = new ArrayList<>(); 
+	private List<ReactionMessage> messages = new ArrayList<>();
 
 	private CommandExecutor commandRegister;
 
 	private Map<Long, AudioTrack> loopMap;
 	private Map<Long, AudioTrack> forceLoopMap;
-	
+
 	private Map<Long, AudioTrack> previousTrack;
 
 	private AudioPlayerManager playerManager;
@@ -121,7 +117,7 @@ public class PandaEntus {
 
 	private Date startupDate = new Date();
 	private Map<String, AkinatorManager> akiMap = new HashMap<>();
-	
+
 	@Setter
 	private AudioPlaylist audioPlaylist;
 
@@ -129,7 +125,7 @@ public class PandaEntus {
 
 	private Listener eventListener;
 	private ActivityListener activityListener;
-	
+
 	private String botUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36";
 
 	public void run(String[] args) {
@@ -139,12 +135,12 @@ public class PandaEntus {
 				.setSaveLog(true)
 				.setEnableColor(true)
 				.setEnableTranslateColor(true);
-		
+
 		if (Version.SHA.equals("")) {
 			System.out.println("あなたは現在開発者ビルドを使用しています。");
 			System.out.println("PandaEntus の公式ビルドは Jenkins からダウンロードすることができます。");
 			System.out.println("Jenkins: https://ci.simplyrin.net");
-			
+
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {
@@ -197,12 +193,12 @@ public class PandaEntus {
 
 			Configuration dataConfig = Config.getConfig(dataFile);
 			dataConfig.set("OutenMaster", 3);
-            
+
 			Config.saveConfig(dataConfig, dataFile);
 		}
-		
+
 		this.dataConfig = Config.getConfig(dataFile);
-		
+
 		File activityData = new File("activity.yml");
 		if (!activityData.exists()) {
 			try {
@@ -211,14 +207,14 @@ public class PandaEntus {
 				e.printStackTrace();
 			}
 		}
-		
+
 		this.activityConfig = Config.getConfig(activityData);
-		
+
 		// パス再設定
 		if (this.config.getString("Bot.Restart-Script", null) == null) {
 			this.config.set("Bot.Restart-Script", "start.sh");
 		}
-		
+
 		this.timeManager = new TimeManager(this);
 		this.poolItems = new PoolItems(this);
 		this.timeUtils = new TimeUtils();
@@ -256,15 +252,16 @@ public class PandaEntus {
 		try {
 			System.out.println("コマンドを登録しています...");
 			CommandListUpdateAction commands = this.getJda().updateCommands();
-			
+
 			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			for (final ClassPath.ClassInfo classInfo : ClassPath.from(classLoader).getTopLevelClasses()) {
 				if (classInfo.getName().startsWith("net.simplyrin.pandaentus.command")) {
-					BaseCommand baseCommand = (BaseCommand) Class.forName(classInfo.getName()).getDeclaredConstructor().newInstance();
+					BaseCommand baseCommand = (BaseCommand) Class.forName(classInfo.getName()).getDeclaredConstructor()
+							.newInstance();
 					this.commandRegister.registerCommand(commands, baseCommand.getCommand(), baseCommand);
 				}
 			}
-			
+
 			List<Command> commandList = commands.complete();
 			System.out.println("コマンドを登録しました。スラッシュコマンド: " + commandList.size());
 		} catch (Exception e) {
@@ -294,13 +291,14 @@ public class PandaEntus {
 		this.playerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		this.playerManager.registerSourceManager(new BandcampAudioSourceManager());
 
-		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(/*allowSearch:*/ false, new Music(), new Web(), new Android(), new TvHtml5Embedded());
+		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager();
 
 		ArrayList<IpBlock> ipBlocks = new ArrayList<>();
+
 		AbstractRoutePlanner planner = new RotatingIpRoutePlanner(ipBlocks);
 		YoutubeIpRotatorSetup rotator = new YoutubeIpRotatorSetup(planner);
 
-		rotator.forConfiguration(youtube.getHttpInterfaceManager(), false)
+		rotator.forConfiguration(youtube.getHttpConfiguration(), false)
 				.withMainDelegateFilter(null) // This is important, otherwise you may get NullPointerExceptions.
 				.setup();
 
@@ -313,7 +311,7 @@ public class PandaEntus {
 		this.addShutdownHook(() -> {
 			jda.shutdown();
 			Config.saveConfig(this.config, "config.yml");
-            Config.saveConfig(this.dataConfig, "data.yml");
+			Config.saveConfig(this.dataConfig, "data.yml");
 			Config.saveConfig(this.activityConfig, "activity.yml");
 			poolItems.save();
 			System.out.println("Config ファイルを保存しました。");
@@ -321,38 +319,38 @@ public class PandaEntus {
 			rinStream.close();
 		});
 	}
-	
+
 	public void saveConfig() {
 		Config.saveConfig(this.config, "config.yml");
 	}
 
-    public void saveDataConfig() {
-        Config.saveConfig(this.dataConfig, "data.yml");
-    }
-	
+	public void saveDataConfig() {
+		Config.saveConfig(this.dataConfig, "data.yml");
+	}
+
 	public void saveActivityConfig() {
 		File activityData = new File("activity.yml");
 		Config.saveConfig(this.activityConfig, activityData);
 	}
-	
+
 	public Category getTextChannelCategory(Guild guild) {
 		List<Category> list = guild.getCategoriesByName("Text Channels", true);
 		if (list == null || list.isEmpty()) {
 			list = guild.getCategoriesByName("テキストチャンネル", true);
 		}
-		
+
 		return list.size() > 0 ? list.get(0) : null;
 	}
-	
+
 	public Category getVoiceChannelCategory(Guild guild) {
 		List<Category> list = guild.getCategoriesByName("Voice Channels", true);
 		if (list == null || list.isEmpty()) {
 			list = guild.getCategoriesByName("ボイスチャンネル", true);
 		}
-		
+
 		return list.size() > 0 ? list.get(0) : null;
 	}
-	
+
 	public String getVoiceChannelName(Category category) {
 		String name = category.getName();
 		if (name.equals("ボイスチャンネル")) {
@@ -365,14 +363,14 @@ public class PandaEntus {
 	public void addShutdownHook(Runnable runnable) {
 		Runtime.getRuntime().addShutdownHook(new Thread(runnable));
 	}
-	
+
 	public int mmssToSeconds(String time) {
 		int mm, ss;
-		
+
 		String[] split = time.contains(":") ? time.split(":") : time.split("：");
 		mm = Integer.valueOf(split[0]);
 		ss = Integer.valueOf(split[1]);
-		
+
 		return (mm * 60) + ss;
 	}
 
@@ -452,7 +450,8 @@ public class PandaEntus {
 	}
 
 	public Time getTimeFromDate(Date createdTime) {
-		int[] units = { Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND };
+		int[] units = { Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE,
+				Calendar.SECOND };
 		Date today = new Date();
 		int[] result = new int[units.length];
 
@@ -484,7 +483,8 @@ public class PandaEntus {
 	}
 
 	public static Time addTime(Time time1, Time time2) {
-		int[] units = { Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND };
+		int[] units = { Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR_OF_DAY, Calendar.MINUTE,
+				Calendar.SECOND };
 		int[] result = new int[units.length];
 
 		Calendar sCal = Calendar.getInstance();
@@ -493,7 +493,8 @@ public class PandaEntus {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date d1 = null;
 		try {
-			d1 = simpleDateFormat.parse(time1.year + "/" + time1.month + "/" + time1.day + " " + time1.hour + ":" + time1.minute + ":" + time1.second);
+			d1 = simpleDateFormat.parse(time1.year + "/" + time1.month + "/" + time1.day + " " + time1.hour + ":"
+					+ time1.minute + ":" + time1.second);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -501,7 +502,8 @@ public class PandaEntus {
 
 		Date d2 = null;
 		try {
-			d2 = simpleDateFormat.parse(time2.year + "/" + time2.month + "/" + time2.day + " " + time2.hour + ":" + time2.minute + ":" + time2.second);
+			d2 = simpleDateFormat.parse(time2.year + "/" + time2.month + "/" + time2.day + " " + time2.hour + ":"
+					+ time2.minute + ":" + time2.second);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -539,26 +541,26 @@ public class PandaEntus {
 		String result = sw.toString();
 
 		File file = this.stringToTempFile(result);
-		
+
 		for (String id : this.getBotOwner()) {
 			User user = this.jda.getUserById(id);
 			user.openPrivateChannel().complete().sendFiles(FileUpload.fromData(file)).complete();
 		}
 	}
-	
+
 	public File stringToTempFile(String message) {
 		try {
 			File folder = new File("temp");
 			folder.mkdirs();
-			
+
 			File file = new File(folder, UUID.randomUUID().toString().split("-")[0] + ".txt");
-			
+
 			Files.writeString(Path.of(file.toURI()), message, StandardCharsets.UTF_8);
 			return file;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
@@ -566,7 +568,8 @@ public class PandaEntus {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = null;
 		try {
-			date = simpleDateFormat.parse(time.year + "/" + time.month + "/" + time.day + " " + time.hour + ":" + time.minute + ":" + time.second);
+			date = simpleDateFormat.parse(time.year + "/" + time.month + "/" + time.day + " " + time.hour + ":"
+					+ time.minute + ":" + time.second);
 		} catch (ParseException e) {
 		}
 		return date;
@@ -646,10 +649,10 @@ public class PandaEntus {
 	}
 
 	private boolean notice;
-	
+
 	public boolean isBotOwner(User user) {
 		boolean bool = false;
-		
+
 		List<String> botOwnerList = this.getBotOwner();
 		if (botOwnerList == null || botOwnerList.isEmpty()) {
 			this.getConfig().set("BotOwnerList", Arrays.asList("999", "888"));
@@ -664,7 +667,7 @@ public class PandaEntus {
 				}
 			}
 		}
-		
+
 		return bool;
 	}
 
@@ -723,7 +726,7 @@ public class PandaEntus {
 
 		return i;
 	}
-	
+
 	/**
 	 * https://stackoverflow.com/questions/9214786/how-to-convert-the-seconds-in-this-format-hhmmss/47841277
 	 */
@@ -757,6 +760,5 @@ public class PandaEntus {
 
 		return hrSize;
 	}
-
 
 }
