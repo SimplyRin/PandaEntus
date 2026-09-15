@@ -289,6 +289,16 @@ public class PandaEntus {
 
 		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager();
 
+		String youtubeRefreshToken = this.config.getString("YouTube.OAuth2.Refresh-Token", null);
+		if (youtubeRefreshToken == null || youtubeRefreshToken.isEmpty()) {
+			// 初回起動時など、リフレッシュトークン未設定の場合はここでログに認証用URLとコードが出力される。
+			// 認証完了後、同じくログに出力されるリフレッシュトークンを config.yml の
+			// YouTube.OAuth2.Refresh-Token に保存して再起動すること。
+			youtube.useOauth2(null, false);
+		} else {
+			youtube.useOauth2(youtubeRefreshToken, true);
+		}
+
 		this.playerManager.registerSourceManager(youtube);
 
 		this.vcNameManager = new VoiceChannelNameManager(this);
