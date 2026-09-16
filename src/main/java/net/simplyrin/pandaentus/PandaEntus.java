@@ -27,6 +27,12 @@ import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceM
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.clients.AndroidVr;
 import dev.lavalink.youtube.clients.Ios;
@@ -141,8 +147,8 @@ public class PandaEntus {
 
 		if (Version.SHA.equals("")) {
 			System.out.println("あなたは現在開発者ビルドを使用しています。");
-			System.out.println("PandaEntus の公式ビルドは Jenkins からダウンロードすることができます。");
-			System.out.println("Jenkins: https://ci.simplyrin.net");
+			System.out.println("PandaEntus の公式ビルドは GitHub Releases からダウンロードすることができます。");
+			System.out.println("Releases: https://github.com/SimplyRin/PandaEntus/releases");
 
 			try {
 				Thread.sleep(1000);
@@ -318,6 +324,30 @@ public class PandaEntus {
 			youtube.useOauth2(null, false);
 		} else {
 			youtube.useOauth2(youtubeRefreshToken, true);
+		}
+
+		// YouTube へのアクセスだけを別の IP (WireGuard 等) 経由にする。
+		// プロキシは YoutubeAudioSourceManager 専用の HttpInterfaceManager にのみ適用されるため、
+		// Discord / SoundCloud / Bandcamp 等の通信は素の回線のまま影響を受けない。
+		// メタデータ取得だけでなく googlevideo.com からの音声ストリームも同じ経路を通る。
+		String proxyHost = this.config.getString("YouTube.Proxy.Host", null);
+		int proxyPort = this.config.getInt("YouTube.Proxy.Port", 0);
+		if (proxyHost != null && !proxyHost.isEmpty() && proxyPort > 0) {
+			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+			youtube.getHttpInterfaceManager()
+					.configureRequests(requestConfig -> RequestConfig.copy(requestConfig).setProxy(proxy).build());
+
+			String proxyUser = this.config.getString("YouTube.Proxy.User", null);
+			if (proxyUser != null && !proxyUser.isEmpty()) {
+				String proxyPassword = this.config.getString("YouTube.Proxy.Password", "");
+				BasicCredentialsProvider credentials = new BasicCredentialsProvider();
+				credentials.setCredentials(new AuthScope(proxy),
+						new UsernamePasswordCredentials(proxyUser, proxyPassword));
+				youtube.getHttpInterfaceManager()
+						.configureBuilder(builder -> builder.setDefaultCredentialsProvider(credentials));
+			}
+
+			System.out.println("YouTube へのアクセスを " + proxyHost + ":" + proxyPort + " 経由に設定しました。");
 		}
 
 		this.playerManager.registerSourceManager(youtube);

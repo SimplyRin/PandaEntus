@@ -24,6 +24,6 @@ public class Version {
 	public static final String BUILD_TIME  ="@buildtime@";
 	public static final String POMVERSION = "@pomversion@";
 	public static final String SHA = "@commitId@";
-	public static final String JENKINS_BUILDER_NUMBER = "@jenkinsBuildNumber@";
+	public static final String GITHUB_RUN_NUMBER = "@githubRunNumber@";
 
 }

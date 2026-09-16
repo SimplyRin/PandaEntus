@@ -104,7 +104,7 @@
               <value>${SHA}</value>
             </replacement>
             <replacement>
-              <token>@jenkinsBuildNumber@</token>
+              <token>@githubRunNumber@</token>
               <value>${build.number}</value>
             </replacement>
           </replacements>
