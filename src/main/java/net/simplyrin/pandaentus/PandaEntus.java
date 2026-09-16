@@ -28,6 +28,13 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
+import dev.lavalink.youtube.clients.AndroidVr;
+import dev.lavalink.youtube.clients.Ios;
+import dev.lavalink.youtube.clients.MWeb;
+import dev.lavalink.youtube.clients.Music;
+import dev.lavalink.youtube.clients.Tv;
+import dev.lavalink.youtube.clients.Web;
+import dev.lavalink.youtube.clients.WebEmbedded;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -287,7 +294,21 @@ public class PandaEntus {
 		this.playerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault());
 		this.playerManager.registerSourceManager(new BandcampAudioSourceManager());
 
-		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager();
+		// poToken / visitorData が設定されていれば Web 系クライアントに適用する。
+		// 未設定だと YouTube の bot 検出に引っかかり "This video requires login" になりやすい。
+		// 取得方法: https://github.com/iv-org/youtube-trusted-session-generator
+		String poToken = this.config.getString("YouTube.PoToken", null);
+		String visitorData = this.config.getString("YouTube.VisitorData", null);
+		if (poToken != null && !poToken.isEmpty() && visitorData != null && !visitorData.isEmpty()) {
+			Web.setPoTokenAndVisitorData(poToken, visitorData);
+			WebEmbedded.setPoTokenAndVisitorData(poToken, visitorData);
+		}
+
+		// デフォルトのクライアント一覧 (Music, AndroidVr, Web, WebEmbedded) には
+		// OAuth 対応クライアントが 1 つも含まれておらず、リフレッシュトークンが使われない。
+		// OAuth に対応しているのは Tv のみ (Tv はメタデータ取得不可・再生用途専用)。
+		YoutubeAudioSourceManager youtube = new YoutubeAudioSourceManager(true,
+				new Music(), new AndroidVr(), new Web(), new WebEmbedded(), new MWeb(), new Ios(), new Tv());
 
 		String youtubeRefreshToken = this.config.getString("YouTube.OAuth2.Refresh-Token", null);
 		if (youtubeRefreshToken == null || youtubeRefreshToken.isEmpty()) {
