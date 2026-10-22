@@ -1,7 +1,6 @@
-package net.simplyrin.pandaentus.utils;
+package net.simplyrin.pandaentus.utils
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executors
 
 /**
  * Created by SimplyRin on 2018/06/06.
@@ -21,16 +20,18 @@ import java.util.concurrent.Executors;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class ThreadPool {
+object ThreadPool {
 
-	private static ExecutorService executorService = Executors.newFixedThreadPool(512);
+	private val executorService = Executors.newFixedThreadPool(512)
 
-	public static void run(Runnable runnable) {
-		runAsync(runnable);
+	@JvmStatic
+	fun run(runnable: Runnable) {
+		runAsync(runnable)
 	}
 
-	public static void runAsync(Runnable runnable) {
-		executorService.execute(runnable);
+	@JvmStatic
+	fun runAsync(runnable: Runnable) {
+		executorService.execute(runnable)
 	}
 
 }
