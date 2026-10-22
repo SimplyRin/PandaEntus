@@ -576,6 +576,13 @@ class PandaEntus {
 		return tempVideoId
 	}
 
+	/**
+	 * 登録済みコマンドのコマンド名を返す。登録されていない場合は空文字
+	 */
+	fun commandNameOf(clazz: Class<out BaseCommand>): String {
+		return this.commandRegister.getRegisteredCommand(clazz)?.command.orEmpty()
+	}
+
 	fun getBotOwner(): List<String>? {
 		return this.config.getStringList("BotOwnerList")
 	}
