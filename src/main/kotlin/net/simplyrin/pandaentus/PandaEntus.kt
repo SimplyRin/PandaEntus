@@ -11,6 +11,7 @@ import java.util.Arrays
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.system.exitProcess
 
 import com.google.common.reflect.ClassPath
@@ -114,7 +115,7 @@ class PandaEntus {
 		private set
 	lateinit var voiceTextApiKey: String
 		private set
-	val messages: MutableList<ReactionMessage> = ArrayList()
+	val messages: MutableList<ReactionMessage> = CopyOnWriteArrayList()
 
 	lateinit var commandRegister: CommandExecutor
 		private set
@@ -359,9 +360,9 @@ class PandaEntus {
 
 		this.addShutdownHook {
 			this.jda.shutdown()
-			Config.saveConfig(this.config, "config.yml")
-			Config.saveConfig(this.dataConfig, "data.yml")
-			Config.saveConfig(this.activityConfig, "activity.yml")
+			this.saveConfig()
+			this.saveDataConfig()
+			this.saveActivityConfig()
 			this.poolItems.save()
 			println("Config ファイルを保存しました。")
 
@@ -369,17 +370,23 @@ class PandaEntus {
 		}
 	}
 
+	// 定期保存とシャットダウン時の保存が同時に走ってファイルが壊れないよう、設定ごとに排他制御する
 	fun saveConfig() {
-		Config.saveConfig(this.config, "config.yml")
+		synchronized(this.config) {
+			Config.saveConfig(this.config, "config.yml")
+		}
 	}
 
 	fun saveDataConfig() {
-		Config.saveConfig(this.dataConfig, "data.yml")
+		synchronized(this.dataConfig) {
+			Config.saveConfig(this.dataConfig, "data.yml")
+		}
 	}
 
 	fun saveActivityConfig() {
-		val activityData = File("activity.yml")
-		Config.saveConfig(this.activityConfig, activityData)
+		synchronized(this.activityConfig) {
+			Config.saveConfig(this.activityConfig, File("activity.yml"))
+		}
 	}
 
 	fun getTextChannelCategory(guild: Guild): Category? {

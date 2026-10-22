@@ -11,6 +11,7 @@ import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
+import net.simplyrin.pandaentus.listeners.ActivityListener
 import net.simplyrin.pandaentus.tools.ImageColor
 
 /**
@@ -57,12 +58,14 @@ class PlayedCommand : BaseCommand() {
 		if (args.size > 1) {
 			if (args[1].equals("enable", ignoreCase = true)) {
 				instance.config.set(enabledPath, true)
+				instance.saveConfig()
 				event.reply("ゲームプレイ記録を **有効** にしました。")
 				return
 			}
 
 			if (args[1].equals("disable", ignoreCase = true)) {
 				instance.config.set(enabledPath, false)
+				instance.saveConfig()
 				event.reply("ゲームプレイ記録を **無効** にしました。")
 				return
 			}
@@ -77,8 +80,10 @@ class PlayedCommand : BaseCommand() {
 			val baseKey = "Guild." + guild.id + "." + member.id + ".Game"
 
 			val games = HashMap<String, Int>()
-			for (gameName in instance.activityConfig.getSection(baseKey)?.keys.orEmpty()) {
-				games[gameName] = instance.activityConfig.getInt("$baseKey.$gameName")
+			synchronized(instance.activityConfig) {
+				for (gameKey in instance.activityConfig.getSection(baseKey)?.keys.orEmpty()) {
+					games[ActivityListener.decodeGameKey(gameKey)] = instance.activityConfig.getInt("$baseKey.$gameKey")
+				}
 			}
 
 			// プレイ時間が長い順に上位 5 件
