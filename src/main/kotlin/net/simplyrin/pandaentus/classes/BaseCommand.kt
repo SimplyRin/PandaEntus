@@ -23,33 +23,27 @@ import net.simplyrin.pandaentus.PandaEntus
  */
 open class BaseCommand {
 
-	open fun getCommand(): String? {
-		return null
-	}
+	open val command: String?
+		get() = null
 
-	open fun getDescription(): String? {
-		return null
-	}
+	open val description: String?
+		get() = null
 
 	open fun sendTyping(): Boolean {
 		return true
 	}
 
-	open fun getCommandData(): CommandData? {
-		return null
-	}
+	open val commandData: CommandData?
+		get() = null
 
-	open fun getAliases(): List<String>? {
-		return null
-	}
+	open val aliases: List<String>?
+		get() = null
 
-	open fun getType(): CommandType? {
-		return null
-	}
+	open val type: CommandType?
+		get() = null
 
-	open fun getPermission(): CommandPermission? {
-		return null
-	}
+	open val permission: CommandPermission?
+		get() = null
 
 	open fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
 	}

@@ -131,12 +131,12 @@ class WordWolfManager(
 		this.generalPlayers.addAll(ids)
 
 		for (wolfP in this.wolfPlayers) {
-			val member = this.guild.getMemberById(wolfP)!!
+			val member = this.guild.getMemberById(wolfP) ?: continue
 			member.user.openPrivateChannel().complete().sendMessage("ゲームが始まりました。お題: **" + this.wolfTheme + "**").complete()
 		}
 
 		for (generalP in this.generalPlayers) {
-			val member = this.guild.getMemberById(generalP)!!
+			val member = this.guild.getMemberById(generalP) ?: continue
 			member.user.openPrivateChannel().complete().sendMessage("ゲームが始まりました。お題: **" + this.playerTheme + "**").complete()
 		}
 
@@ -169,7 +169,7 @@ class WordWolfManager(
 					message.editMessage("残り時間: 0:00").complete()
 					var mention = ""
 					for (id in this.players) {
-						val mem = this.guild.getMemberById(id)!!
+						val mem = this.guild.getMemberById(id) ?: continue
 						mention += mem.asMention + " "
 					}
 					this.channel.sendMessage(mention + "\n話し合いの時間が終了しました。\n個人チャットへ送信したメッセージに従ってください。").complete()
@@ -184,7 +184,7 @@ class WordWolfManager(
 
 			var i = 1
 			for (id in this.players) {
-				val member = this.guild.getMemberById(id)!!
+				val member = this.guild.getMemberById(id) ?: continue
 				this.voteMap[i] = member
 
 				members += i.toString() + ": " + member.effectiveName + "\n"
@@ -194,7 +194,7 @@ class WordWolfManager(
 			}
 
 			for (id in this.players) {
-				val member = this.guild.getMemberById(id)!!
+				val member = this.guild.getMemberById(id) ?: continue
 				member.user.openPrivateChannel().complete().sendMessage("狼だと思う人の名前または、最初の番号を入力してください。\n```$members```").complete()
 			}
 
@@ -270,24 +270,18 @@ class WordWolfManager(
 
 		msg += "人狼: " + this.wolfTheme + "\n"
 		for (id in this.wolfPlayers) {
-			try {
-				val member = this.guild.getMemberById(id)!!
-				msg += member.effectiveName + " (投票数: " + this.getVotedCount(member) + ")\n"
-			} catch (e: Exception) {
-			}
+			val member = this.guild.getMemberById(id) ?: continue
+			msg += member.effectiveName + " (投票数: " + this.getVotedCount(member) + ")\n"
 		}
 
 		msg += "\n市民: " + this.playerTheme + "\n"
 		for (id in this.generalPlayers) {
-			try {
-				val member = this.guild.getMemberById(id)!!
-				msg += member.effectiveName + " (投票数: " + this.getVotedCount(member) + ")\n"
-			} catch (e: Exception) {
-			}
+			val member = this.guild.getMemberById(id) ?: continue
+			msg += member.effectiveName + " (投票数: " + this.getVotedCount(member) + ")\n"
 		}
 
-		val wwc = this.instance.commandRegister.getRegisteredCommand(WordWolfCommand::class.java) as WordWolfCommand
-		this.channel.sendMessage("ゲームが終了しました。結果:\n```$msg```\nもう一度始める場合は **${wwc.getCommand()}** を使用してください。").complete()
+		val commandName = this.instance.commandRegister.getRegisteredCommand(WordWolfCommand::class.java)?.command.orEmpty()
+		this.channel.sendMessage("ゲームが終了しました。結果:\n```$msg```\nもう一度始める場合は **$commandName** を使用してください。").complete()
 
 		this.voteReception = false
 
@@ -319,7 +313,7 @@ class WordWolfManager(
 			return
 		}
 
-		val wwc = this.instance.commandRegister.getRegisteredCommand(WordWolfCommand::class.java) as WordWolfCommand
+		val commandName = this.instance.commandRegister.getRegisteredCommand(WordWolfCommand::class.java)?.command.orEmpty()
 
 		val member = event.member ?: return
 
@@ -328,7 +322,7 @@ class WordWolfManager(
 		val channel = member.user.openPrivateChannel().complete()
 		channel.sendMessage("ワードウルフへの参加を受け付けました。\n"
 			+ "ゲーム開始までお待ちください。\n"
-			+ "開始コマンド: **" + wwc.getCommand() + " start**").complete()
+			+ "開始コマンド: **" + commandName + " start**").complete()
 	}
 
 	companion object {

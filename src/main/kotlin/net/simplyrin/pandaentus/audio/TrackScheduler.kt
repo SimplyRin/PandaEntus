@@ -101,10 +101,12 @@ class TrackScheduler(
 			if (voiceChannel != null) {
 				if (voiceChannel.members.size >= 1) {
 					player.startTrack(track.makeClone(), false)
-				} else if (this.instance.forceLoopMap[this.guild.idLong] != null) {
-					val forceLoopTrack = this.instance.forceLoopMap[this.guild.idLong]!!
+				} else {
+					val forceLoopTrack = this.instance.forceLoopMap[this.guild.idLong]
 
-					player.startTrack(forceLoopTrack.makeClone(), false)
+					if (forceLoopTrack != null) {
+						player.startTrack(forceLoopTrack.makeClone(), false)
+					}
 				}
 			}
 		} else if (endReason.mayStartNext) {

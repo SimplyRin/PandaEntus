@@ -35,10 +35,10 @@ class PandaMessageEvent(
 	val user: User,
 	val channel: MessageChannel,
 	val channelType: ChannelType,
-	val guild: Guild?,
+	val guild: Guild,
 	val jda: JDA,
 	val message: Message?,
-	val member: Member?,
+	val member: Member,
 	val slashCommandEvent: SlashCommandInteractionEvent?,
 	val replyAction: ReplyCallbackAction?
 ) {
@@ -47,8 +47,9 @@ class PandaMessageEvent(
 		get() = this.user
 
 	fun reply(message: String): Message {
-		return if (this.isSlashCommand()) {
-			this.replyAction!!.setContent(message).complete().retrieveOriginal().complete()
+		val replyAction = this.replyAction
+		return if (replyAction != null) {
+			replyAction.setContent(message).complete().retrieveOriginal().complete()
 		} else {
 			this.channel.sendTyping().complete()
 			this.channel.sendMessage(message).complete()
@@ -60,8 +61,9 @@ class PandaMessageEvent(
 	}
 
 	fun reply(embed: MessageEmbed): Message {
-		return if (this.isSlashCommand()) {
-			this.replyAction!!.addEmbeds(embed).complete().retrieveOriginal().complete()
+		val replyAction = this.replyAction
+		return if (replyAction != null) {
+			replyAction.addEmbeds(embed).complete().retrieveOriginal().complete()
 		} else {
 			this.channel.sendTyping().complete()
 			this.channel.sendMessageEmbeds(embed).complete()
@@ -74,16 +76,30 @@ class PandaMessageEvent(
 
 	companion object {
 
+		/**
+		 * サーバー外 (DM など) やメンバーを取得できないイベントの場合は null を返す
+		 */
 		@JvmStatic
-		fun get(event: MessageReceivedEvent): PandaMessageEvent {
+		fun get(event: MessageReceivedEvent): PandaMessageEvent? {
+			if (!event.isFromGuild) {
+				return null
+			}
+			val member = event.member ?: return null
+
 			return PandaMessageEvent(event.author, event.channel, event.channelType, event.guild, event.jda,
-				event.message, event.member, null, null)
+				event.message, member, null, null)
 		}
 
+		/**
+		 * サーバー外 (DM など) やメンバーを取得できないイベントの場合は null を返す
+		 */
 		@JvmStatic
-		fun get(event: SlashCommandInteractionEvent): PandaMessageEvent {
-			return PandaMessageEvent(event.user, event.channel, event.channelType, event.guild, event.jda,
-				null, event.member, event, event.deferReply())
+		fun get(event: SlashCommandInteractionEvent): PandaMessageEvent? {
+			val guild = event.guild ?: return null
+			val member = event.member ?: return null
+
+			return PandaMessageEvent(event.user, event.channel, event.channelType, guild, event.jda,
+				null, member, event, event.deferReply())
 		}
 
 	}

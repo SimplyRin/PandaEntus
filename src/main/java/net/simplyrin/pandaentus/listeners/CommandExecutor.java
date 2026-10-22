@@ -106,7 +106,12 @@ public class CommandExecutor extends ListenerAdapter {
 				guild.getName() + "@" + guild.getIdLong() + ", " + user.getName() + ": " + raw + " (" + args[0] + ")");
 
 		if (args.length > 0) {
-			this.check(args, user, member, PandaMessageEvent.get(event), raw);
+			var pandaMessageEvent = PandaMessageEvent.get(event);
+			if (pandaMessageEvent == null) {
+				return;
+			}
+
+			this.check(args, user, member, pandaMessageEvent, raw);
 		}
 	}
 
@@ -125,7 +130,12 @@ public class CommandExecutor extends ListenerAdapter {
 		String[] args = raw.split(" ");
 
 		if (args.length > 0) {
-			this.check(args, user, member, PandaMessageEvent.get(event), raw);
+			var pandaMessageEvent = PandaMessageEvent.get(event);
+			if (pandaMessageEvent == null) {
+				return;
+			}
+
+			this.check(args, user, member, pandaMessageEvent, raw);
 		}
 	}
 

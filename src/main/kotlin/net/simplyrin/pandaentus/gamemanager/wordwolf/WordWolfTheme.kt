@@ -31,7 +31,7 @@ class WordWolfTheme private constructor(val baseTheme: String, val a: String, va
 		@JvmStatic
 		fun getTheme(name: String): WordWolfTheme {
 			var file: File? = null
-			for (value in folder.listFiles()!!) {
+			for (value in folder.listFiles().orEmpty()) {
 				val config = Config.getConfig(value)
 				if (name.equals(config.getString("name"), ignoreCase = true)) {
 					file = value
@@ -45,7 +45,8 @@ class WordWolfTheme private constructor(val baseTheme: String, val a: String, va
 		 */
 		@JvmStatic
 		fun getTheme(): WordWolfTheme {
-			return getTheme(folder.listFiles()!!.toList().shuffled()[0])
+			val file = folder.listFiles().orEmpty().toList().shuffled().firstOrNull()
+			return getTheme(requireNotNull(file) { "テーマファイルが見つかりません" })
 		}
 
 		/**
@@ -57,8 +58,13 @@ class WordWolfTheme private constructor(val baseTheme: String, val a: String, va
 
 			val themes = config.getStringList("themes").shuffled()
 
-			val st = themes[0].split("|")
-			return WordWolfTheme(config.getString("name"), st[0], st[1])
+			val st = themes.firstOrNull()?.split("|")
+			val a = st?.getOrNull(0)
+			val b = st?.getOrNull(1)
+			requireNotNull(a) { "テーマの定義が不正です: " + file.name }
+			requireNotNull(b) { "テーマの定義が不正です: " + file.name }
+
+			return WordWolfTheme(config.getString("name"), a, b)
 		}
 
 	}

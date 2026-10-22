@@ -272,8 +272,8 @@ class PandaEntus {
 			val classLoader = Thread.currentThread().contextClassLoader
 			for (classInfo in ClassPath.from(classLoader).topLevelClasses) {
 				if (classInfo.name.startsWith("net.simplyrin.pandaentus.command")) {
-					val baseCommand = Class.forName(classInfo.name).getDeclaredConstructor().newInstance() as BaseCommand
-					this.commandRegister.registerCommand(commands, baseCommand.getCommand(), baseCommand)
+					val baseCommand = Class.forName(classInfo.name).getDeclaredConstructor().newInstance() as? BaseCommand ?: continue
+					this.commandRegister.registerCommand(commands, baseCommand.command, baseCommand)
 				}
 			}
 
@@ -540,11 +540,11 @@ class PandaEntus {
 		pw.flush()
 		val result = sw.toString()
 
-		val file = this.stringToTempFile(result)
+		val file = this.stringToTempFile(result) ?: return
 
 		for (id in this.getBotOwner().orEmpty()) {
 			val user = this.jda.getUserById(id) ?: continue
-			user.openPrivateChannel().complete().sendFiles(FileUpload.fromData(file!!)).complete()
+			user.openPrivateChannel().complete().sendFiles(FileUpload.fromData(file)).complete()
 		}
 	}
 

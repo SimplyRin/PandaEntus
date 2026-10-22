@@ -68,9 +68,16 @@ class AkinatorManager(val guild: Guild, val channelId: String) : ListenerAdapter
 	init {
 		this.guild.jda.addEventListener(this)
 
-		val channel = this.guild.getTextChannelById(this.channelId)!!
+		this.runGame()
+	}
 
-		this.query = this.akiWrapper!!.currentQuery
+	/**
+	 * ゲームが終了するまでブロックして質問を送り続ける
+	 */
+	private fun runGame() {
+		val channel = this.guild.getTextChannelById(this.channelId) ?: return
+
+		this.query = this.akiWrapper?.currentQuery
 
 		while (true) {
 			val currentQuery = this.query ?: break
@@ -129,18 +136,18 @@ class AkinatorManager(val guild: Guild, val channelId: String) : ListenerAdapter
 	}
 
 	fun parseAnswer(value: String): Akiwrapper.Answer? {
-		val textChannel = this.guild.getTextChannelById(this.channelId)!!
+		val textChannel = this.guild.getTextChannelById(this.channelId)
 
 		if (this.checkEnd) {
 			when (value.lowercase()) {
 				"1", "１" -> {
-					textChannel.sendMessage("おち").complete()
+					textChannel?.sendMessage("おち")?.complete()
 
 					this.isGameEnd = true
 
 					this.isReceivingQuestion = false
 					this.checkEnd = false
-					this.guess!!.confirm()
+					this.guess?.confirm()
 
 					this.akiWrapper = null
 					this.guild.jda.removeEventListener(this)
@@ -149,7 +156,10 @@ class AkinatorManager(val guild: Guild, val channelId: String) : ListenerAdapter
 					this.isReceivingQuestion = false
 					this.checkEnd = false
 
-					this.query = this.guess!!.reject()
+					val guess = this.guess
+					if (guess != null) {
+						this.query = guess.reject()
+					}
 				}
 			}
 
@@ -163,14 +173,17 @@ class AkinatorManager(val guild: Guild, val channelId: String) : ListenerAdapter
 			"たぶんそう", "部分的にそう", "4", "４" -> return Akiwrapper.Answer.PROBABLY
 			"たぶん違う", "そうでもない", "5", "５" -> return Akiwrapper.Answer.PROBABLY_NOT
 			"もどる", "戻る", "7", "７" -> {
-				textChannel.sendTyping().complete()
+				textChannel?.sendTyping()?.complete()
 
-				this.query = this.question!!.undoAnswer()
+				val question = this.question
+				if (question != null) {
+					this.query = question.undoAnswer()
+				}
 
 				return null
 			}
 			"やめる", "8", "８" -> {
-				textChannel.sendMessage(":pray:").complete()
+				textChannel?.sendMessage(":pray:")?.complete()
 
 				this.isGameEnd = true
 
@@ -228,7 +241,10 @@ class AkinatorManager(val guild: Guild, val channelId: String) : ListenerAdapter
 			if (answer != null) {
 				channel.sendTyping().complete()
 
-				this.query = this.question!!.answer(answer)
+				val question = this.question
+				if (question != null) {
+					this.query = question.answer(answer)
+				}
 			}
 
 			this.isReceivingQuestion = false

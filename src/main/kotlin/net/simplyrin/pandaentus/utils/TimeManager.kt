@@ -51,12 +51,12 @@ class TimeManager @JvmOverloads constructor(private val instance: PandaEntus, pr
 
 	@Suppress("DEPRECATION")
 	fun getJoinedTime(): String {
-		val date = this.date!!
+		val date = this.date ?: return ""
 		return "${date.hours}時${date.minutes}分"
 	}
 
 	fun getCurrentTime(): String {
-		return this.instance.getUptime(this.date!!)
+		return this.instance.getUptime(this.date ?: Date())
 	}
 
 }
