@@ -108,7 +108,7 @@ public class VoiceChannelNameManager {
 			HashMap<String, Integer> games = new HashMap<>();
 			
 			for (var entry : this.map.entrySet()) {
-				if (entry.getKey().startsWith(String.valueOf(channelId))) {
+				if (entry.getKey().startsWith(channelId + ",")) {
 					if (entry.getValue() == null) {
 						continue;
 					}

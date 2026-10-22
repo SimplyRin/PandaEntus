@@ -349,7 +349,11 @@ public class WordWolfManager extends ListenerAdapter {
 			return;
 		}
 		
-		if (this.recruitMessage == null && !this.recruitMessage.getId().equals(event.getMessageId())) {
+		// 募集メッセージ以外へのリアクション、開始後、参加済みのユーザーは無視する
+		if (this.recruitMessage == null || !this.recruitMessage.getId().equals(event.getMessageId())) {
+			return;
+		}
+		if (this.gameStarted || this.players.contains(event.getUserId())) {
 			return;
 		}
 		

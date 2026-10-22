@@ -1,8 +1,9 @@
 package net.simplyrin.pandaentus.listeners;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
@@ -40,7 +41,8 @@ public class ActivityListener extends ListenerAdapter {
 		this.startManager();
 	}
 	
-	private HashMap<String, List<String>> map = new HashMap<>();
+	// イベントスレッドと監視スレッドから同時にアクセスされるため並行安全なコレクションを使う
+	private Map<String, List<String>> map = new ConcurrentHashMap<>();
 	
 	public void startManager() {
 		new Thread(() -> {
@@ -92,12 +94,9 @@ public class ActivityListener extends ListenerAdapter {
 		
 		// this.instance.getVcNameManager().updateVoiceChannelName(member, activity);
 
-		if (this.map.get(guild.getId() + "-" + member.getId()) == null) {
-			this.map.put(guild.getId() + "-" + member.getId(), new ArrayList<>());
-		}
-		
-		if (!this.map.get(guild.getId() + "-" + member.getId()).contains(activity.getName())) {
-			this.map.get(guild.getId() + "-" + member.getId()).add(activity.getName());
+		var games = this.map.computeIfAbsent(guild.getId() + "-" + member.getId(), key -> new CopyOnWriteArrayList<>());
+		if (!games.contains(activity.getName())) {
+			games.add(activity.getName());
 		}
 
 		System.out.println("[ActivityListener-START] " + member.getEffectiveName() + "@" + guild.getId() + ": " + activity.getName());
@@ -121,13 +120,8 @@ public class ActivityListener extends ListenerAdapter {
 
 		var activity = event.getOldActivity();
 		
-		if (this.map.get(guild.getId() + "-" + member.getId()) == null) {
-			this.map.put(guild.getId() + "-" + member.getId(), new ArrayList<>());
-		}
-		
-		if (this.map.get(guild.getId() + "-" + member.getId()).contains(activity.getName())) {
-			this.map.get(guild.getId() + "-" + member.getId()).remove(activity.getName());
-		}
+		var games = this.map.computeIfAbsent(guild.getId() + "-" + member.getId(), key -> new CopyOnWriteArrayList<>());
+		games.remove(activity.getName());
 		
 		System.out.println("[ActivityListener-END] " + member.getEffectiveName() + "@" + guild.getId() + ": " + activity.getName());
 	}

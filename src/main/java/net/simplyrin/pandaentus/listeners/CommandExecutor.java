@@ -138,30 +138,29 @@ public class CommandExecutor extends ListenerAdapter {
 				commands.addAll(baseCommand.getAliases());
 			}
 
-			switch (baseCommand.getType()) {
-			case EqualsIgnoreCase:
-				for (String command : commands) {
-					if (args[0].equalsIgnoreCase(command)) {
-						this.execute(baseCommand, user, member, event, raw, args);
-					}
+			// 名前やエイリアスが複数一致しても、1 つのコマンドは 1 回だけ実行する
+			boolean matched = false;
+			for (String command : commands) {
+				switch (baseCommand.getType()) {
+				case EqualsIgnoreCase:
+					matched = args[0].equalsIgnoreCase(command);
+					break;
+				case StartsWith:
+					matched = args[0].toLowerCase().startsWith(command.toLowerCase());
+					break;
+				case Contains:
+					matched = args[0].toLowerCase().contains(command.toLowerCase());
+					break;
+				default:
+					break;
 				}
-				break;
-			case StartsWith:
-				for (String command : commands) {
-					if (args[0].toLowerCase().startsWith(command.toLowerCase())) {
-						this.execute(baseCommand, user, member, event, raw, args);
-					}
+				if (matched) {
+					break;
 				}
-				break;
-			case Contains:
-				for (String command : commands) {
-					if (args[0].toLowerCase().contains(command.toLowerCase())) {
-						this.execute(baseCommand, user, member, event, raw, args);
-					}
-				}
-				break;
-			default:
-				break;
+			}
+
+			if (matched) {
+				this.execute(baseCommand, user, member, event, raw, args);
 			}
 		}
 	}

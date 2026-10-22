@@ -36,7 +36,7 @@ public class TimeUtils {
 
 	public void resetGuild(String guildId) {
 		for (CallTime callTime : this.getList()) {
-			if (callTime.key.startsWith(guildId)) {
+			if (callTime.key.startsWith(guildId + ",")) {
 				this.callTime.remove(callTime.key);
 			}
 		}
@@ -46,7 +46,7 @@ public class TimeUtils {
 		List<CallTime> list = new ArrayList<>();
 		for (CallTime callTime : this.getList()) {
 			System.out.println("Checking " + callTime.key + ", " + callTime.totalTime);
-			if (callTime.key.startsWith(guildId)) {
+			if (callTime.key.startsWith(guildId + ",")) {
 				System.out.println("[ADDED] - Checking " + callTime.key + ", " + callTime.totalTime);
 				list.add(callTime);
 			}
