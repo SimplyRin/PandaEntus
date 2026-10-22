@@ -1,14 +1,9 @@
-package net.simplyrin.pandaentus.classes;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
+package net.simplyrin.pandaentus.classes
 
 /**
- * Created by SimplyRin on 2021/11/01.
+ * Created by SimplyRin on 2020/07/13.
  *
- * Copyright (C) 2021 SimplyRin
+ * Copyright (C) 2020 SimplyRin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +18,8 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-@Getter
-@AllArgsConstructor
-public class ReactionMessage {
-	
-	private Message message;
-	private Emoji emote;
+enum class CommandPermission {
+
+	Everyone, BotOwner, ServerAdministrator
 
 }

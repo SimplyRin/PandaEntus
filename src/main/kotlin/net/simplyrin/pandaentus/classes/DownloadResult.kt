@@ -1,7 +1,9 @@
-package net.simplyrin.pandaentus.classes;
+package net.simplyrin.pandaentus.classes
+
+import java.io.File
 
 /**
- * Created by SimplyRin on 2020/07/09.
+ * Created by SimplyRin on 2020/07/18.
  *
  * Copyright (C) 2020 SimplyRin
  *
@@ -18,8 +20,10 @@ package net.simplyrin.pandaentus.classes;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public enum CommandType {
+class DownloadResult {
 
-	EqualsIgnoreCase, StartsWith, Contains;
+	var file: File? = null
+	var isResult: Boolean = false
+	var message: String? = null
 
 }

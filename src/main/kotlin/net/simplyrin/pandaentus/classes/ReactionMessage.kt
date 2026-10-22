@@ -1,9 +1,12 @@
-package net.simplyrin.pandaentus.classes;
+package net.simplyrin.pandaentus.classes
+
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.emoji.Emoji
 
 /**
- * Created by SimplyRin on 2020/07/13.
+ * Created by SimplyRin on 2021/11/01.
  *
- * Copyright (C) 2020 SimplyRin
+ * Copyright (C) 2021 SimplyRin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +21,4 @@ package net.simplyrin.pandaentus.classes;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public enum CommandPermission {
-
-	Everyone, BotOwner, ServerAdministrator;
-
-}
+class ReactionMessage(val message: Message, val emote: Emoji)

@@ -56,7 +56,7 @@ class TimeManager @JvmOverloads constructor(private val instance: PandaEntus, pr
 	}
 
 	fun getCurrentTime(): String {
-		return this.instance.getUptime(this.date)
+		return this.instance.getUptime(this.date!!)
 	}
 
 }

@@ -1,9 +1,4 @@
-package net.simplyrin.pandaentus.classes;
-
-import java.util.List;
-
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.simplyrin.pandaentus.PandaEntus;
+package net.simplyrin.pandaentus.classes
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -23,37 +18,8 @@ import net.simplyrin.pandaentus.PandaEntus;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-public class BaseCommand {
+enum class CommandType {
 
-	public String getCommand() {
-		return null;
-	}
-
-	public String getDescription() {
-		return null;
-	}
-
-	public boolean sendTyping() {
-		return true;
-	}
-
-	public CommandData getCommandData() {
-		return null;
-	}
-
-	public List<String> getAliases() {
-		return null;
-	}
-
-	public CommandType getType() {
-		return null;
-	}
-
-	public CommandPermission getPermission() {
-		return null;
-	}
-
-	public void execute(PandaEntus instance, PandaMessageEvent event, String[] args) {
-	}
+	EqualsIgnoreCase, StartsWith, Contains
 
 }
