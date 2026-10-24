@@ -21,9 +21,9 @@ package net.simplyrin.pandaentus.utils;
 public class Version {
 
 	public static final String BUILD_NUMBER = "";
-	public static final String BUILD_TIME  ="2026-09-16 20:00:10";
+	public static final String BUILD_TIME  ="2026-10-24 09:42:10";
 	public static final String POMVERSION = "1.3";
-	public static final String SHA = "test";
-	public static final String GITHUB_RUN_NUMBER = "999";
+	public static final String SHA = "";
+	public static final String GITHUB_RUN_NUMBER = "";
 
 }

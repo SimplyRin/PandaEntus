@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -186,6 +187,11 @@ public class Listener extends ListenerAdapter {
 		
 		if (!this.instance.getConfig().getBoolean(path)) {
 			if (voiceChannels.size() == count) {
+				// チャンネルの管理権限がない場合は作成しない
+				if (!guild.getSelfMember().hasPermission(category, Permission.MANAGE_CHANNEL)) {
+					System.out.println("[" + guild.getName() + "@" + guild.getId() + "] Missing permission: MANAGE_CHANNEL (" + category.getName() + ")");
+					return;
+				}
 				int c = (count + 1);
 				category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-" + c).setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
 			}
@@ -330,6 +336,12 @@ public class Listener extends ListenerAdapter {
 			String path = "Server." + guild.getId() + ".DisableChannelManagement";
 			
 			if (!this.instance.getConfig().getBoolean(path)) {
+				// 途中で削除に失敗してチャンネルが中途半端に残らないよう、先に全チャンネルの管理権限を確認する
+				if (!this.canManageChannels(guild, category)) {
+					System.out.println("[" + guild.getName() + "@" + guild.getId() + "] Missing permission: MANAGE_CHANNEL (" + category.getName() + ")");
+					return;
+				}
+
 				for (VoiceChannel voiceChannel : voiceChannels) {
 					try {
 						if (voiceChannel != null && voiceChannel.getType().equals(ChannelType.VOICE)) {
@@ -344,6 +356,22 @@ public class Listener extends ListenerAdapter {
 				category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-1").setUserlimit(99).setBitrate(guild.getMaxBitrate()).complete();
 			}
 		}
+	}
+
+	/**
+	 * カテゴリとカテゴリ内の全ボイスチャンネルに対して MANAGE_CHANNEL 権限があるか確認する
+	 */
+	private boolean canManageChannels(Guild guild, Category category) {
+		Member selfMember = guild.getSelfMember();
+		if (!selfMember.hasPermission(category, Permission.MANAGE_CHANNEL)) {
+			return false;
+		}
+		for (VoiceChannel voiceChannel : category.getVoiceChannels()) {
+			if (!selfMember.hasPermission(voiceChannel, Permission.MANAGE_CHANNEL)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public String getNickname(Member member) {
