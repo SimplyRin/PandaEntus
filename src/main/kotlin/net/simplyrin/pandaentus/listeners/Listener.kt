@@ -4,6 +4,7 @@ import java.awt.Color
 import java.util.Date
 
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.channel.concrete.Category
@@ -140,6 +141,12 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 
 		if (!this.instance.config.getBoolean(path)) {
 			if (voiceChannels.size == count) {
+				// チャンネルの管理権限がない場合は作成しない
+				if (!guild.selfMember.hasPermission(category, Permission.MANAGE_CHANNEL)) {
+					println("[" + guild.name + "@" + guild.id + "] Missing permission: MANAGE_CHANNEL (" + category.name + ")")
+					return
+				}
+
 				val c = count + 1
 				category.createVoiceChannel(this.instance.getVoiceChannelName(category) + "-" + c)
 					.setUserlimit(99).setBitrate(guild.maxBitrate).complete()
@@ -206,6 +213,12 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 			val path = "Server." + guild.id + ".DisableChannelManagement"
 
 			if (!this.instance.config.getBoolean(path)) {
+				// 途中で削除に失敗してチャンネルが中途半端に残らないよう、先に全チャンネルの管理権限を確認する
+				if (!this.canManageChannels(guild, category)) {
+					println("[" + guild.name + "@" + guild.id + "] Missing permission: MANAGE_CHANNEL (" + category.name + ")")
+					return
+				}
+
 				for (voiceChannel in voiceChannels) {
 					try {
 						voiceChannel.delete().complete()
@@ -275,6 +288,17 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 
 			textChannel?.sendMessageEmbeds(embedBuilder.build())?.complete()
 		}
+	}
+
+	/**
+	 * カテゴリとカテゴリ内の全ボイスチャンネルに対して MANAGE_CHANNEL 権限があるか確認する
+	 */
+	private fun canManageChannels(guild: Guild, category: Category): Boolean {
+		val selfMember = guild.selfMember
+		if (!selfMember.hasPermission(category, Permission.MANAGE_CHANNEL)) {
+			return false
+		}
+		return category.voiceChannels.all { selfMember.hasPermission(it, Permission.MANAGE_CHANNEL) }
 	}
 
 	fun getNickname(member: Member): String {
