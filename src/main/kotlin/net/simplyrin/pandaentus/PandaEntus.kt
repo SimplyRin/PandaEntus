@@ -19,6 +19,7 @@ import com.google.common.reflect.ClassPath
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 
@@ -61,6 +62,7 @@ import net.simplyrin.pandaentus.listeners.ActivityListener
 import net.simplyrin.pandaentus.listeners.CommandExecutor
 import net.simplyrin.pandaentus.listeners.Listener
 import net.simplyrin.pandaentus.listeners.ReactionListener
+import net.simplyrin.pandaentus.tts.TtsManager
 import net.simplyrin.pandaentus.utils.DataMigration
 import net.simplyrin.pandaentus.utils.PoolItems
 import net.simplyrin.pandaentus.utils.ThreadPool
@@ -131,6 +133,8 @@ class PandaEntus {
 		private set
 	val musicManagers: MutableMap<Long, GuildMusicManager> = HashMap()
 	lateinit var vcNameManager: VoiceChannelNameManager
+		private set
+	lateinit var ttsManager: TtsManager
 		private set
 
 	val startupDate = Date()
@@ -316,7 +320,8 @@ class PandaEntus {
 		this.playerManager = DefaultAudioPlayerManager()
 		this.playerManager.createPlayer()
 		// AudioSourceManagers.registerRemoteSources(this.playerManager);
-		// AudioSourceManagers.registerLocalSource(this.playerManager);
+		// ローカルファイルの再生 (読み上げ、!hv / !kv の音声ファイル用)。!play は http(s) の URL しか受け付けないので、ユーザーが任意のファイルを再生することはできない
+		this.playerManager.registerSourceManager(LocalAudioSourceManager())
 		this.playerManager.registerSourceManager(SoundCloudAudioSourceManager.createDefault())
 		this.playerManager.registerSourceManager(BandcampAudioSourceManager())
 
@@ -373,6 +378,10 @@ class PandaEntus {
 		this.playerManager.registerSourceManager(youtube)
 
 		this.vcNameManager = VoiceChannelNameManager(this)
+
+		// 読み上げ (!ps)
+		this.ttsManager = TtsManager(this)
+		this.jda.addEventListener(this.ttsManager)
 
 		this.jda.presence.setActivity(Activity.playing("🐼"))
 

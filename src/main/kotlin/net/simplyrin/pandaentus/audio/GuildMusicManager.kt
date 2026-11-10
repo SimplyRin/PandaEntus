@@ -18,14 +18,25 @@ class GuildMusicManager(instance: PandaEntus, guild: Guild, manager: AudioPlayer
 	 */
 	val scheduler: TrackScheduler = TrackScheduler(instance, guild, this.player)
 
+	/**
+	 * Audio player for text-to-speech. Its audio takes priority over the music player.
+	 */
+	val ttsPlayer: AudioPlayer = manager.createPlayer()
+
+	/**
+	 * Queue for the text-to-speech player.
+	 */
+	val ttsScheduler: TtsScheduler = TtsScheduler(this.ttsPlayer)
+
 	init {
 		this.player.addListener(this.scheduler)
+		this.ttsPlayer.addListener(this.ttsScheduler)
 	}
 
 	/**
 	 * Wrapper around AudioPlayer to use it as an AudioSendHandler.
 	 */
 	val sendHandler: AudioPlayerSendHandler
-		get() = AudioPlayerSendHandler(this.player)
+		get() = AudioPlayerSendHandler(this.player, this.ttsPlayer)
 
 }

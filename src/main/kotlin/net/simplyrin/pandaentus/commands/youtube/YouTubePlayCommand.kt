@@ -67,7 +67,8 @@ class YouTubePlayCommand : BaseCommand() {
 		if (arguments.size > 1) {
 			val url = arguments[1]
 
-			if (!url.startsWith("http")) {
+			// ローカルファイルの再生を有効にしているため、http(s) の URL 以外 (ファイルのパスなど) は受け付けない
+			if (!url.startsWith("http://") && !url.startsWith("https://")) {
 				event.reply("検索機能を使用することはできません。URL を入力してください。")
 				return
 			}
