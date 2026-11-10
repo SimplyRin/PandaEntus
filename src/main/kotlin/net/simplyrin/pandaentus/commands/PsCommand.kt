@@ -63,7 +63,7 @@ class PsCommand : BaseCommand() {
 		} else {
 			message.append("🔊 " + event.channel.asMention + " の発言を読み上げます。(" + this.command + " でもう一度実行すると停止)")
 		}
-		message.append("\n先頭に `;` を付けた発言は読み上げません。通話に参加している人の発言だけを読み上げます。")
+		message.append("\n先頭に `;` を付けた発言は読み上げません。")
 
 		val voice = TtsVoice.forUser(event.user.idLong, manager.openJTalk.voices)
 		if (voice != null) {

@@ -23,7 +23,7 @@ import net.simplyrin.pandaentus.PandaEntus
  * テキストチャンネルの発言を、Bot が参加しているボイスチャンネルで読み上げる。
  *
  * - `!ps` を実行したテキストチャンネルが読み上げの対象になる (サーバーごとに 1 チャンネル)。もう一度実行すると停止する。
- * - 読み上げるのは、Bot と同じボイスチャンネルに参加している人の発言だけ。
+ * - 通話に参加していなくても、そのテキストチャンネルの発言は読み上げる。
  * - ユーザーごとに声 (種類・ピッチ・速さ) が変わる。[TtsVoice] を参照。
  */
 class TtsManager(private val instance: PandaEntus) : ListenerAdapter() {
@@ -111,15 +111,8 @@ class TtsManager(private val instance: PandaEntus) : ListenerAdapter() {
 		}
 
 		// Bot が切断されていたら、読み上げは終了している
-		val botChannel = guild.audioManager.connectedChannel
-		if (botChannel == null) {
+		if (guild.audioManager.connectedChannel == null) {
 			this.sessions.remove(guild.idLong)
-			return
-		}
-
-		// 通話に参加していない人の発言は読み上げない
-		val member = event.member ?: return
-		if (member.voiceState?.channel?.idLong != botChannel.idLong) {
 			return
 		}
 
