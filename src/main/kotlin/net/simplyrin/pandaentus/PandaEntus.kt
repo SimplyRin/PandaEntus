@@ -14,6 +14,7 @@ import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.system.exitProcess
 
+import club.minnced.discord.jdave.interop.JDaveSessionFactory
 import com.google.common.reflect.ClassPath
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
@@ -38,6 +39,7 @@ import dev.lavalink.youtube.clients.Web
 import dev.lavalink.youtube.clients.WebEmbedded
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.audio.AudioModuleConfig
 import net.dv8tion.jda.api.entities.Activity
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
@@ -271,6 +273,8 @@ class PandaEntus {
 			jdaBuilder.setChunkingFilter(ChunkingFilter.ALL)
 			jdaBuilder.enableCache(CacheFlag.ACTIVITY)
 			jdaBuilder.enableCache(CacheFlag.VOICE_STATE)
+			// Discord のボイス接続は DAVE (E2EE) への対応が必須。未設定だと音声が受け付けられない
+			jdaBuilder.setAudioModuleConfig(AudioModuleConfig().withDaveSessionFactory(JDaveSessionFactory()))
 			this.jda = jdaBuilder.build().awaitReady()
 		} catch (e: Exception) {
 			e.printStackTrace()
