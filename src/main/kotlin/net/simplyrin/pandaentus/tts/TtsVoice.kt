@@ -4,7 +4,7 @@ import java.io.File
 import java.util.Locale
 
 /**
- * 読み上げの声。声の種類 (音声モデル)、ピッチ (半音単位の上げ下げ)、話す速さの組み合わせ。
+ * 読み上げの声。声の種類 (音声モデル) とピッチ (半音単位の上げ下げ) は人ごとに変わり、話す速さは全員 ×1.4 で固定。
  */
 data class TtsVoice(val file: File, val pitch: Double, val rate: Double) {
 
@@ -12,7 +12,8 @@ data class TtsVoice(val file: File, val pitch: Double, val rate: Double) {
 
 		// 聞き取りやすい範囲に収める。差が小さいと別の人の声に聞こえないので、間隔を空けている
 		private val PITCHES = doubleArrayOf(-3.0, -1.5, 0.0, 1.5, 3.0, 4.5)
-		private val RATES = doubleArrayOf(0.9, 1.0, 1.1, 1.2)
+		// 話す速さは全員同じ (×1.4 固定)
+		const val RATE = 1.4
 
 		/**
 		 * ユーザー ID から声を決める。同じユーザーは、いつでも同じ声になる。
@@ -24,15 +25,14 @@ data class TtsVoice(val file: File, val pitch: Double, val rate: Double) {
 				return null
 			}
 
-			// 声の種類・ピッチ・速さを、それぞれ別のハッシュ値から選ぶ (ID の下位桁だけに偏らないようにする)
+			// 声の種類とピッチを、それぞれ別のハッシュ値から選ぶ (ID の下位桁だけに偏らないようにする)
 			val h1 = mix(userId)
 			val h2 = mix(h1)
-			val h3 = mix(h2)
 
 			return TtsVoice(
 				voices[index(h1, voices.size)],
 				PITCHES[index(h2, PITCHES.size)],
-				RATES[index(h3, RATES.size)]
+				RATE
 			)
 		}
 
