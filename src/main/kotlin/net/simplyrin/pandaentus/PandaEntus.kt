@@ -20,7 +20,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager
-import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 
 import org.apache.http.HttpHost
@@ -136,8 +135,6 @@ class PandaEntus {
 
 	val startupDate = Date()
 	val akiMap: MutableMap<String, AkinatorManager> = HashMap()
-
-	var audioPlaylist: AudioPlaylist? = null
 
 	lateinit var amongUsGuildList: MutableList<String>
 		private set

@@ -1,13 +1,14 @@
 package net.simplyrin.pandaentus.commands.youtube
 
 import java.awt.Color
+import java.net.URI
+import java.net.URISyntaxException
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.MessageEmbed
 import net.dv8tion.jda.api.interactions.commands.OptionType
 import net.dv8tion.jda.api.interactions.commands.build.CommandData
 import net.dv8tion.jda.internal.interactions.CommandDataImpl
@@ -77,8 +78,13 @@ class YouTubePlayCommand : BaseCommand() {
 				return
 			}
 
-			// プレイリストの URL は対象外
-			val urls = if (url.contains("list")) emptyList() else listOf(url)
+			// プレイリストには対応していない (YouTube へのリクエストが増えてレートリミットに掛かりやすくなるため)。
+			// 動画の URL についているプレイリストの指定は無視して、その動画だけを再生する
+			val videoUrl = this.stripPlaylist(url)
+			if (videoUrl == null) {
+				event.reply(PLAYLIST_NOT_SUPPORTED)
+				return
+			}
 
 			embedBuilder.setColor(Color.RED)
 			embedBuilder.setAuthor("準備しています...")
@@ -95,51 +101,35 @@ class YouTubePlayCommand : BaseCommand() {
 
 				val musicManager = instance.getGuildAudioPlayer(guild)
 
-				val messages = ArrayList<MessageEmbed>()
+				instance.playerManager.loadItemOrdered(musicManager, videoUrl, object : AudioLoadResultHandler {
 
-				for (urlItem in urls) {
-					instance.playerManager.loadItemOrdered(musicManager, urlItem, object : AudioLoadResultHandler {
+					override fun trackLoaded(track: AudioTrack) {
+						embedBuilder.setAuthor(null)
+						embedBuilder.clearFields()
+						embedBuilder.addField("🎵 タイトル", track.info.title, true)
+						embedBuilder.addField("💿 アーティスト", track.info.author, true)
+						embedBuilder.setFooter(footer)
 
-						override fun trackLoaded(track: AudioTrack) {
-							embedBuilder.setAuthor(null)
-							embedBuilder.clearFields()
-							embedBuilder.addField("🎵 タイトル", track.info.title, true)
-							embedBuilder.addField("💿 アーティスト", track.info.author, true)
-							embedBuilder.setFooter(footer)
+						instance.previousTrack[guild.idLong] = track
+						instance.play(guild, musicManager, track)
 
-							messages.add(embedBuilder.build())
+						message.editMessageEmbeds(embedBuilder.build()).complete()
+					}
 
-							embedBuilder.setFooter("詳細: " + instance.commandNameOf(YouTubeNowPlayingCommand::class.java) +
-								", コマンド一覧: " + instance.commandNameOf(YouTubeHelpCommand::class.java))
+					// SoundCloud のセットや Bandcamp のアルバムなど、プレイリストとして読み込まれたものは再生しない
+					override fun playlistLoaded(playlist: AudioPlaylist) {
+						message.editMessage(PLAYLIST_NOT_SUPPORTED).setEmbeds(emptyList()).complete()
+					}
 
-							instance.previousTrack[guild.idLong] = track
-							instance.play(guild, musicManager, track)
+					override fun noMatches() {
+						message.editMessage("曲が見つかりませんでした。").complete()
+					}
 
-							if (messages.size == 1) {
-								message.editMessageEmbeds(messages[0]).complete()
-							}
-						}
+					override fun loadFailed(exception: FriendlyException) {
+						message.editMessage("曲を読み込めませんでした。\n" + exception.message).complete()
+					}
 
-						override fun playlistLoaded(playlist: AudioPlaylist) {
-							instance.audioPlaylist = playlist
-
-							val firstTrack = playlist.selectedTrack ?: playlist.tracks.firstOrNull() ?: return
-
-							if (instance.loopMap[guild.idLong] == null) {
-								instance.play(guild, musicManager, firstTrack)
-							}
-						}
-
-						override fun noMatches() {
-							message.editMessage("曲が見つかりませんでした。").complete()
-						}
-
-						override fun loadFailed(exception: FriendlyException) {
-							message.editMessage("曲を読み込めませんでした。\n" + exception.message).complete()
-						}
-
-					})
-				}
+				})
 			}
 			return
 		}
@@ -151,6 +141,57 @@ class YouTubePlayCommand : BaseCommand() {
 		helpEmbed.setDescription(help.getHelpMessage())
 
 		event.reply(helpEmbed.build())
+	}
+
+	/**
+	 * YouTube の URL からプレイリスト関連のパラメータ (list, index など) を取り除く。
+	 * プレイリスト自体を指している URL (動画を含まないもの) の場合は null を返す。
+	 * YouTube 以外の URL はそのまま返す。
+	 */
+	private fun stripPlaylist(url: String): String? {
+		val uri = try {
+			URI(url)
+		} catch (e: URISyntaxException) {
+			return url
+		}
+
+		val host = uri.host?.lowercase() ?: return url
+		if (host != "youtu.be" && host != "youtube.com" && !host.endsWith(".youtube.com")) {
+			return url
+		}
+
+		val params = uri.rawQuery.orEmpty().split("&").filter { it.isNotEmpty() }
+		val kept = params.filter { it.substringBefore("=") !in PLAYLIST_PARAMS }
+
+		val path = uri.path.orEmpty()
+		val hasList = params.any { it.substringBefore("=") == "list" } || path == "/playlist"
+		val hasVideo = (host == "youtu.be" && path.length > 1) ||
+			kept.any { it.substringBefore("=") == "v" } ||
+			VIDEO_PATHS.any { path.startsWith(it) }
+
+		if (!hasVideo) {
+			// 動画を含まない: プレイリストならば対象外、それ以外 (チャンネルなど) は従来通り読み込みを試みる
+			return if (hasList) null else url
+		}
+
+		if (kept.size == params.size) {
+			return url
+		}
+
+		val base = url.substringBefore("#").substringBefore("?")
+		return if (kept.isEmpty()) base else base + "?" + kept.joinToString("&")
+	}
+
+	private companion object {
+
+		const val PLAYLIST_NOT_SUPPORTED = "プレイリストには対応していません。動画の URL を入力してください。"
+
+		// プレイリストに関するクエリパラメータ
+		val PLAYLIST_PARAMS = setOf("list", "index", "start_radio", "pp")
+
+		// パスに動画 ID を含む URL の形式
+		val VIDEO_PATHS = listOf("/shorts/", "/live/", "/embed/")
+
 	}
 
 }
