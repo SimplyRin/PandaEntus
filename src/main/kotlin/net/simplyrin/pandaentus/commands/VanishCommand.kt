@@ -57,7 +57,7 @@ class VanishCommand : BaseCommand() {
 			}
 		}
 
-		val config = instance.config
+		val config = instance.dataConfig
 
 		val path = "User." + user.id + "." + event.guild.id + ".Vanish"
 

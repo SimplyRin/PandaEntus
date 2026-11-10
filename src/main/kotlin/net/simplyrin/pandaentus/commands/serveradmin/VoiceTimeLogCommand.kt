@@ -33,7 +33,7 @@ class VoiceTimeLogCommand : BaseCommand() {
 	override val permission = CommandPermission.ServerAdministrator
 
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
-		val config = instance.config
+		val config = instance.dataConfig
 
 		val path = "Server." + event.guild.id + ".NoSendLogTimeLog"
 

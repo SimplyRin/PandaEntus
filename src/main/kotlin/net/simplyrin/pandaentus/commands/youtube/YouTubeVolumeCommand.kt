@@ -51,7 +51,7 @@ class YouTubeVolumeCommand : BaseCommand() {
 		if (arguments.size > 1) {
 			val volume = arguments[1].toIntOrNull()
 			if (volume != null && volume in 1..100) {
-				instance.config.set("Guild." + event.guild.id + ".Voice-Volume", volume)
+				instance.dataConfig.set("Guild." + event.guild.id + ".Voice-Volume", volume)
 
 				val musicManager = instance.getGuildAudioPlayer(event.guild)
 				musicManager.player.volume = volume

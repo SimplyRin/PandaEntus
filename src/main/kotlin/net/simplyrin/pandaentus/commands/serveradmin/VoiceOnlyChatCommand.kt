@@ -44,7 +44,7 @@ class VoiceOnlyChatCommand : BaseCommand() {
 				if (args.size > 2) {
 					val channel = guild.createTextChannel(args[2]).complete()
 
-					instance.config.set("VoiceOnlyChat." + guild.id + ".ID", channel.id)
+					instance.dataConfig.set("VoiceOnlyChat." + guild.id + ".ID", channel.id)
 					event.reply("通話参加者専用テキストチャンネルを作成しました。( " + channel.asMention + " )\n" +
 						"デフォルトではユーザーがチャンネルへのメッセージを送信できないよう権限を設定してください。")
 					return
@@ -55,7 +55,7 @@ class VoiceOnlyChatCommand : BaseCommand() {
 			}
 
 			if (args[1].equals("delete", ignoreCase = true)) {
-				val id: String? = instance.config.getString("VoiceOnlyChat." + guild.id + ".ID", null)
+				val id: String? = instance.dataConfig.getString("VoiceOnlyChat." + guild.id + ".ID", null)
 				val channel = if (id.isNullOrEmpty()) null else guild.getTextChannelById(id)
 				if (channel == null) {
 					event.reply("このサーバーでは、通話参加者専用テキストチャンネルがまだ作成されていません。\n" +
@@ -65,8 +65,8 @@ class VoiceOnlyChatCommand : BaseCommand() {
 
 				channel.delete().complete()
 
-				instance.config.set("VoiceOnlyChat." + guild.id + ".Role", null)
-				instance.config.set("VoiceOnlyChat." + guild.id + ".ID", null)
+				instance.dataConfig.set("VoiceOnlyChat." + guild.id + ".Role", null)
+				instance.dataConfig.set("VoiceOnlyChat." + guild.id + ".ID", null)
 				event.reply("通話参加者専用テキストチャンネルを削除しました。")
 				return
 			}
@@ -88,7 +88,7 @@ class VoiceOnlyChatCommand : BaseCommand() {
 	 */
 	private fun updateSendPermission(instance: PandaEntus, member: Member, allowed: Boolean) {
 		val guild = member.guild
-		val id: String = instance.config.getString("VoiceOnlyChat." + guild.id + ".ID", null) ?: return
+		val id: String = instance.dataConfig.getString("VoiceOnlyChat." + guild.id + ".ID", null) ?: return
 
 		val channel = guild.getTextChannelById(id) ?: return
 

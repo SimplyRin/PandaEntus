@@ -59,7 +59,7 @@ class VoiceChannelNameManager(val instance: PandaEntus) {
 
 		val channelId = this.joinedChannel[member.guild.id + "-" + member.id] ?: return
 
-		val defaultName: String = this.instance.config.getString("DefaultChannelName.$channelId.Default", null) ?: return
+		val defaultName: String = this.instance.dataConfig.getString("DefaultChannelName.$channelId.Default", null) ?: return
 
 		val channel = member.guild.getVoiceChannelById(channelId) ?: return
 

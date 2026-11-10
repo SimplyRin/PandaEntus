@@ -57,15 +57,15 @@ class PlayedCommand : BaseCommand() {
 
 		if (args.size > 1) {
 			if (args[1].equals("enable", ignoreCase = true)) {
-				instance.config.set(enabledPath, true)
-				instance.saveConfig()
+				instance.dataConfig.set(enabledPath, true)
+				instance.saveDataConfig()
 				event.reply("ゲームプレイ記録を **有効** にしました。")
 				return
 			}
 
 			if (args[1].equals("disable", ignoreCase = true)) {
-				instance.config.set(enabledPath, false)
-				instance.saveConfig()
+				instance.dataConfig.set(enabledPath, false)
+				instance.saveDataConfig()
 				event.reply("ゲームプレイ記録を **無効** にしました。")
 				return
 			}
@@ -73,7 +73,7 @@ class PlayedCommand : BaseCommand() {
 
 		val name = args.firstOrNull().orEmpty()
 
-		val enabled = instance.config.getBoolean(enabledPath, false)
+		val enabled = instance.dataConfig.getBoolean(enabledPath, false)
 
 		// 記録表示
 		if (enabled) {

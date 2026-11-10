@@ -119,7 +119,7 @@ class ReactionListener(private val instance: PandaEntus) : ListenerAdapter() {
 			override fun line(response: String?) {
 				if (response != null && !response.lowercase().startsWith("error:")) {
 					println("[YouTube Download Task] Title: $response")
-					instance.config.set("YouTube.$videoId.Title", response.trim())
+					instance.dataConfig.set("YouTube.$videoId.Title", response.trim())
 				}
 			}
 
@@ -134,7 +134,7 @@ class ReactionListener(private val instance: PandaEntus) : ListenerAdapter() {
 
 				if (response.contains(":")) {
 					println("[YouTube Download Task] Duration: $response")
-					instance.config.set("YouTube.$videoId.Duration", response.trim())
+					instance.dataConfig.set("YouTube.$videoId.Duration", response.trim())
 				}
 
 				val seconds = parseDuration(response.trim())
@@ -163,7 +163,7 @@ class ReactionListener(private val instance: PandaEntus) : ListenerAdapter() {
 					}
 
 					override fun processEnded() {
-						instance.config.set("YouTube.$videoId.Path", mp3.absolutePath)
+						instance.dataConfig.set("YouTube.$videoId.Path", mp3.absolutePath)
 
 						embedBuilder.setAuthor(user.name + " -> 送信しています...", null, uploadingUrl)
 						phase.editMessageEmbeds(embedBuilder.build()).complete()
@@ -186,8 +186,8 @@ class ReactionListener(private val instance: PandaEntus) : ListenerAdapter() {
 	 * ダウンロードしたファイルの案内用 Embed を作成する
 	 */
 	private fun createReadyEmbed(videoId: String): EmbedBuilder {
-		val title: String? = this.instance.config.getString("YouTube.$videoId.Title")
-		val duration: String? = this.instance.config.getString("YouTube.$videoId.Duration")
+		val title: String? = this.instance.dataConfig.getString("YouTube.$videoId.Title")
+		val duration: String? = this.instance.dataConfig.getString("YouTube.$videoId.Duration")
 
 		val embedBuilder = EmbedBuilder()
 		embedBuilder.setColor(Color.GREEN)

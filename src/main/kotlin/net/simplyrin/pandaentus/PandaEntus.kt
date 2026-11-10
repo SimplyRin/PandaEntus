@@ -60,6 +60,7 @@ import net.simplyrin.pandaentus.listeners.ActivityListener
 import net.simplyrin.pandaentus.listeners.CommandExecutor
 import net.simplyrin.pandaentus.listeners.Listener
 import net.simplyrin.pandaentus.listeners.ReactionListener
+import net.simplyrin.pandaentus.utils.DataMigration
 import net.simplyrin.pandaentus.utils.PoolItems
 import net.simplyrin.pandaentus.utils.ThreadPool
 import net.simplyrin.pandaentus.utils.TimeManager
@@ -151,7 +152,8 @@ class PandaEntus {
 	fun run(args: Array<String>) {
 		val rinStream = RinStream()
 		rinStream.setPrefix("yyyy/MM/dd (E) HH:mm:ss")
-			// .enableError()
+			// 標準エラー出力 (JDA / Lavaplayer のログや例外のスタックトレース) も logs/ に保存する
+			.enableError()
 			.setSaveLog(true)
 			.setEnableColor(true)
 			.setEnableTranslateColor(true)
@@ -218,6 +220,21 @@ class PandaEntus {
 		}
 
 		this.dataConfig = Config.getConfig(dataFile)
+
+		// config.yml に混在していた Bot のデータ (Guild, YouTube の動画情報など) を data.yml へ移す
+		val movedCount = DataMigration.migrate(this.config, this.dataConfig)
+		if (movedCount > 0) {
+			// 念のため、移行前の config.yml を一度だけ退避しておく
+			val backup = File("config.yml.before-data-migration")
+			if (!backup.exists()) {
+				Files.copy(file.toPath(), backup.toPath())
+			}
+
+			// data.yml を先に保存する。途中で止まっても、次回起動時に重複分は data.yml 側が優先されて再度移行される
+			Config.saveConfig(this.dataConfig, dataFile)
+			Config.saveConfig(this.config, file)
+			println("config.yml から data.yml へ $movedCount 件のデータを移行しました。(退避: ${backup.name})")
+		}
 
 		val activityData = File("activity.yml")
 		if (!activityData.exists()) {
@@ -631,7 +648,7 @@ class PandaEntus {
 	}
 
 	fun play(guild: Guild, musicManager: GuildMusicManager, track: AudioTrack) {
-		val volume = this.config.getInt("Guild." + guild.id + ".Voice-Volume", 1)
+		val volume = this.dataConfig.getInt("Guild." + guild.id + ".Voice-Volume", 1)
 		musicManager.player.volume = volume
 
 		if (musicManager.player.isPaused) {

@@ -36,7 +36,7 @@ class AddCommand : BaseCommand() {
 		val channel = event.channel
 
 		if (args.size > 3) {
-			val config = instance.config
+			val config = instance.dataConfig
 			config.set("LocalMessage." + channel.id + ".Message", args[1])
 			config.set("LocalMessage." + channel.id + ".Value.1", args[2])
 			config.set("LocalMessage." + channel.id + ".Value.2", args[3])

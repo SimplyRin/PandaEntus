@@ -139,7 +139,7 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 
 		val path = "Server." + guild.id + ".DisableChannelManagement"
 
-		if (!this.instance.config.getBoolean(path)) {
+		if (!this.instance.dataConfig.getBoolean(path)) {
 			if (voiceChannels.size == count) {
 				// チャンネルの管理権限がない場合は作成しない
 				if (!guild.selfMember.hasPermission(category, Permission.MANAGE_CHANNEL)) {
@@ -212,7 +212,7 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 
 			val path = "Server." + guild.id + ".DisableChannelManagement"
 
-			if (!this.instance.config.getBoolean(path)) {
+			if (!this.instance.dataConfig.getBoolean(path)) {
 				// 途中で削除に失敗してチャンネルが中途半端に残らないよう、先に全チャンネルの管理権限を確認する
 				if (!this.canManageChannels(guild, category)) {
 					println("[" + guild.name + "@" + guild.id + "] Missing permission: MANAGE_CHANNEL (" + category.name + ")")
@@ -259,7 +259,7 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 						val targetMember = guild.getMemberById(callTime.name)
 						if (targetMember != null) {
 							val path = "User." + targetMember.id + "." + guild.id + ".Vanish"
-							val isVanish = this.instance.config.getBoolean(path, false)
+							val isVanish = this.instance.dataConfig.getBoolean(path, false)
 							if (!isVanish) {
 								embedBuilder.setDescription("ユーザーごとの通話時間:")
 								embedBuilder.addField(targetMember.effectiveName, callTime.getTime(), true)
@@ -281,7 +281,7 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 		}
 
 		val path = "Server." + guild.id + ".NoSendLogTimeLog"
-		if (!this.instance.config.getBoolean(path)) {
+		if (!this.instance.dataConfig.getBoolean(path)) {
 			// general チャンネルがあればそこへ、なければテキストチャンネルカテゴリの最初のチャンネルへ送信する
 			val textChannel = guild.getTextChannelsByName("general", true).firstOrNull()
 				?: this.instance.getTextChannelCategory(guild)?.textChannels?.firstOrNull()

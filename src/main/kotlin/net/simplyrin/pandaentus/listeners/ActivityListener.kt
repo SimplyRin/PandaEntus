@@ -116,7 +116,7 @@ class ActivityListener(val instance: PandaEntus) : ListenerAdapter() {
 				}
 			}
 
-			val enabled = this.instance.config.getBoolean("Guild.$guildId.$userId.IsEnabledActivity", false)
+			val enabled = this.instance.dataConfig.getBoolean("Guild.$guildId.$userId.IsEnabledActivity", false)
 			if (!enabled) {
 				continue
 			}

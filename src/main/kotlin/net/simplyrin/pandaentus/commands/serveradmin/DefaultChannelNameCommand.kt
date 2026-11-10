@@ -47,8 +47,8 @@ class DefaultChannelNameCommand : BaseCommand() {
 
 					val defaultName = args.drop(3).joinToString(" ").trim()
 
-					instance.config.set("DefaultChannelName.$channelName.Default", defaultName)
-					instance.saveConfig()
+					instance.dataConfig.set("DefaultChannelName.$channelName.Default", defaultName)
+					instance.saveDataConfig()
 
 					event.reply("$channelName -> \"$defaultName\"")
 					return
@@ -60,7 +60,7 @@ class DefaultChannelNameCommand : BaseCommand() {
 
 			if (args[1].equals("delete", ignoreCase = true)) {
 				if (args.size > 2) {
-					instance.config.set("DefaultChannelName." + args[2] + ".Default", null)
+					instance.dataConfig.set("DefaultChannelName." + args[2] + ".Default", null)
 
 					event.reply("削除しました: " + args[2])
 					return
