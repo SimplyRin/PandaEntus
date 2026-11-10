@@ -218,6 +218,17 @@
       <id>lavalink</id>
       <url>https://maven.lavalink.dev/releases</url>
     </repository>
+    <!-- youtube-source のスナップショット版 (下記の依存で使用) -->
+    <repository>
+      <id>lavalink-snapshots</id>
+      <url>https://maven.lavalink.dev/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <!-- 推移的依存の脆弱性対策: 古いバージョンを引き込む依存先より優先して最新版を使う -->
@@ -355,7 +366,9 @@
     <dependency>
       <groupId>dev.lavalink.youtube</groupId>
       <artifactId>v2</artifactId>
-      <version>1.18.2</version>
+      <!-- 1.18.2 は YouTube のプレイヤー変更に未対応で全動画が再生できないため、修正入りのコミット版を使う。
+           正式リリースで修正されたらそちらへ戻すこと。 -->
+      <version>f45bbb7aebfcbc1c553769e04af6cd43afa8b7c3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
