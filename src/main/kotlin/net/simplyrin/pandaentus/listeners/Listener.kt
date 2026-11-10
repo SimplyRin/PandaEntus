@@ -158,6 +158,10 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 		val member = event.member
 
 		if (member.user.isBot) {
+			// 自分 (Bot) が退出したときは、保留していた通話の終了処理を行う (他に通話している人がいなければ、通話ログの送信とチャンネルの作り直し)
+			if (member.id == event.guild.selfMember.id) {
+				this.onSelfLeave(event)
+			}
 			return
 		}
 
@@ -181,6 +185,19 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 		this.quitMember(guild, category, leftChannel.parentCategory, member, leftChannel, true)
 	}
 
+	/**
+	 * Bot 自身が通話から退出したときの処理。
+	 * Bot が参加している間は通話の終了処理を保留しているので、退出後に全チャンネルが空であれば、ここで終了処理を行う。
+	 */
+	private fun onSelfLeave(event: GuildVoiceUpdateEvent) {
+		val guild = event.guild
+		val channelLeft = event.channelLeft ?: return
+		val category = this.instance.getVoiceChannelCategory(guild) ?: return
+		val leftChannel = guild.getVoiceChannelById(channelLeft.id) ?: return
+
+		this.quitMember(guild, category, leftChannel.parentCategory, event.member, leftChannel, true)
+	}
+
 	fun quitMember(guild: Guild, category: Category, parentCategory: Category?, member: Member, channelLeft: VoiceChannel, leaveEvent: Boolean) {
 		println("[" + guild.name + "@" + guild.id + "] #" + channelLeft.name + " LEAVE: " + this.getNickname(member) + "@" + member.id)
 
@@ -196,6 +213,15 @@ class Listener(private val instance: PandaEntus) : ListenerAdapter() {
 
 		val voiceChannels = category.voiceChannels
 		if (voiceChannels.size == 1) {
+			return
+		}
+
+		// Bot が通話に参加している間は、通話を終了せず (通話ログの送信なし)、チャンネルの作り直しもしない。
+		// 作り直すと Bot が入っているチャンネルが削除されて、再生中の音楽が止まってしまうため。
+		// Bot が退出したときに onPandaGuildVoiceLeave から再度ここに来て、終了処理が行われる。
+		val botChannel = guild.selfMember.voiceState?.channel
+		if (botChannel != null && voiceChannels.any { it.id == botChannel.id }) {
+			println("[" + guild.name + "@" + guild.id + "] Bot が #" + botChannel.name + " に参加しているため、通話の終了処理を保留します")
 			return
 		}
 
