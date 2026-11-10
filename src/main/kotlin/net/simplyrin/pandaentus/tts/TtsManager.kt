@@ -60,9 +60,9 @@ class TtsManager(private val instance: PandaEntus) : ListenerAdapter() {
 	}
 
 	/**
-	 * 読み上げを開始する。Bot がボイスチャンネルに参加していなければ、voiceChannel に参加する。
+	 * Bot がボイスチャンネルに参加していなければ、voiceChannel に参加する。音声を再生する送信ハンドラも設定する。
 	 */
-	fun start(guild: Guild, textChannelId: Long, voiceChannel: AudioChannel) {
+	fun connect(guild: Guild, voiceChannel: AudioChannel) {
 		val audioManager = guild.audioManager
 		if (audioManager.connectedChannel == null) {
 			audioManager.openAudioConnection(voiceChannel)
@@ -72,6 +72,13 @@ class TtsManager(private val instance: PandaEntus) : ListenerAdapter() {
 
 		// 読み上げ用の送信ハンドラを設定する
 		this.instance.getGuildAudioPlayer(guild)
+	}
+
+	/**
+	 * 読み上げを開始する。Bot がボイスチャンネルに参加していなければ、voiceChannel に参加する。
+	 */
+	fun start(guild: Guild, textChannelId: Long, voiceChannel: AudioChannel) {
+		this.connect(guild, voiceChannel)
 
 		this.sessions[guild.idLong] = Session(textChannelId)
 	}
@@ -152,6 +159,16 @@ class TtsManager(private val instance: PandaEntus) : ListenerAdapter() {
 			file.delete()
 			return
 		}
+
+		this.enqueueFile(guild, file)
+	}
+
+	/**
+	 * 音声ファイル (wav) を、読み上げと同じ経路で再生する。再生が終わったらファイルは削除する。
+	 * ファイルは [FOLDER] の直下に置くこと。
+	 */
+	fun enqueueFile(guild: Guild, file: File) {
+		val musicManager = this.instance.getGuildAudioPlayer(guild)
 
 		// loadItemOrdered は、同じキーの読み込みを呼び出した順に実行する。そのため、発言の順番のまま再生される
 		this.instance.playerManager.loadItemOrdered(musicManager, file.absolutePath, object : AudioLoadResultHandler {

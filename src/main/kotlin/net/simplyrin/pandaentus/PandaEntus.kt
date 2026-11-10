@@ -62,6 +62,8 @@ import net.simplyrin.pandaentus.listeners.ActivityListener
 import net.simplyrin.pandaentus.listeners.CommandExecutor
 import net.simplyrin.pandaentus.listeners.Listener
 import net.simplyrin.pandaentus.listeners.ReactionListener
+import net.simplyrin.pandaentus.coefont.CoeFontClient
+import net.simplyrin.pandaentus.coefont.CoeFontLimiter
 import net.simplyrin.pandaentus.tts.TtsManager
 import net.simplyrin.pandaentus.utils.DataMigration
 import net.simplyrin.pandaentus.utils.PoolItems
@@ -135,6 +137,10 @@ class PandaEntus {
 	lateinit var vcNameManager: VoiceChannelNameManager
 		private set
 	lateinit var ttsManager: TtsManager
+
+	lateinit var coeFontClient: CoeFontClient
+
+	lateinit var coeFontLimiter: CoeFontLimiter
 		private set
 
 	val startupDate = Date()
@@ -382,6 +388,9 @@ class PandaEntus {
 		// 読み上げ (!ps)
 		this.ttsManager = TtsManager(this)
 		this.jda.addEventListener(this.ttsManager)
+
+		this.coeFontClient = CoeFontClient(this.config)
+		this.coeFontLimiter = CoeFontLimiter(this)
 
 		this.jda.presence.setActivity(Activity.playing("🐼"))
 

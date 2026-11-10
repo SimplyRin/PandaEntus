@@ -10,9 +10,10 @@ import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
-import net.simplyrin.pandaentus.utils.VoicePlayer
-import net.simplyrin.processmanager.Callback
-import net.simplyrin.processmanager.ProcessManager
+import net.simplyrin.pandaentus.coefont.CoeFontClient
+import net.simplyrin.pandaentus.coefont.CoeFontLimiter
+import net.simplyrin.pandaentus.tts.TtsManager
+import net.simplyrin.pandaentus.utils.ThreadPool
 
 /**
  * Created by SimplyRin on 2023/03/30.
@@ -37,6 +38,9 @@ import net.simplyrin.processmanager.ProcessManager
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+/**
+ * CoeFont CLOUD の「ひろゆき」の声で、入力した文章を通話で再生する。1 日 5 回まで (Bot 全体)。
+ */
 class HvCommand : BaseCommand() {
 
 	override val command = "!hv"
@@ -46,53 +50,68 @@ class HvCommand : BaseCommand() {
 	override val permission = CommandPermission.Everyone
 
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
-		val embedBuilder = EmbedBuilder()
-
 		val channel = event.channel
 		val member = event.member
 		val guild = event.guild
 
-		if (member.voiceState?.channel == null) {
-			embedBuilder.setColor(Color.RED)
-			embedBuilder.setDescription("ボイスチャンネルに接続してください！")
-			channel.sendMessageEmbeds(embedBuilder.build()).complete()
+		val voiceChannel = member.voiceState?.channel
+		if (voiceChannel == null) {
+			this.error(event, "ボイスチャンネルに接続してください！")
 			return
 		}
 
-		if (args.size > 1) {
-			val uniqueId = "./hv/" + UUID.randomUUID().toString().split("-")[0] + ".wav"
-			File("hv").mkdirs()
-
-			val file = File(uniqueId)
-
-			val value = args.drop(1).joinToString(" ").trim()
-
-			val command = arrayOf("tarakotalk", "save", "\"" + value + "\"", uniqueId)
-
-			event.message?.delete()?.complete()
-
-			ProcessManager.runCommand(command, object : Callback() {
-
-				override fun line(response: String?) {
-					println(response)
-				}
-
-				override fun processEnded() {
-					try {
-						Thread.sleep(500)
-					} catch (e: Exception) {
-					}
-
-					VoicePlayer.play(instance, guild, member, channel, file)
-				}
-
-			}, true)
+		if (args.size <= 1) {
+			this.error(event, "使用方法: " + args.firstOrNull().orEmpty() + " <ボイス> (" + CoeFontClient.MAX_LENGTH + " 文字まで、1 日 " + CoeFontLimiter.DAILY_LIMIT + " 回まで)")
 			return
 		}
 
+		val text = args.drop(1).joinToString(" ").trim()
+		if (text.length > CoeFontClient.MAX_LENGTH) {
+			this.error(event, CoeFontClient.MAX_LENGTH.toString() + " 文字までです。(" + text.length + " 文字)")
+			return
+		}
+
+		val connectedChannel = guild.audioManager.connectedChannel
+		if (connectedChannel != null && connectedChannel.idLong != voiceChannel.idLong) {
+			this.error(event, "Bot は別のボイスチャンネル (" + connectedChannel.name + ") に参加しています。")
+			return
+		}
+
+		val limiter = instance.coeFontLimiter
+		if (!limiter.tryAcquire()) {
+			this.error(event, "今日の使用回数 (" + CoeFontLimiter.DAILY_LIMIT + " 回) に達しました。日本時間の 0 時にリセットされます。")
+			return
+		}
+
+		val message = event.reply("🎤 音声を生成しています... (今日の残り " + limiter.remaining() + " 回)")
+
+		ThreadPool.run {
+			TtsManager.FOLDER.mkdirs()
+			val file = File(TtsManager.FOLDER, "hv-" + UUID.randomUUID().toString() + ".wav")
+
+			try {
+				instance.coeFontClient.generate(text, file)
+			} catch (e: CoeFontClient.Companion.GenerateException) {
+				// 生成できなかったときは、使用回数を戻す
+				file.delete()
+				limiter.release()
+				println("[CoeFont] " + e.message + (e.cause?.let { " (" + it + ")" } ?: ""))
+				message.editMessage("❌ " + e.message).queue()
+				return@run
+			}
+
+			instance.ttsManager.connect(guild, voiceChannel)
+			instance.ttsManager.enqueueFile(guild, file)
+
+			message.editMessage("🎤 再生します。(今日の残り " + limiter.remaining() + " 回)").queue()
+		}
+	}
+
+	private fun error(event: PandaMessageEvent, description: String) {
+		val embedBuilder = EmbedBuilder()
 		embedBuilder.setColor(Color.RED)
-		embedBuilder.setDescription("使用方法: " + args.firstOrNull().orEmpty() + " <ボイス>")
-		channel.sendMessageEmbeds(embedBuilder.build()).complete()
+		embedBuilder.setDescription(description)
+		event.channel.sendMessageEmbeds(embedBuilder.build()).complete()
 	}
 
 }
