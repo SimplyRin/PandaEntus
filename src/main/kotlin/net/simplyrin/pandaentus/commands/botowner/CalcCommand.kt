@@ -1,9 +1,11 @@
 package net.simplyrin.pandaentus.commands.botowner
 
 import java.awt.Color
-import java.util.Scanner
+import java.math.BigDecimal
+import java.math.MathContext
 
 import net.dv8tion.jda.api.EmbedBuilder
+import net.objecthunter.exp4j.ExpressionBuilder
 import net.simplyrin.pandaentus.PandaEntus
 import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
@@ -30,6 +32,40 @@ import net.simplyrin.pandaentus.classes.PandaMessageEvent
  */
 class CalcCommand : BaseCommand() {
 
+	companion object {
+
+		// 計算式の長さの上限
+		private const val MAX_LENGTH = 200
+
+		/**
+		 * 計算式を計算して、結果を文字列で返す。計算できなければ null を返す。
+		 *
+		 * 計算は Java のライブラリ (exp4j) の中だけで行い、外部コマンドは実行しない。
+		 * 使えるのは、数値、四則演算、べき乗、括弧と、exp4j の組み込み関数 (sin, sqrt など) だけ。
+		 */
+		@JvmStatic
+		fun calculate(input: String): String? {
+			if (input.isBlank() || input.length > MAX_LENGTH) {
+				return null
+			}
+
+			val result = try {
+				ExpressionBuilder(input).build().evaluate()
+			} catch (e: Exception) {
+				// 式として読み取れない、0 で割った、など
+				return null
+			}
+
+			if (result.isNaN() || result.isInfinite()) {
+				return null
+			}
+
+			// 0.1+0.2 が 0.30000000000000004 にならないように、15 桁に丸めてから表示する
+			return BigDecimal(result).round(MathContext(15)).stripTrailingZeros().toPlainString()
+		}
+
+	}
+
 	override val command = "="
 
 	override val type = CommandType.StartsWith
@@ -39,28 +75,23 @@ class CalcCommand : BaseCommand() {
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
 		val channel = event.channel
 
-		val embedBuilder = EmbedBuilder()
-
-		val input = args.firstOrNull().orEmpty().replace("=", "")
+		// "=1 + 1" のように空白を入れた式も、1 つの式として扱う
+		val input = args.joinToString("").replace("=", "")
 		if (input.isEmpty()) {
+			val embedBuilder = EmbedBuilder()
 			embedBuilder.setColor(Color.RED)
 			embedBuilder.setDescription("使用方法: =<計算式>\n=1+1")
 			channel.sendMessageEmbeds(embedBuilder.build()).complete()
 			return
 		}
 
-		val process = try {
-			Runtime.getRuntime().exec(arrayOf("calc", input))
-		} catch (e: Exception) {
-			instance.postError(e)
+		val result = calculate(input)
+		if (result == null) {
+			channel.sendMessage("計算できませんでした。").complete()
 			return
 		}
 
-		Scanner(process.inputStream).use { scanner ->
-			if (scanner.hasNext()) {
-				channel.sendMessage("結果: **" + scanner.nextLine().trim() + "**").complete()
-			}
-		}
+		channel.sendMessage("結果: **$result**").complete()
 	}
 
 }

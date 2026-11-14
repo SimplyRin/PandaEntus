@@ -2,6 +2,15 @@ package net.simplyrin.pandaentus.commands
 
 import java.awt.Color
 import java.io.File
+import java.net.URI
+import java.net.URLEncoder
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.time.Duration
+import java.util.Base64
 import java.util.UUID
 
 import net.dv8tion.jda.api.EmbedBuilder
@@ -10,9 +19,8 @@ import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
+import net.simplyrin.pandaentus.utils.ThreadPool
 import net.simplyrin.pandaentus.utils.VoicePlayer
-import net.simplyrin.processmanager.Callback
-import net.simplyrin.processmanager.ProcessManager
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -33,6 +41,16 @@ import net.simplyrin.processmanager.ProcessManager
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 class KvCommand : BaseCommand() {
+
+	companion object {
+
+		private const val ENDPOINT = "https://api.voicetext.jp/v1/tts"
+
+		private val client: HttpClient = HttpClient.newBuilder()
+			.connectTimeout(Duration.ofSeconds(10))
+			.build()
+
+	}
 
 	override val command = "!kv"
 
@@ -55,45 +73,66 @@ class KvCommand : BaseCommand() {
 		}
 
 		if (args.size > 1) {
-			val uniqueId = "./kv/" + UUID.randomUUID().toString().split("-")[0] + ".wav"
-			File("kv").mkdirs()
+			val folder = File("kv")
+			folder.mkdirs()
 
-			val file = File(uniqueId)
+			val file = File(folder, UUID.randomUUID().toString().split("-")[0] + ".wav")
 
 			val value = args.drop(1).joinToString(" ").trim()
 
-			val command = arrayOf("curl", "https://api.voicetext.jp/v1/tts",
-				"-o", uniqueId,
-				"-u", instance.voiceTextApiKey + ":",
-				"-d", "text=" + value,
-				"-d", "speaker=show",
-				"-d", "pitch=150",
-				"-d", "format=wav")
-
 			event.message?.delete()?.complete()
 
-			ProcessManager.runCommand(command, object : Callback() {
-
-				override fun line(response: String?) {
-					println(response)
-				}
-
-				override fun processEnded() {
-					try {
-						Thread.sleep(500)
-					} catch (e: Exception) {
+			ThreadPool.run {
+				try {
+					if (this.generate(instance.voiceTextApiKey, value, file)) {
+						VoicePlayer.play(instance, guild, member, channel, file)
+					} else {
+						file.delete()
+						channel.sendMessage("音声を生成できませんでした。").complete()
 					}
-
-					VoicePlayer.play(instance, guild, member, channel, file)
+				} catch (e: Exception) {
+					file.delete()
+					e.printStackTrace()
 				}
-
-			}, true)
+			}
 			return
 		}
 
 		embedBuilder.setColor(Color.RED)
 		embedBuilder.setDescription("使用方法: " + args.firstOrNull().orEmpty() + " <ボイス>")
 		channel.sendMessageEmbeds(embedBuilder.build()).complete()
+	}
+
+	/**
+	 * VoiceText Web API で text を読み上げた音声 (wav) を output に保存する。成功したら true を返す。
+	 */
+	private fun generate(apiKey: String, text: String, output: File): Boolean {
+		val form = listOf("text" to text, "speaker" to "show", "pitch" to "150", "format" to "wav")
+			.joinToString("&") { (key, value) ->
+				URLEncoder.encode(key, Charsets.UTF_8) + "=" + URLEncoder.encode(value, Charsets.UTF_8)
+			}
+
+		// API キーをユーザー名、パスワードを空にした Basic 認証
+		val authorization = "Basic " + Base64.getEncoder().encodeToString("$apiKey:".toByteArray(Charsets.UTF_8))
+
+		val request = HttpRequest.newBuilder(URI.create(ENDPOINT))
+			.timeout(Duration.ofSeconds(30))
+			.header("Authorization", authorization)
+			.header("Content-Type", "application/x-www-form-urlencoded")
+			.POST(HttpRequest.BodyPublishers.ofString(form))
+			.build()
+
+		val response = client.send(request, HttpResponse.BodyHandlers.ofInputStream())
+		response.body().use { body ->
+			if (response.statusCode() != 200) {
+				println("[VoiceText] 生成に失敗しました: HTTP " + response.statusCode())
+				return false
+			}
+
+			Files.copy(body, output.toPath(), StandardCopyOption.REPLACE_EXISTING)
+		}
+
+		return true
 	}
 
 }

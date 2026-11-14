@@ -1,14 +1,23 @@
 # PandaEntus
 身内鯖の Discord Bot
 
-技術がなさすぎて Ubuntu などの Linux 環境でしか動かなくなりました。
+Windows / macOS / Linux で動作します。Java 25 以降が必要です。
 
 必要になったみたいな機能を暇になったときに追加する
 
-# Soft-Dependencies
-- calc
-- youtube-dl
-- ffmpeg
+# 起動
+`mvn clean package` でビルドして、`target/PandaEntus-1.3-jar-with-dependencies.jar` を Bot 用のフォルダに置きます。
+起動スクリプトの見本は `start.sh` (Linux / macOS) と `start.bat` (Windows) です。
+
+# 外部ツール
+| ツール | 使う機能 | 用意の方法 |
+----|----|----
+| yt-dlp | YouTube リンクのリアクション、TikTok、Instagram | 自動で `tools/` にダウンロードして、定期的に更新します |
+| ffmpeg | YouTube リンクのリアクション (mp3 への変換) | Windows / Linux は自動で `tools/` にダウンロードして、定期的に更新します ([FFmpeg-Builds](https://github.com/FFmpeg-Builds/FFmpeg-Builds))。macOS は `brew install ffmpeg` などで入れてください |
+| Open JTalk | `!ps` (読み上げ) | 各自で入れて、config.yml の `OpenJTalk` を設定します |
+| Tesseract | `!ocr` | Windows は同梱されています。Linux / macOS は各自で入れてください |
+
+自動ダウンロードは、config.yml の `Tools.AutoUpdate: false` で止められます。自分で用意したものを使うときは、`Tools.YtDlp.Path` と `Tools.FFmpeg.Path` を指定します。
 
 # Command
 | コマンド | 内容 | 権限 |

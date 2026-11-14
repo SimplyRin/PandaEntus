@@ -93,6 +93,10 @@ class OcrCommand : BaseCommand() {
 				event.reply("```$value```")
 			} catch (e: Exception) {
 				event.reply("解析に失敗しました。")
+			} catch (e: LinkageError) {
+				// Tesseract のネイティブライブラリを読み込めなかった (Linux / macOS では別途インストールが必要)
+				println("[OCR] Tesseract を読み込めませんでした: $e")
+				event.reply("このサーバーでは OCR を使用できません。(Tesseract がインストールされていません)")
 			} finally {
 				file.delete()
 			}

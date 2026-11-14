@@ -1,17 +1,16 @@
 package net.simplyrin.pandaentus.commands
 
 import java.io.File
-import java.util.concurrent.TimeUnit
+import java.util.UUID
 
-import com.google.gson.JsonParser
+import net.dv8tion.jda.api.utils.FileUpload
 import net.simplyrin.pandaentus.PandaEntus
 import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
+import net.simplyrin.pandaentus.utils.SafeUrl
 import net.simplyrin.pandaentus.utils.ThreadPool
-import net.simplyrin.processmanager.Callback
-import net.simplyrin.processmanager.ProcessManager
 
 /**
  * Created by SimplyRin on 2020/11/23.
@@ -39,54 +38,63 @@ class TikTokCommand : BaseCommand() {
 
 	override val permission = CommandPermission.Everyone
 
+	/**
+	 * TikTok の動画を yt-dlp でダウンロードして、Discord に送信する。通信は config.yml の YouTube.Proxy (あれば) を経由する。
+	 */
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
-		val file = File(File("tiktok"), "api.php")
+		val url = SafeUrl.parse(args.firstOrNull().orEmpty(), "tiktok.com") ?: return
 
-		val content = event.message?.contentRaw ?: return
+		val guild = event.guild
+		val id = UUID.randomUUID().toString().split("-")[0]
 
-		ProcessManager.runCommand(arrayOf("/usr/bin/php", file.absolutePath, content), object : Callback() {
+		ThreadPool.run {
+			val folder = File("tiktok")
+			folder.mkdirs()
 
-			override fun line(response: String?) {
-				if (response == null) {
-					return
+			try {
+				println("[TikTok] [$id] Downloading: $url")
+
+				// Discord でそのまま再生できるように、H.264 の動画を優先する
+				val result = instance.externalTools.runYtDlp(listOf(
+					"-S", "vcodec:h264",
+					"--output", File(folder, "$id.%(ext)s").absolutePath,
+					"--", url), 300)
+
+				val downloaded = folder.listFiles().orEmpty()
+					.firstOrNull { it.isFile && it.name.startsWith("$id.") && !it.name.endsWith(".part") }
+
+				if (result == null || !result.success || downloaded == null) {
+					println("[TikTok] [$id] ダウンロードに失敗しました: " + (result?.describeFailure() ?: "yt-dlp を使用できません"))
+					event.reply("TikTok の動画を取得できませんでした。")
+					return@run
 				}
 
-				println("TikTokCommand.java: $response")
+				if (downloaded.length() > guild.maxFileSize) {
+					event.reply("動画が大きすぎるため、送信できませんでした。(" + instance.formatSize(downloaded.length().toDouble()) + ")")
+					return@run
+				}
 
 				// tiktok チャンネルがあればそちらへ、なければ実行したチャンネルへ送信する
-				val tiktokChannel = event.guild.getTextChannelsByName("tiktok", true).firstOrNull()
+				val tiktokChannel = guild.getTextChannelsByName("tiktok", true).firstOrNull()
 				val channel = tiktokChannel ?: event.channel
-				val mention = tiktokChannel != null
 
-				println("TikTokCommand.java: TikTok URL sending to #" + channel.name)
+				println("[TikTok] [$id] Sending to #" + channel.name)
 
-				val jsonObject = try {
-					JsonParser.parseString(response).asJsonObject
-				} catch (e: Exception) {
-					return
+				val upload = FileUpload.fromData(downloaded, "tiktok-$id." + downloaded.extension)
+				val action = channel.sendFiles(upload)
+				if (tiktokChannel != null) {
+					action.setContent(event.author.asMention)
 				}
-
-				val url = jsonObject.get("url")?.asString ?: return
-				val path = jsonObject.get("path")?.asString ?: return
-
-				val message = channel.sendMessage((if (mention) event.author.asMention + " " else "") + url).complete()
-
-				val downloaded = File(path)
-				downloaded.deleteOnExit()
-
-				ThreadPool.run {
-					try {
-						TimeUnit.DAYS.sleep(1)
-					} catch (e: Exception) {
-					}
-
-					println("Delete: $path")
-					downloaded.delete()
-					message.delete().complete()
-				}
+				action.complete()
+			} catch (e: Exception) {
+				e.printStackTrace()
+			} finally {
+				// 途中で止まったときの .part なども含めて片付ける
+				folder.listFiles().orEmpty()
+					.filter { it.isFile && it.name.startsWith("$id.") }
+					.forEach { it.delete() }
 			}
-
-		}, true)
+		}
 	}
 
 }

@@ -1,12 +1,16 @@
 package net.simplyrin.pandaentus.commands.botowner
 
 import java.io.File
+import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.security.DigestInputStream
+import java.security.MessageDigest
+import java.util.HexFormat
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -43,6 +47,9 @@ class UpdateCommand : BaseCommand() {
 		private const val RELEASES_URL = "https://github.com/$REPOSITORY/releases"
 		private const val RELEASES_API = "https://api.github.com/repos/$REPOSITORY/releases?per_page=10"
 		private const val USER_AGENT = "PandaEntus-Updater"
+
+		// Windows で、次の起動のときに置き換える jar に付ける拡張子 (start.bat が参照する)
+		private const val UPDATE_SUFFIX = ".update"
 
 	}
 
@@ -87,21 +94,29 @@ class UpdateCommand : BaseCommand() {
 				"最新のバージョン: **" + runNumber + "**\n" +
 				releaseUrl)
 
-			val file = File("PandaEntus-" + Version.POMVERSION + "-jar-with-dependencies-v" + runNumber + ".jar")
+			// 実行中の jar と同じフォルダに保存する
+			val now = this.getRunningJar() ?: File(jarName).absoluteFile
+			val file = File(now.parentFile, "PandaEntus-" + Version.POMVERSION + "-jar-with-dependencies-v" + runNumber + ".jar")
 
 			val message = event.reply("ファイルをダウンロードしています...。")
-			if (!this.downloadJar(downloadUrl, file)) {
+			if (!this.downloadJar(downloadUrl, file, this.getAssetSha256(release, jarName))) {
+				file.delete()
 				message.editMessage("ファイルのダウンロードに失敗しました。").complete()
 				return
 			}
 			message.editMessage("ファイルをダウンロードしました。").complete()
 
-			val now = File(jarName)
-			if (now.delete()) {
-				file.renameTo(now)
+			try {
+				// Linux / macOS では、実行中の jar をそのまま置き換えられる
+				Files.move(file.toPath(), now.toPath(), StandardCopyOption.REPLACE_EXISTING)
 				message.editMessage("PandaEntus を更新しました。再起動してください。").complete()
-			} else {
-				message.editMessage("更新に失敗しました。Bot を停止して " + file.name + " を " + now.name + " に置き換えて使用してください。").complete()
+			} catch (e: IOException) {
+				// Windows では、実行中の jar を置き換えられない。別名で残して、次の起動のときに start.bat が置き換える
+				val pending = File(now.parentFile, now.name + UPDATE_SUFFIX)
+				Files.move(file.toPath(), pending.toPath(), StandardCopyOption.REPLACE_EXISTING)
+				message.editMessage("新しいバージョンを " + pending.name + " に保存しました。\n" +
+					"同梱の start.bat で再起動すると、自動で置き換わります。" +
+					"自分で置き換える場合は、Bot を停止してから " + pending.name + " を " + now.name + " に上書きしてください。").complete()
 			}
 			return
 		} catch (e: Exception) {
@@ -164,16 +179,60 @@ class UpdateCommand : BaseCommand() {
 		return null
 	}
 
-	fun downloadJar(url: String, file: File): Boolean {
+	/**
+	 * GitHub が返す、添付ファイルの SHA-256。古いリリースなどで取得できなければ null を返す。
+	 */
+	fun getAssetSha256(release: JsonObject, assetName: String): String? {
+		val assets = release.getAsJsonArray("assets") ?: return null
+
+		for (element in assets) {
+			val asset = element.asJsonObject
+			if (asset.get("name")?.asString == assetName) {
+				val digest = asset.get("digest")?.takeIf { !it.isJsonNull }?.asString ?: return null
+				return digest.takeIf { it.startsWith("sha256:") }?.removePrefix("sha256:")
+			}
+		}
+
+		return null
+	}
+
+	/**
+	 * 実行中の jar ファイル。jar から起動していない (開発中など) 場合は null を返す。
+	 */
+	fun getRunningJar(): File? {
+		return try {
+			val location = PandaEntus::class.java.protectionDomain?.codeSource?.location ?: return null
+			File(location.toURI()).takeIf { it.isFile && it.name.endsWith(".jar") }
+		} catch (e: Exception) {
+			null
+		}
+	}
+
+	/**
+	 * url のファイルを file に保存する。sha256 が分かっているときは、一致することも確認する。
+	 */
+	fun downloadJar(url: String, file: File, sha256: String?): Boolean {
 		try {
+			if (!url.startsWith("https://github.com/$REPOSITORY/")) {
+				println("[Update] 想定していないダウンロード元です: $url")
+				return false
+			}
+
 			val connection = URI.create(url).toURL().openConnection() as HttpURLConnection
 			connection.addRequestProperty("user-agent", USER_AGENT)
 			// browser_download_url は objects.githubusercontent.com へリダイレクトされる。
 			connection.instanceFollowRedirects = true
 			connection.connect()
 
-			connection.inputStream.use { inputStream ->
+			val digest = MessageDigest.getInstance("SHA-256")
+			DigestInputStream(connection.inputStream, digest).use { inputStream ->
 				Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING)
+			}
+
+			val actual = HexFormat.of().formatHex(digest.digest())
+			if (sha256 != null && !actual.equals(sha256, ignoreCase = true)) {
+				println("[Update] ダウンロードしたファイルの SHA-256 が一致しません。")
+				return false
 			}
 			return true
 		} catch (e: Exception) {

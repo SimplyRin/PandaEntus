@@ -1,5 +1,7 @@
 package net.simplyrin.pandaentus.commands.botowner
 
+import java.io.File
+
 import kotlin.system.exitProcess
 
 import net.simplyrin.pandaentus.PandaEntus
@@ -7,8 +9,7 @@ import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
-import net.simplyrin.processmanager.Callback
-import net.simplyrin.processmanager.ProcessManager
+import net.simplyrin.pandaentus.utils.Platform
 
 /**
  * Created by SimplyRin on 2021/11/21.
@@ -30,6 +31,18 @@ import net.simplyrin.processmanager.ProcessManager
  */
 class RestartCommand : BaseCommand() {
 
+	companion object {
+
+		/**
+		 * 再起動用のスクリプトの既定の名前 (Windows は start.bat、それ以外は start.sh)
+		 */
+		@JvmStatic
+		fun defaultScript(): String {
+			return if (Platform.isWindows) "start.bat" else "start.sh"
+		}
+
+	}
+
 	override val command = "!restart"
 
 	override val description = "Bot を再起動します。"
@@ -41,35 +54,33 @@ class RestartCommand : BaseCommand() {
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
 		if (args.size > 1) {
 			if (args[1].equals("now", ignoreCase = true)) {
-				event.reply("再起動しています...。")
+				val brs: String = instance.config.getString("Bot.Restart-Script") ?: defaultScript()
 
-				val brs: String = instance.config.getString("Bot.Restart-Script") ?: "start.sh"
+				val script = File(brs).absoluteFile
+				if (!script.isFile) {
+					event.reply("再起動用のスクリプト (" + brs + ") が見つかりません。config.yml の Bot.Restart-Script を確認してください。")
+					return
+				}
+
+				event.reply("再起動しています...。")
 
 				Runtime.getRuntime().addShutdownHook(Thread {
 					try {
-						val isWindows = System.getProperty("os.name").lowercase().startsWith("windows")
-
-						println("Restarting with $brs isWindows: $isWindows")
-						val cmd = (if (isWindows) "cmd /c start " else "/bin/sh ") + brs
-						println("Command: $cmd")
-
-						val command = if (isWindows) {
-							arrayOf("cmd", "/c", "start", brs)
+						val command = if (Platform.isWindows) {
+							// start は、引用符で囲んだ最初の引数をウィンドウのタイトルとして扱う。
+							// タイトルを明示しておかないと、空白を含むパスがタイトルとして解釈されてしまう
+							listOf("cmd", "/c", "start", "\"PandaEntus\"", script.path)
 						} else {
-							arrayOf("/bin/bash", brs)
+							listOf(if (File("/bin/bash").exists()) "/bin/bash" else "sh", script.path)
 						}
 
-						ProcessManager.runCommand(command, object : Callback() {
+						println("Restarting with: " + command.joinToString(" "))
 
-							override fun line(line: String?) {
-								println(line)
-							}
-
-							override fun processEnded() {
-								println("Process ended.")
-							}
-
-						}, false)
+						// 終了を待たずに起動する。出力は受け取らないので、捨てる
+						ProcessBuilder(command)
+							.redirectOutput(ProcessBuilder.Redirect.DISCARD)
+							.redirectError(ProcessBuilder.Redirect.DISCARD)
+							.start()
 					} catch (e: Exception) {
 						e.printStackTrace()
 					}

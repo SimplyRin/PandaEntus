@@ -4,13 +4,14 @@ import java.awt.Color
 import java.io.File
 
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.utils.FileUpload
 import net.simplyrin.pandaentus.PandaEntus
 import net.simplyrin.pandaentus.utils.ThreadPool
-import net.simplyrin.processmanager.Callback
-import net.simplyrin.processmanager.ProcessManager
 
 /**
  * Created by SimplyRin on 2020/06/21.
@@ -36,6 +37,13 @@ class ReactionListener(private val instance: PandaEntus) : ListenerAdapter() {
 
 		// ダウンロードできる動画の最大の長さ (秒)
 		private const val MAX_DURATION_SECONDS = 60 * 8
+
+		// YouTube の動画 ID。これ以外の文字列は yt-dlp に渡さない (オプションとして解釈される文字列を防ぐ)
+		private val VIDEO_ID = Regex("^[A-Za-z0-9_-]{11}$")
+
+		private const val LOADING_URL = "https://static.simplyrin.net/gif/loading.gif?id=1"
+		private const val DOWNLOADING_URL = "https://static.simplyrin.net/gif/download.gif?id=1"
+		private const val UPLOADING_URL = "https://static.simplyrin.net/gif/upload.gif?id=1"
 
 	}
 
@@ -73,113 +81,125 @@ class ReactionListener(private val instance: PandaEntus) : ListenerAdapter() {
 		tempVideoId = tempVideoId.split("&")[0]
 		tempVideoId = tempVideoId.split("?")[0]
 
-		val videoId = tempVideoId
+		val videoId = tempVideoId.trim()
 
 		println("[YouTube Download Task] Original: $url, Repalced: $videoId")
+
+		if (!VIDEO_ID.matches(videoId)) {
+			println("[YouTube Download Task] 動画 ID として扱えないため、中止しました。")
+			return
+		}
 
 		val folder = File("ytdl")
 		folder.mkdirs()
 
 		val mp3 = File(folder, "$videoId.mp3")
 
-		if (mp3.exists()) {
-			ThreadPool.run {
-				val embedBuilder = this.createReadyEmbed(videoId)
-
-				val tempMessage = channel.sendFiles(FileUpload.fromData(mp3)).setEmbeds(embedBuilder.build()).complete()
-
-				try {
-					Thread.sleep(1000L * 60 * 60 * 48)
-				} catch (e: Exception) {
+		// yt-dlp の実行には時間がかかるので、JDA のイベント用スレッドでは実行しない
+		ThreadPool.run {
+			try {
+				if (mp3.exists()) {
+					this.sendCached(channel, videoId, mp3)
+				} else {
+					this.download(channel, user, videoId, folder, mp3)
 				}
-
-				tempMessage.delete().complete()
+			} catch (e: Exception) {
+				e.printStackTrace()
 			}
-			return
+		}
+	}
+
+	private fun sendCached(channel: MessageChannel, videoId: String, mp3: File) {
+		val embedBuilder = this.createReadyEmbed(videoId)
+
+		val tempMessage = channel.sendFiles(FileUpload.fromData(mp3)).setEmbeds(embedBuilder.build()).complete()
+
+		try {
+			Thread.sleep(1000L * 60 * 60 * 48)
+		} catch (e: Exception) {
 		}
 
-		val loadingUrl = "https://static.simplyrin.net/gif/loading.gif?id=1"
-		val downloadingUrl = "https://static.simplyrin.net/gif/download.gif?id=1"
-		val uploadingUrl = "https://static.simplyrin.net/gif/upload.gif?id=1"
+		tempMessage.delete().complete()
+	}
+
+	private fun download(channel: MessageChannel, user: User, videoId: String, folder: File, mp3: File) {
+		val tools = this.instance.externalTools
+		val videoUrl = "https://www.youtube.com/watch?v=$videoId"
 
 		val embedBuilder = EmbedBuilder()
 		embedBuilder.setColor(Color.GREEN)
-		embedBuilder.setAuthor(user.name + " -> 処理中...", null, loadingUrl)
+		embedBuilder.setAuthor(user.name + " -> 処理中...", null, LOADING_URL)
 
 		val phase = channel.sendMessageEmbeds(embedBuilder.build()).complete()
 
-		var youtubeDlPath = "youtube-dl"
-		val youtubeDl = File("youtube-dl")
-		if (youtubeDl.exists()) {
-			youtubeDlPath = youtubeDl.absolutePath
+		// タイトル、長さ (秒)、長さ (表示用) を 1 行ずつ出力させる
+		val info = tools.runYtDlp(listOf(
+			"--print", "%(title)s", "--print", "%(duration)s", "--print", "%(duration_string)s",
+			"--", videoUrl), 120)
+		if (info == null) {
+			this.fail(phase, user, "yt-dlp を使用できません。")
+			return
+		}
+		if (!info.success || info.stdout.size < 3) {
+			println("[YouTube Download Task] 動画情報の取得に失敗しました: " + info.describeFailure())
+			this.fail(phase, user, "動画の情報を取得できませんでした。")
+			return
 		}
 
-		ProcessManager.runCommand(arrayOf(youtubeDlPath, "--get-title", videoId), object : Callback() {
+		val title = info.stdout[0].trim()
+		val seconds = info.stdout[1].trim().toDoubleOrNull()
+		val duration = info.stdout[2].trim()
 
-			override fun line(response: String?) {
-				if (response != null && !response.lowercase().startsWith("error:")) {
-					println("[YouTube Download Task] Title: $response")
-					instance.dataConfig.set("YouTube.$videoId.Title", response.trim())
-				}
-			}
+		println("[YouTube Download Task] Title: $title, Duration: $duration (${seconds}s, Max: " +
+			this.instance.formatMillis(MAX_DURATION_SECONDS * 1000L) + ")")
 
-		}, true)
+		// ライブ配信などは長さを取得できない
+		if (seconds == null) {
+			this.fail(phase, user, "動画の長さを取得できませんでした。")
+			return
+		}
+		if (seconds >= MAX_DURATION_SECONDS) {
+			this.fail(phase, user, "動画が長すぎます！")
+			return
+		}
 
-		ProcessManager.runCommand(arrayOf(youtubeDlPath, "--get-duration", videoId), object : Callback() {
+		val data = this.instance.dataConfig
+		synchronized(data) {
+			data.set("YouTube.$videoId.Title", title)
+			data.set("YouTube.$videoId.Duration", duration)
+		}
 
-			override fun line(response: String?) {
-				if (response == null) {
-					return
-				}
+		embedBuilder.setAuthor(user.name + " -> ダウンロードしています...", null, DOWNLOADING_URL)
+		phase.editMessageEmbeds(embedBuilder.build()).complete()
 
-				if (response.contains(":")) {
-					println("[YouTube Download Task] Duration: $response")
-					instance.dataConfig.set("YouTube.$videoId.Duration", response.trim())
-				}
+		val result = tools.runYtDlp(listOf(
+			"-f", "bestaudio", "-x", "--audio-format", "mp3",
+			"--output", File(folder, "$videoId.%(ext)s").absolutePath,
+			"--", videoUrl), 600)
+		if (result == null || !result.success || !mp3.exists()) {
+			println("[YouTube Download Task] ダウンロードに失敗しました: " + (result?.describeFailure() ?: "yt-dlp を起動できません"))
+			this.fail(phase, user, "ダウンロードに失敗しました。")
+			return
+		}
 
-				val seconds = parseDuration(response.trim())
+		synchronized(data) {
+			data.set("YouTube.$videoId.Path", mp3.absolutePath)
+		}
 
-				println("[YouTube Download Task] Seconds: ${seconds}s (Duration: ${response.trim()}, Max: " +
-					instance.formatMillis(MAX_DURATION_SECONDS * 1000L) + ")")
+		embedBuilder.setAuthor(user.name + " -> 送信しています...", null, UPLOADING_URL)
+		phase.editMessageEmbeds(embedBuilder.build()).complete()
 
-				if (seconds >= MAX_DURATION_SECONDS) {
-					embedBuilder.setColor(Color.RED)
-					embedBuilder.setAuthor(user.name + " -> 動画が長すぎます！", null, loadingUrl)
-					phase.editMessageEmbeds(embedBuilder.build()).complete()
-					return
-				}
+		val readyEmbedBuilder = this.createReadyEmbed(videoId)
 
-				embedBuilder.setAuthor(user.name + " -> ダウンロードしています...", null, downloadingUrl)
-				phase.editMessageEmbeds(embedBuilder.build()).complete()
+		channel.sendFiles(FileUpload.fromData(mp3)).setEmbeds(readyEmbedBuilder.build()).complete()
+		phase.delete().complete()
+	}
 
-				ProcessManager.runCommand(arrayOf(youtubeDlPath, "-f", "bestaudio", "--audio-format", "mp3", "--no-playlist",
-					"--output", "./ytdl/$videoId.%(ext)s", "-x", videoId), object : Callback() {
-
-					override fun line(response: String?) {
-						if (response != null && response.startsWith("[ffmpeg] Destination:")) {
-							val title = response.replace("[ffmpeg] Destination:", "").replace("\"", "").trim()
-							println("[YouTube Download Task] Filename: $title")
-						}
-					}
-
-					override fun processEnded() {
-						instance.dataConfig.set("YouTube.$videoId.Path", mp3.absolutePath)
-
-						embedBuilder.setAuthor(user.name + " -> 送信しています...", null, uploadingUrl)
-						phase.editMessageEmbeds(embedBuilder.build()).complete()
-
-						if (mp3.exists()) {
-							val readyEmbedBuilder = createReadyEmbed(videoId)
-
-							channel.sendFiles(FileUpload.fromData(mp3)).setEmbeds(readyEmbedBuilder.build()).complete()
-							phase.delete().complete()
-						}
-					}
-
-				}, true)
-			}
-
-		}, true)
+	private fun fail(phase: Message, user: User, reason: String) {
+		val embedBuilder = EmbedBuilder()
+		embedBuilder.setColor(Color.RED)
+		embedBuilder.setAuthor(user.name + " -> " + reason)
+		phase.editMessageEmbeds(embedBuilder.build()).complete()
 	}
 
 	/**
@@ -195,18 +215,6 @@ class ReactionListener(private val instance: PandaEntus) : ListenerAdapter() {
 		embedBuilder.addField("タイトル", title.takeUnless { it.isNullOrEmpty() } ?: "不明", true)
 		embedBuilder.addField("長さ", duration.takeUnless { it.isNullOrEmpty() } ?: "不明", true)
 		return embedBuilder
-	}
-
-	/**
-	 * "mm:ss" や "h:mm:ss" 形式の長さを秒に変換する。解析できない場合は Int.MAX_VALUE
-	 */
-	private fun parseDuration(duration: String): Int {
-		val parts = duration.split(":").map { it.toIntOrNull() }
-		if (parts.isEmpty() || parts.any { it == null }) {
-			return Int.MAX_VALUE
-		}
-
-		return parts.filterNotNull().fold(0) { total, part -> total * 60 + part }
 	}
 
 }

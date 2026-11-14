@@ -1,7 +1,6 @@
 package net.simplyrin.pandaentus.commands
 
 import java.awt.Color
-import java.util.Scanner
 
 import net.dv8tion.jda.api.EmbedBuilder
 import net.simplyrin.pandaentus.PandaEntus
@@ -10,6 +9,7 @@ import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
 import net.simplyrin.pandaentus.utils.Version
+import oshi.SystemInfo
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -48,34 +48,31 @@ class VersionLegacyCommand : BaseCommand() {
 		event.reply(embedBuilder.build())
 	}
 
+	/**
+	 * サーバー (OS) が起動してからの時間。OS のコマンド (uptime) は使わず、OSHI で取得する。
+	 */
 	fun getUptime(instance: PandaEntus): String {
-		var uptime = "unknown"
-
-		try {
-			val process = Runtime.getRuntime().exec(arrayOf("uptime", "-p"))
-
-			Scanner(process.inputStream).use { scanner ->
-				if (scanner.hasNext()) {
-					uptime = scanner.nextLine()
-						.replace("up ", "")
-						.replace(",", "")
-						.replace(" years", "年")
-						.replace(" year", "年")
-						.replace(" weeks", "週間")
-						.replace(" week", "週間")
-						.replace(" days", "日")
-						.replace(" day", "日")
-						.replace(" hours", "時間")
-						.replace(" hour", "時間")
-						.replace(" minutes", "分")
-						.replace(" minute", "分")
-				}
-			}
-		} catch (e: Exception) {
-			instance.postError(e)
+		val seconds = try {
+			SystemInfo().operatingSystem.systemUptime
+		} catch (e: Throwable) {
+			println("[Version] 起動時間を取得できませんでした: $e")
+			return "unknown"
 		}
 
-		return uptime
+		val days = seconds / 86400
+		val hours = seconds % 86400 / 3600
+		val minutes = seconds % 3600 / 60
+
+		val parts = ArrayList<String>()
+		if (days > 0) {
+			parts.add(days.toString() + "日")
+		}
+		if (hours > 0) {
+			parts.add(hours.toString() + "時間")
+		}
+		parts.add(minutes.toString() + "分")
+
+		return parts.joinToString(" ")
 	}
 
 }

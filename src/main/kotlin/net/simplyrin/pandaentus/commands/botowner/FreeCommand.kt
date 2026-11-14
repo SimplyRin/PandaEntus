@@ -8,8 +8,7 @@ import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
-import net.simplyrin.processmanager.Callback
-import net.simplyrin.processmanager.ProcessManager
+import oshi.SystemInfo
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -40,65 +39,35 @@ class FreeCommand : BaseCommand() {
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
 		val channel = event.channel
 
-		ProcessManager.runCommand(arrayOf("free", "-h"), object : Callback() {
+		// OS のコマンド (free) は使わず、OSHI で取得する (Windows / macOS / Linux で同じ動きになる)
+		val memory = try {
+			SystemInfo().hardware.memory
+		} catch (e: Throwable) {
+			println("[Free] メモリの情報を取得できませんでした: $e")
+			channel.sendMessage("メモリの情報を取得できませんでした。").complete()
+			return
+		}
 
-			var memTotal = ""
-			var memUsed = ""
-			var memFree = ""
-			var swapTotal = ""
-			var swapUsed = ""
-			var swapFree = ""
+		val total = memory.total
+		// 空き = すぐに使える量 (キャッシュなど、解放できる分を含む)
+		val free = memory.available
+		val used = total - free
 
-			override fun line(line: String?) {
-				if (line == null) {
-					return
-				}
+		val swapTotal = memory.virtualMemory.swapTotal
+		val swapUsed = memory.virtualMemory.swapUsed
+		val swapFree = swapTotal - swapUsed
 
-				println(line)
+		val embedBuilder = EmbedBuilder()
+		embedBuilder.setColor(Color.YELLOW)
+		embedBuilder.setAuthor("Ram usage")
+		embedBuilder.addField("Total", instance.formatSize(total.toDouble()), true)
+		embedBuilder.addField("Used", instance.formatSize(used.toDouble()), true)
+		embedBuilder.addField("Free", instance.formatSize(free.toDouble()), true)
+		embedBuilder.addField("Swap Total", instance.formatSize(swapTotal.toDouble()), true)
+		embedBuilder.addField("Swap Used", instance.formatSize(swapUsed.toDouble()), true)
+		embedBuilder.addField("Swap Free", instance.formatSize(swapFree.toDouble()), true)
 
-				if (line.startsWith("Mem:")) {
-					val columns = this.parseColumns(line)
-
-					this.memTotal = columns.getOrNull(1).orEmpty()
-					this.memUsed = columns.getOrNull(2).orEmpty()
-					this.memFree = columns.getOrNull(3).orEmpty()
-				} else if (line.startsWith("Swap")) {
-					val columns = this.parseColumns(line)
-
-					this.swapTotal = columns.getOrNull(1).orEmpty()
-					this.swapUsed = columns.getOrNull(2).orEmpty()
-					this.swapFree = columns.getOrNull(3).orEmpty()
-				}
-			}
-
-			private fun parseColumns(line: String): List<String> {
-				val columns = line.trim().replace(Regex(" +"), " ").split(" ")
-				for ((i, column) in columns.withIndex()) {
-					println("args[$i] -> $column")
-				}
-				return columns
-			}
-
-			override fun processEnded() {
-				try {
-					Thread.sleep(100)
-				} catch (e: Exception) {
-				}
-
-				val embedBuilder = EmbedBuilder()
-				embedBuilder.setColor(Color.YELLOW)
-				embedBuilder.setAuthor("Ram usage")
-				embedBuilder.addField("Total", this.memTotal, true)
-				embedBuilder.addField("Used", this.memUsed, true)
-				embedBuilder.addField("Free", this.memFree, true)
-				embedBuilder.addField("Swap Total", this.swapTotal, true)
-				embedBuilder.addField("Swap Used", this.swapUsed, true)
-				embedBuilder.addField("Swap Free", this.swapFree, true)
-
-				channel.sendMessageEmbeds(embedBuilder.build()).complete()
-			}
-
-		}, true)
+		channel.sendMessageEmbeds(embedBuilder.build()).complete()
 	}
 
 }

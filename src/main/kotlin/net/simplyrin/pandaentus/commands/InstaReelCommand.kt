@@ -1,6 +1,5 @@
 package net.simplyrin.pandaentus.commands
 
-import java.io.File
 import java.util.UUID
 
 import net.simplyrin.pandaentus.PandaEntus
@@ -8,8 +7,8 @@ import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
-import net.simplyrin.processmanager.Callback
-import net.simplyrin.processmanager.ProcessManager
+import net.simplyrin.pandaentus.utils.SafeUrl
+import net.simplyrin.pandaentus.utils.ThreadPool
 
 /**
  * Created by SimplyRin on 2020/11/25.
@@ -42,32 +41,30 @@ class InstaReelCommand : BaseCommand() {
 	override val permission = CommandPermission.Everyone
 
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
-		val url = args.firstOrNull().orEmpty().substringBefore("?")
+		val url = SafeUrl.parse(args.firstOrNull().orEmpty().substringBefore("?"), "instagram.com") ?: return
 
 		val id = UUID.randomUUID().toString().split("-")[0]
 		println("[InstaReelCommand] [$id] Checking: $url")
 
-		var youtubeDlPathTemp = "youtube-dl"
-		val youtubeDl = File("youtube-dl")
-		if (youtubeDl.exists()) {
-			youtubeDlPathTemp = youtubeDl.absolutePath
-		}
-
-		ProcessManager.runCommand(arrayOf(youtubeDlPathTemp, "--get-url", url), object : Callback() {
-
-			override fun line(response: String?) {
-				if (response == null) {
-					return
+		ThreadPool.run {
+			try {
+				val result = instance.externalTools.runYtDlp(listOf("--get-url", "--", url), 120)
+				if (result == null || !result.success) {
+					println("[InstaReel] [$id] 取得に失敗しました: " + (result?.describeFailure() ?: "yt-dlp を使用できません"))
+					return@run
 				}
 
-				println("[InstaReel] [$id] $response")
+				for (line in result.stdout) {
+					println("[InstaReel] [$id] $line")
 
-				if (response.lowercase().startsWith("https://")) {
-					event.channel.sendMessage(response).complete()
+					if (line.lowercase().startsWith("https://")) {
+						event.channel.sendMessage(line.trim()).complete()
+					}
 				}
+			} catch (e: Exception) {
+				e.printStackTrace()
 			}
-
-		}, true)
+		}
 	}
 
 }

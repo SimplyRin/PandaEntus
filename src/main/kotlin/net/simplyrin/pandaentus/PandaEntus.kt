@@ -64,6 +64,8 @@ import net.simplyrin.pandaentus.listeners.Listener
 import net.simplyrin.pandaentus.listeners.ReactionListener
 import net.simplyrin.pandaentus.coefont.CoeFontClient
 import net.simplyrin.pandaentus.coefont.CoeFontLimiter
+import net.simplyrin.pandaentus.commands.botowner.RestartCommand
+import net.simplyrin.pandaentus.tools.ExternalTools
 import net.simplyrin.pandaentus.tts.TtsManager
 import net.simplyrin.pandaentus.utils.DataMigration
 import net.simplyrin.pandaentus.utils.PoolItems
@@ -141,6 +143,8 @@ class PandaEntus {
 	lateinit var coeFontClient: CoeFontClient
 
 	lateinit var coeFontLimiter: CoeFontLimiter
+		private set
+	lateinit var externalTools: ExternalTools
 		private set
 
 	val startupDate = Date()
@@ -258,7 +262,7 @@ class PandaEntus {
 
 		// パス再設定
 		if (this.config.getString("Bot.Restart-Script", null) == null) {
-			this.config.set("Bot.Restart-Script", "start.sh")
+			this.config.set("Bot.Restart-Script", RestartCommand.defaultScript())
 		}
 
 		this.timeManager = TimeManager(this)
@@ -391,6 +395,10 @@ class PandaEntus {
 
 		this.coeFontClient = CoeFontClient(this.config)
 		this.coeFontLimiter = CoeFontLimiter(this)
+
+		// yt-dlp と ffmpeg の用意と、定期的な更新
+		this.externalTools = ExternalTools(this.config, this.dataConfig) { this.saveDataConfig() }
+		this.externalTools.start()
 
 		this.jda.presence.setActivity(Activity.playing("🐼"))
 

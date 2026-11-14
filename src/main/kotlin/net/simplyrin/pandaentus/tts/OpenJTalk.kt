@@ -2,10 +2,12 @@ package net.simplyrin.pandaentus.tts
 
 import java.io.File
 import java.io.IOException
+import java.nio.charset.Charset
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 import net.simplyrin.config.Configuration
+import net.simplyrin.pandaentus.utils.Platform
 
 /**
  * Open JTalk (open_jtalk コマンド) を使って、テキストから音声ファイル (wav) を生成する。
@@ -18,19 +20,51 @@ import net.simplyrin.config.Configuration
  *   VoiceDirectories:        # この中の *.htsvoice を全て声として使う (複数あれば、ユーザーごとに声の種類も変わる)
  *     - voices
  *     - /usr/share/hts-voice
+ *   Charset: UTF-8           # 辞書の文字コード。Windows 用の Shift_JIS の辞書を使うときは Shift_JIS にする
  * ```
+ *
+ * 省略したときは、Bot のフォルダ内の open_jtalk/ (bin/open_jtalk, dic, voice)、Debian / Ubuntu、Homebrew (macOS) の順に探す。
  */
 class OpenJTalk(
 	private val binary: String,
 	private val dictionary: String,
-	private val voiceDirectories: List<String>
+	private val voiceDirectories: List<String>,
+	private val charset: Charset = Charsets.UTF_8
 ) {
 
 	companion object {
 
 		const val DEFAULT_BINARY = "open_jtalk"
-		const val DEFAULT_DICTIONARY = "/var/lib/mecab/dic/open-jtalk/naist-jdic"
-		val DEFAULT_VOICE_DIRECTORIES = listOf("voices", "/usr/share/hts-voice")
+
+		// 設定がないときに探す場所。Bot のフォルダ内 (open_jtalk/)、Debian / Ubuntu、Homebrew (macOS) の順
+		private val BINARY_CANDIDATES = listOf("open_jtalk/bin/open_jtalk", "open_jtalk/open_jtalk")
+		private val DICTIONARY_CANDIDATES = listOf(
+			"open_jtalk/dic",
+			"/var/lib/mecab/dic/open-jtalk/naist-jdic",
+			"/opt/homebrew/opt/open-jtalk/dic",
+			"/usr/local/opt/open-jtalk/dic"
+		)
+		val DEFAULT_VOICE_DIRECTORIES = listOf(
+			"voices",
+			"open_jtalk/voice",
+			"/usr/share/hts-voice",
+			"/opt/homebrew/opt/open-jtalk/voice",
+			"/usr/local/opt/open-jtalk/voice"
+		)
+
+		/**
+		 * Bot のフォルダ内に open_jtalk があればそれを、なければ PATH の open_jtalk を使う。
+		 */
+		private fun defaultBinary(): String {
+			return BINARY_CANDIDATES
+				.map { File(Platform.executable(it)) }
+				.firstOrNull { it.isFile }?.absolutePath
+				?: DEFAULT_BINARY
+		}
+
+		private fun defaultDictionary(): String {
+			return DICTIONARY_CANDIDATES.firstOrNull { File(it).isDirectory } ?: DICTIONARY_CANDIDATES[0]
+		}
 
 		// 音声の生成にかける時間の上限
 		private const val TIMEOUT_SECONDS = 15L
@@ -42,10 +76,20 @@ class OpenJTalk(
 		fun fromConfig(config: Configuration): OpenJTalk {
 			val directories = config.getStringList("OpenJTalk.VoiceDirectories").filter { it.isNotBlank() }
 
+			// 辞書の文字コード。Windows 用に配布されている辞書は Shift_JIS のことがある
+			val charsetName = config.getString("OpenJTalk.Charset", "").orEmpty()
+			val charset = try {
+				if (charsetName.isBlank()) Charsets.UTF_8 else Charset.forName(charsetName)
+			} catch (e: Exception) {
+				println("[TTS] OpenJTalk.Charset (" + charsetName + ") を使用できないため、UTF-8 を使います。")
+				Charsets.UTF_8
+			}
+
 			return OpenJTalk(
-				config.getString("OpenJTalk.Binary", DEFAULT_BINARY),
-				config.getString("OpenJTalk.Dictionary", DEFAULT_DICTIONARY),
-				directories.ifEmpty { DEFAULT_VOICE_DIRECTORIES }
+				config.getString("OpenJTalk.Binary", "").orEmpty().ifBlank { defaultBinary() },
+				config.getString("OpenJTalk.Dictionary", "").orEmpty().ifBlank { defaultDictionary() },
+				directories.ifEmpty { DEFAULT_VOICE_DIRECTORIES },
+				charset
 			)
 		}
 
@@ -112,7 +156,7 @@ class OpenJTalk(
 				.start()
 
 			// テキストは標準入力で渡す (コマンドラインに含めないので、記号などがオプションとして解釈されない)
-			process.outputStream.use { it.write((text + "\n").toByteArray(Charsets.UTF_8)) }
+			process.outputStream.use { it.write((text + "\n").toByteArray(this.charset)) }
 
 			if (!process.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
 				process.destroyForcibly()

@@ -333,11 +333,6 @@
       <version>1.4.1-java16</version>
     </dependency>
     <dependency>
-      <groupId>net.simplyrin.processmanager</groupId>
-      <artifactId>ProcessManager</artifactId>
-      <version>1.2</version>
-    </dependency>
-    <dependency>
       <groupId>net.simplyrin.config</groupId>
       <artifactId>Config</artifactId>
       <version>2.0</version>
@@ -358,7 +353,7 @@
       <version>6.7.0</version>
     </dependency>
     <!-- Discord のボイス接続に必須の DAVE (E2EE) 実装。Java 25 が必要。
-         ネイティブは実行するプラットフォームの分 (VPS = linux-x86-64, 開発機 = darwin) を含める -->
+         ネイティブは実行するプラットフォームの分 (Linux, macOS, Windows) を含める -->
     <dependency>
       <groupId>club.minnced</groupId>
       <artifactId>jdave-api</artifactId>
@@ -373,6 +368,34 @@
       <groupId>club.minnced</groupId>
       <artifactId>jdave-native-darwin</artifactId>
       <version>0.1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>club.minnced</groupId>
+      <artifactId>jdave-native-win-x86-64</artifactId>
+      <version>0.1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>club.minnced</groupId>
+      <artifactId>jdave-native-linux-aarch64</artifactId>
+      <version>0.1.8</version>
+    </dependency>
+    <!-- 計算式の評価 (=1+1)。外部コマンドを使わない -->
+    <dependency>
+      <groupId>net.objecthunter</groupId>
+      <artifactId>exp4j</artifactId>
+      <version>0.4.8</version>
+    </dependency>
+    <!-- メモリや起動時間など、OS の情報の取得 (Windows / macOS / Linux) -->
+    <dependency>
+      <groupId>com.github.oshi</groupId>
+      <artifactId>oshi-core</artifactId>
+      <version>6.12.0</version>
+    </dependency>
+    <!-- ffmpeg の配布ファイル (tar.xz) の展開 -->
+    <dependency>
+      <groupId>org.tukaani</groupId>
+      <artifactId>xz</artifactId>
+      <version>1.12</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

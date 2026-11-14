@@ -42,12 +42,7 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DSHA=${{ env.SHA_SHORT }} -Dbuild.type=github -Dbuild.number=${{ github.run_number }}
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Module Artifacts
-          path: "target/**.jar"
-
+      # ビルドした jar は Artifact storage には置かず、Pre-release に添付する (!update はここから取得する)
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -97,4 +92,4 @@ jobs:
             | Filename  | MD5 Hash |
             | ------------- | ------------- |
             | [PandaEntus-${{ env.RELEASE_VERSION }}.jar](https://github.com/SimplyRin/PandaEntus/releases/download/v${{ github.run_number }}/PandaEntus-${{ env.RELEASE_VERSION }}.jar)  | ${{ env.PANDAENTUS }} |
-            | [PandaEntus-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar](https://github.com/PandaEntus/BungeeCord/releases/download/v${{ github.run_number }}/PandaEntus-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar)  | ${{ env.PANDAENTUS_WITH_DEPENDENCIES }} |
+            | [PandaEntus-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar](https://github.com/SimplyRin/PandaEntus/releases/download/v${{ github.run_number }}/PandaEntus-${{ env.RELEASE_VERSION }}-jar-with-dependencies.jar)  | ${{ env.PANDAENTUS_WITH_DEPENDENCIES }} |
