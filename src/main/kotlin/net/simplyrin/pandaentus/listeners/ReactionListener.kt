@@ -128,16 +128,20 @@ class ReactionListener(private val instance: PandaEntus) : ListenerAdapter() {
 
 		val embedBuilder = EmbedBuilder()
 		embedBuilder.setColor(Color.GREEN)
-		embedBuilder.setAuthor(user.name + " -> 処理中...", null, LOADING_URL)
+		embedBuilder.setAuthor(user.name + " -> 準備しています...", null, LOADING_URL)
 
 		val phase = channel.sendMessageEmbeds(embedBuilder.build()).complete()
 
-		// タイトル、長さ (秒)、長さ (表示用) を 1 行ずつ出力させる
+		// 1 日 1 回、yt-dlp の更新を確認する (更新があればここで入れ替える)。Discord には「準備しています」とだけ出す
+		tools.prepareYtDlp()
+
+		// タイトル、長さ (秒)、長さ (表示用) を 1 行ずつ出力させる。通信は !play と同じ YouTube.Proxy を経由する
 		val info = tools.runYtDlp(listOf(
 			"--print", "%(title)s", "--print", "%(duration)s", "--print", "%(duration_string)s",
 			"--", videoUrl), 120)
 		if (info == null) {
-			this.fail(phase, user, "yt-dlp を使用できません。")
+			println("[YouTube Download Task] yt-dlp を使用できません。")
+			this.fail(phase, user, "ダウンロードの準備に失敗しました。")
 			return
 		}
 		if (!info.success || info.stdout.size < 3) {

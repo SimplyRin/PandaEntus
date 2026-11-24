@@ -5,9 +5,11 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.charset.StandardCharsets
 import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -68,6 +70,9 @@ class ExternalTools(
 
 		private const val DAY_MILLIS = 24L * 60 * 60 * 1000
 
+		// yt-dlp の更新確認に失敗したとき、次に確認し直すまでの間隔 (GitHub が落ちているときに毎回待たされないようにする)
+		private const val YT_DLP_RETRY_MILLIS = 60L * 60 * 1000
+
 		// 展開するファイルの大きさの上限 (壊れたアーカイブでディスクを使い切らないようにする)
 		private const val MAX_EXTRACT_SIZE = 1024L * 1024 * 1024
 
@@ -81,6 +86,13 @@ class ExternalTools(
 		.connectTimeout(Duration.ofSeconds(15))
 		.followRedirects(HttpClient.Redirect.NORMAL)
 		.build()
+
+	// yt-dlp の更新と実行前の確認を 1 つずつ行うためのロック (ffmpeg の更新とは分ける)
+	private val ytDlpLock = Any()
+
+	// 最後に yt-dlp の更新確認に失敗した時刻
+	@Volatile
+	private var ytDlpFailedAt = 0L
 
 	private val scheduler = Executors.newSingleThreadScheduledExecutor { runnable ->
 		Thread(runnable, "external-tools").apply { isDaemon = true }
@@ -144,6 +156,8 @@ class ExternalTools(
 	 * 通信は config.yml の YouTube.Proxy (あれば) を経由する。
 	 */
 	fun runYtDlp(args: List<String>, timeoutSeconds: Long): ProcessRunner.Result? {
+		this.prepareYtDlp()
+
 		val ytDlp = this.ytDlp()
 		if (ytDlp == null) {
 			println("[Tools] yt-dlp が見つかりません。")
@@ -157,8 +171,17 @@ class ExternalTools(
 		val proxyHost: String? = config.getString("YouTube.Proxy.Host", null)
 		val proxyPort = config.getInt("YouTube.Proxy.Port", 0)
 		if (!proxyHost.isNullOrEmpty() && proxyPort > 0) {
+			// !play と同じく、YouTube.Proxy.User / Password があれば認証付きで使う
+			val proxyUser: String? = config.getString("YouTube.Proxy.User", null)
+			val credentials = if (proxyUser.isNullOrEmpty()) {
+				""
+			} else {
+				val proxyPassword = config.getString("YouTube.Proxy.Password", "").orEmpty()
+				encode(proxyUser) + ":" + encode(proxyPassword) + "@"
+			}
+
 			command.add("--proxy")
-			command.add("http://$proxyHost:$proxyPort")
+			command.add("http://$credentials$proxyHost:$proxyPort")
 		}
 
 		val ffmpeg = this.ffmpegLocation()
@@ -170,6 +193,36 @@ class ExternalTools(
 		command.addAll(args)
 
 		return ProcessRunner.run(command, timeoutSeconds)
+	}
+
+	/**
+	 * yt-dlp を実行する前に呼ぶ。前回の確認から 1 日 (Tools.YtDlp.UpdateIntervalDays) 経っていれば、
+	 * 新しいバージョンがあるか確認し、あれば更新してから戻る。
+	 * 更新に失敗しても、手元の yt-dlp があればそれを使えるように、例外は投げない。
+	 */
+	fun prepareYtDlp() {
+		if (!this.config.getBoolean("Tools.AutoUpdate", true)) {
+			return
+		}
+		if (!this.config.getString("Tools.YtDlp.Path", "").isNullOrBlank()) {
+			return
+		}
+		if (System.currentTimeMillis() - this.ytDlpFailedAt < YT_DLP_RETRY_MILLIS && this.managedFile("yt-dlp").isFile) {
+			return
+		}
+
+		synchronized(this.ytDlpLock) {
+			try {
+				this.updateYtDlp()
+			} catch (e: Exception) {
+				this.ytDlpFailedAt = System.currentTimeMillis()
+				println("[Tools] yt-dlp の更新に失敗しました: $e")
+			}
+		}
+	}
+
+	private fun encode(value: String): String {
+		return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20")
 	}
 
 	private fun managedFile(name: String): File {
@@ -184,10 +237,13 @@ class ExternalTools(
 			}
 
 			if (config.getString("Tools.YtDlp.Path", "").isNullOrBlank()) {
-				try {
-					this.updateYtDlp()
-				} catch (e: Exception) {
-					println("[Tools] yt-dlp の更新に失敗しました: $e")
+				synchronized(this.ytDlpLock) {
+					try {
+						this.updateYtDlp()
+					} catch (e: Exception) {
+						this.ytDlpFailedAt = System.currentTimeMillis()
+						println("[Tools] yt-dlp の更新に失敗しました: $e")
+					}
 				}
 			}
 
@@ -217,18 +273,35 @@ class ExternalTools(
 		this.saveData()
 	}
 
-	private fun updateYtDlp() {
-		val assetName = when {
+	/**
+	 * 動いている OS と CPU に合った yt-dlp のファイル名 (GitHub のリリースにあるもの)。対応するものがなければ null
+	 */
+	private fun ytDlpAssetName(): String? {
+		return when {
 			Platform.isWindows && Platform.isX64 -> "yt-dlp.exe"
 			Platform.isWindows && Platform.isArm64 -> "yt-dlp_arm64.exe"
+			Platform.isWindows && Platform.isX86 -> "yt-dlp_x86.exe"
+			Platform.isLinux && Platform.isMusl && Platform.isX64 -> "yt-dlp_musllinux"
+			Platform.isLinux && Platform.isMusl && Platform.isArm64 -> "yt-dlp_musllinux_aarch64"
 			Platform.isLinux && Platform.isX64 -> "yt-dlp_linux"
 			Platform.isLinux && Platform.isArm64 -> "yt-dlp_linux_aarch64"
+			// Intel / Apple Silicon の両方で動く (Universal)
 			Platform.isMac -> "yt-dlp_macos"
-			else -> return
+			else -> null
+		}
+	}
+
+	private fun updateYtDlp() {
+		val assetName = this.ytDlpAssetName()
+		if (assetName == null) {
+			println("[Tools] この環境 (" + Platform.describe() + ") 用の yt-dlp はないため、PATH にある yt-dlp を使います。")
+			return
 		}
 
+		// 別の OS / CPU 用の yt-dlp が残っている場合 (tools/ を別のマシンから持ってきたときなど) は、すぐに入れ替える
 		val target = this.managedFile("yt-dlp")
-		if (target.isFile && !this.isDue("Tools.YtDlp.CheckedAt", "Tools.YtDlp.UpdateIntervalDays", 7)) {
+		val sameAsset = assetName == this.dataConfig.getString("Tools.YtDlp.Asset", "")
+		if (target.isFile && sameAsset && !this.isDue("Tools.YtDlp.CheckedAt", "Tools.YtDlp.UpdateIntervalDays", 1)) {
 			return
 		}
 
@@ -237,12 +310,12 @@ class ExternalTools(
 		val asset = this.getAssets(release).firstOrNull { it.name == assetName }
 			?: throw IOException("リリースに $assetName がありません。")
 
-		if (target.isFile && version == this.dataConfig.getString("Tools.YtDlp.Version", "")) {
+		if (target.isFile && sameAsset && version == this.dataConfig.getString("Tools.YtDlp.Version", "")) {
 			this.saveState("Tools.YtDlp.Version", version, "Tools.YtDlp.CheckedAt")
 			return
 		}
 
-		println("[Tools] yt-dlp $version をダウンロードしています...")
+		println("[Tools] yt-dlp $version ($assetName) をダウンロードしています...")
 
 		FOLDER.mkdirs()
 		val temp = File(FOLDER, "yt-dlp.download")
@@ -253,8 +326,11 @@ class ExternalTools(
 			temp.delete()
 		}
 
+		synchronized(this.dataConfig) {
+			this.dataConfig.set("Tools.YtDlp.Asset", assetName)
+		}
 		this.saveState("Tools.YtDlp.Version", version, "Tools.YtDlp.CheckedAt")
-		println("[Tools] yt-dlp を $version に更新しました。")
+		println("[Tools] yt-dlp を $version ($assetName) に更新しました。")
 	}
 
 	private fun updateFfmpeg() {

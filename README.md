@@ -12,7 +12,7 @@ Windows / macOS / Linux で動作します。Java 25 以降が必要です。
 # 外部ツール
 | ツール | 使う機能 | 用意の方法 |
 ----|----|----
-| yt-dlp | YouTube リンクのリアクション、TikTok、Instagram | 自動で `tools/` にダウンロードして、定期的に更新します |
+| yt-dlp | YouTube リンクのリアクション、TikTok、Instagram | 動いている OS と CPU に合ったもの (Windows x64 / arm64 / x86、Linux x64 / arm64 (glibc / musl)、macOS) を自動で `tools/` にダウンロードします。使う前に 1 日 1 回更新を確認し、新しいバージョンがあれば更新してから使います。通信は `!play` と同じ `YouTube.Proxy` を経由します |
 | ffmpeg | YouTube リンクのリアクション (mp3 への変換) | Windows / Linux は自動で `tools/` にダウンロードして、定期的に更新します ([FFmpeg-Builds](https://github.com/FFmpeg-Builds/FFmpeg-Builds))。macOS は `brew install ffmpeg` などで入れてください |
 | Open JTalk | `!ps` (読み上げ) | 各自で入れて、config.yml の `OpenJTalk` を設定します |
 | Tesseract | `!ocr` | Windows は同梱されています。Linux / macOS は各自で入れてください |

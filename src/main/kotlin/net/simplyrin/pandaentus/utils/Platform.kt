@@ -26,6 +26,24 @@ object Platform {
 	@JvmField
 	val isX64 = osArch == "amd64" || osArch == "x86_64"
 
+	/** 32bit の x86 */
+	@JvmField
+	val isX86 = osArch == "x86" || osArch == "i386" || osArch == "i486" || osArch == "i586" || osArch == "i686"
+
+	/**
+	 * glibc ではなく musl を使う Linux (Alpine など)。musl のローダー /lib/ld-musl-*.so.1 があるかで判断する
+	 */
+	@JvmField
+	val isMusl = isLinux && (File("/lib").listFiles()?.any { it.name.startsWith("ld-musl-") } ?: false)
+
+	/**
+	 * ログ用の OS と CPU の名前
+	 */
+	@JvmStatic
+	fun describe(): String {
+		return System.getProperty("os.name").orEmpty() + " / " + System.getProperty("os.arch").orEmpty()
+	}
+
 	/**
 	 * 実行ファイルの名前 (Windows では .exe を付ける)
 	 */
