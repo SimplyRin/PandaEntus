@@ -148,7 +148,7 @@ class PandaEntus {
 		private set
 
 	val startupDate = Date()
-	val akiMap: MutableMap<String, AkinatorManager> = HashMap()
+	val akinatorManager = AkinatorManager()
 
 	lateinit var amongUsGuildList: MutableList<String>
 		private set
@@ -296,6 +296,7 @@ class PandaEntus {
 		this.jda.addEventListener(ReactionListener(this))
 		this.activityListener = ActivityListener(this)
 		this.jda.addEventListener(this.activityListener)
+		this.jda.addEventListener(this.akinatorManager)
 
 		// 自動登録
 		try {

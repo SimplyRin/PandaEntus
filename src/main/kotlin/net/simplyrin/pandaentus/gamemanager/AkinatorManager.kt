@@ -1,18 +1,20 @@
 package net.simplyrin.pandaentus.gamemanager
 
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-import net.dv8tion.jda.api.EmbedBuilder
-import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.api.entities.channel.ChannelType
+import net.dv8tion.jda.api.components.actionrow.ActionRow
+import net.dv8tion.jda.api.components.buttons.Button
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder
 import net.simplyrin.pandaentus.utils.ThreadPool
-import org.eu.zajc.akiwrapper.Akiwrapper
-import org.eu.zajc.akiwrapper.AkiwrapperBuilder
-import org.eu.zajc.akiwrapper.core.entities.Guess
-import org.eu.zajc.akiwrapper.core.entities.Query
-import org.eu.zajc.akiwrapper.core.entities.Question
 
 /**
  * Created by SimplyRin on 2020/03/18.
@@ -32,223 +34,226 @@ import org.eu.zajc.akiwrapper.core.entities.Question
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class AkinatorManager(val guild: Guild, val channelId: String) : ListenerAdapter() {
 
-	var akiWrapper: Akiwrapper? = AkiwrapperBuilder()
-		.setFilterProfanity(false)
-		.setLanguage(Akiwrapper.Language.JAPANESE)
-		.build()
-		private set
+/**
+ * 進行中のアキネーターをまとめて管理するリスナー (JDA に 1 つだけ登録する)
+ *
+ * - `!akinator`: チャンネル全体でプレイ (1 チャンネルにつき 1 ゲーム)
+ * - `/akinator`: 開始ユーザーだけに見えるメッセージで、全体プレイにするか自分だけで遊ぶかを聞く。
+ *   自分だけで遊んだ場合は、最後に結果をチャンネルへ共有するか聞く (1 ユーザーにつき 1 ゲーム)
+ */
+class AkinatorManager : ListenerAdapter() {
 
-	var latestMessageId: String? = null
+	/** セッション ID -> セッション */
+	private val sessions = ConcurrentHashMap<String, AkinatorSession>()
 
-	var lastChannel: String? = null
-		private set
+	/** チャンネル ID -> 全体プレイのセッション ID */
+	private val publicSessions = ConcurrentHashMap<String, String>()
 
-	@Volatile
-	var isGameEnd = false
-		private set
+	/** ユーザー ID -> 個人プレイのセッション ID */
+	private val privateSessions = ConcurrentHashMap<String, String>()
 
-	var query: Query? = null
-		private set
+	/** /akinator のモード選択待ち (トークン -> 作成時刻) */
+	private val pendingModeChoices = ConcurrentHashMap<String, Long>()
 
-	// 他スレッドの onMessageReceived から更新されるため volatile にする
-	@Volatile
-	var isReceivingQuestion = false
-		private set
-	var question: Question? = null
-		private set
-
-	var guess: Guess? = null
-		private set
-
-	@Volatile
-	private var checkEnd = false
+	private val scheduler = Executors.newSingleThreadScheduledExecutor { runnable ->
+		Thread(runnable, "Akinator-Timeout").apply { this.isDaemon = true }
+	}
 
 	init {
-		this.guild.jda.addEventListener(this)
-
-		this.runGame()
+		this.scheduler.scheduleAtFixedRate({
+			try {
+				this.expireIdle()
+			} catch (e: Exception) {
+				e.printStackTrace()
+			}
+		}, 1, 1, TimeUnit.MINUTES)
 	}
 
 	/**
-	 * ゲームが終了するまでブロックして質問を送り続ける
+	 * `!akinator`: チャンネル全体で開始する
 	 */
-	private fun runGame() {
-		val channel = this.guild.getTextChannelById(this.channelId) ?: return
-
-		this.query = this.akiWrapper?.currentQuery
-
-		while (true) {
-			val currentQuery = this.query ?: break
-
-			if (this.isGameEnd) {
-				break
-			}
-
-			var embedBuilder = EmbedBuilder()
-
-			if (currentQuery is Question) {
-				// onMessageReceived を有効にして、結果を送る
-
-				this.isReceivingQuestion = true
-				this.question = currentQuery
-
-				embedBuilder = this.setEmbed(currentQuery)
-
-				channel.sendMessageEmbeds(embedBuilder.build()).complete()
-
-				while (this.isReceivingQuestion) {
-					try {
-						TimeUnit.SECONDS.sleep(1)
-					} catch (e: InterruptedException) {
-						throw RuntimeException(e)
-					}
-				}
-			} else if (currentQuery is Guess) {
-				this.guess = currentQuery
-
-				embedBuilder.setAuthor("あなたが想像しているのは...")
-				embedBuilder.setDescription(currentQuery.name + " (" + currentQuery.description + ")")
-				embedBuilder.setImage(currentQuery.image?.toExternalForm())
-				embedBuilder.addField("正解！", "1", true)
-				embedBuilder.addField("違うので続ける...", "2", true)
-
-				this.isReceivingQuestion = true
-				this.checkEnd = true
-				channel.sendMessageEmbeds(embedBuilder.build()).complete()
-
-				if (currentQuery.description != "---") {
-					println(currentQuery.description)
-				}
-
-				while (this.checkEnd) {
-					try {
-						TimeUnit.SECONDS.sleep(1)
-					} catch (e: InterruptedException) {
-						throw RuntimeException(e)
-					}
-				}
-			}
+	fun startPublic(channel: MessageChannel, owner: User, ownerName: String) {
+		val session = this.createPublicSession(channel, owner, ownerName)
+		if (session == null) {
+			channel.sendMessage("このチャンネルではすでにアキネーターが進行中です。").queue(null) { it.printStackTrace() }
+			return
 		}
 
-		println("Bravo!")
+		ThreadPool.run {
+			try {
+				channel.sendMessage(CONNECTING_MESSAGE).complete()
+			} catch (e: Exception) {
+				e.printStackTrace()
+			}
+			session.start(null)
+		}
 	}
 
-	fun parseAnswer(value: String): Akiwrapper.Answer? {
-		val textChannel = this.guild.getTextChannelById(this.channelId)
+	/**
+	 * `/akinator`: 開始ユーザーだけに見えるメッセージで、遊び方を選んでもらう
+	 */
+	fun promptMode(event: SlashCommandInteractionEvent) {
+		val token = UUID.randomUUID().toString().substring(0, 8)
+		this.pendingModeChoices[token] = System.currentTimeMillis()
 
-		if (this.checkEnd) {
-			when (value.lowercase()) {
-				"1", "１" -> {
-					textChannel?.sendMessage("おち")?.complete()
+		val content = "**アキネーターを始めます。どちらで遊びますか？**\n" +
+			"・**自分だけで遊ぶ**: あなただけに見えるメッセージで進行します。最後に結果をチャンネルへ共有するか選べます\n" +
+			"・**チャンネル全体で遊ぶ**: `!akinator` と同じく、このチャンネルの全員で回答します"
 
-					this.isGameEnd = true
-
-					this.isReceivingQuestion = false
-					this.checkEnd = false
-					this.guess?.confirm()
-
-					this.akiWrapper = null
-					this.guild.jda.removeEventListener(this)
-				}
-				"2", "２" -> {
-					this.isReceivingQuestion = false
-					this.checkEnd = false
-
-					val guess = this.guess
-					if (guess != null) {
-						this.query = guess.reject()
-					}
-				}
-			}
-
-			return null
-		}
-
-		when (value.lowercase()) {
-			"はい", "1", "１" -> return Akiwrapper.Answer.YES
-			"いいえ", "2", "２" -> return Akiwrapper.Answer.NO
-			"わからない", "分からない", "3", "３" -> return Akiwrapper.Answer.DONT_KNOW
-			"たぶんそう", "部分的にそう", "4", "４" -> return Akiwrapper.Answer.PROBABLY
-			"たぶん違う", "そうでもない", "5", "５" -> return Akiwrapper.Answer.PROBABLY_NOT
-			"もどる", "戻る", "7", "７" -> {
-				textChannel?.sendTyping()?.complete()
-
-				val question = this.question
-				if (question != null) {
-					this.query = question.undoAnswer()
-				}
-
-				return null
-			}
-			"やめる", "8", "８" -> {
-				textChannel?.sendMessage(":pray:")?.complete()
-
-				this.isGameEnd = true
-
-				this.akiWrapper = null
-				this.guild.jda.removeEventListener(this)
-				return null
-			}
-		}
-		return null
+		event.reply(content)
+			.setEphemeral(true)
+			.setComponents(ActionRow.of(
+				Button.primary(MODE_PREFIX + token + ":" + MODE_PRIVATE, "自分だけで遊ぶ"),
+				Button.secondary(MODE_PREFIX + token + ":" + MODE_PUBLIC, "チャンネル全体で遊ぶ"),
+			))
+			.queue(null) { it.printStackTrace() }
 	}
 
-	fun setEmbed(question: Question): EmbedBuilder {
-		val embedBuilder = EmbedBuilder()
-		embedBuilder.setDescription("**" + question.text + "**")
-		embedBuilder.setAuthor("進行度: " + question.progression + "% (" + (question.step + 1) + ")")
-		embedBuilder.addField("はい", "1", true)
-		embedBuilder.addField("いいえ", "2", true)
-		embedBuilder.addField("わからない", "3", true)
-		embedBuilder.addField("たぶんそう", "4", true)
-		embedBuilder.addField("たぶんちがう", "5", true)
-		embedBuilder.addField("もどる", "7", true)
-		embedBuilder.addField("やめる", "8", true)
-		return embedBuilder
+	override fun onButtonInteraction(event: ButtonInteractionEvent) {
+		val componentId = event.componentId
+		if (!componentId.startsWith(BUTTON_PREFIX)) {
+			return
+		}
+
+		if (componentId.startsWith(MODE_PREFIX)) {
+			this.onModeChosen(event, componentId.removePrefix(MODE_PREFIX))
+			return
+		}
+
+		// aki:<セッション ID>:<質問番号>:<アクション>
+		val parts = componentId.removePrefix(BUTTON_PREFIX).split(":")
+		val session = parts.getOrNull(0)?.let { this.sessions[it] }
+		val turn = parts.getOrNull(1)?.toIntOrNull()
+		val action = parts.getOrNull(2)?.let { AkinatorSession.Action.fromCode(it) }
+
+		if (session == null || turn == null || action == null) {
+			event.reply("このアキネーターはすでに終了しています。").setEphemeral(true).queue()
+			return
+		}
+
+		session.onButton(event, turn, action)
 	}
 
 	override fun onMessageReceived(event: MessageReceivedEvent) {
-		if (event.isFromType(ChannelType.PRIVATE)) {
+		if (!event.isFromGuild || event.author.isBot) {
 			return
 		}
 
-		if (event.author.isBot) {
+		val sessionId = this.publicSessions[event.channel.id] ?: return
+		val session = this.sessions[sessionId] ?: return
+
+		session.onText(event.author, event.message.contentRaw)
+	}
+
+	private fun onModeChosen(event: ButtonInteractionEvent, value: String) {
+		val token = value.substringBefore(":")
+		val mode = value.substringAfter(":")
+
+		if (this.pendingModeChoices.remove(token) == null) {
+			event.reply("この選択はすでに終了しています。もう一度 `/akinator` を実行してください。").setEphemeral(true).queue()
 			return
 		}
 
-		val guild = event.guild
 		val channel = event.channel
+		val user = event.user
+		val userName = event.member?.effectiveName ?: user.effectiveName
 
-		if (guild.id != this.guild.id) {
-			return
-		}
+		when (mode) {
+			MODE_PUBLIC -> {
+				val session = this.createPublicSession(channel, user, userName)
+				if (session == null) {
+					event.editMessage("このチャンネルではすでにアキネーターが進行中です。").setComponents(emptyList()).queue()
+					return
+				}
 
-		if (channel.id != this.channelId) {
-			return
-		}
-
-		if (!this.isReceivingQuestion) {
-			return
-		}
-
-		val message = event.message.contentRaw.trim()
-
-		ThreadPool.run {
-			val answer = this.parseAnswer(message)
-
-			if (answer != null) {
-				channel.sendTyping().complete()
-
-				val question = this.question
-				if (question != null) {
-					this.query = question.answer(answer)
+				event.editMessage("チャンネル全体でアキネーターを開始しました。").setComponents(emptyList()).queue()
+				ThreadPool.run {
+					try {
+						channel.sendMessage("**" + userName + " さんがアキネーターを開始しました！**\n" + CONNECTING_MESSAGE).complete()
+					} catch (e: Exception) {
+						e.printStackTrace()
+					}
+					session.start(null)
 				}
 			}
+			MODE_PRIVATE -> {
+				val session = AkinatorSession(this.newSessionId(), channel, user, userName, false, this::remove)
 
-			this.isReceivingQuestion = false
+				// 同じユーザーの古い個人プレイは終了させる
+				this.privateSessions.put(user.id, session.id)?.let { oldId ->
+					this.sessions[oldId]?.terminate("新しいアキネーターを開始したため、このゲームは終了しました。")
+				}
+				this.sessions[session.id] = session
+
+				event.editMessage(MessageEditBuilder()
+					.setContent("**アキネーターに接続しています...。**")
+					.setComponents(emptyList())
+					.build()).queue()
+
+				val hook = event.hook
+				ThreadPool.run {
+					session.start(hook)
+				}
+			}
+			else -> event.reply("不明な選択です。").setEphemeral(true).queue()
 		}
+	}
+
+	/**
+	 * @return すでにそのチャンネルで全体プレイが進行中の場合は null
+	 */
+	private fun createPublicSession(channel: MessageChannel, owner: User, ownerName: String): AkinatorSession? {
+		val session = AkinatorSession(this.newSessionId(), channel, owner, ownerName, true, this::remove)
+		if (this.publicSessions.putIfAbsent(channel.id, session.id) != null) {
+			return null
+		}
+		this.sessions[session.id] = session
+		return session
+	}
+
+	private fun remove(session: AkinatorSession) {
+		this.sessions.remove(session.id)
+		if (session.isPublic) {
+			this.publicSessions.remove(session.channel.id, session.id)
+		} else {
+			this.privateSessions.remove(session.owner.id, session.id)
+		}
+	}
+
+	private fun expireIdle() {
+		val now = System.currentTimeMillis()
+
+		for (session in this.sessions.values) {
+			if (session.state == AkinatorSession.State.CONNECTING) {
+				continue
+			}
+			if (now - session.lastActivity >= IDLE_TIMEOUT_MILLIS) {
+				session.terminate("⌛ 一定時間操作がなかったため、アキネーターを終了しました。")
+			}
+		}
+
+		this.pendingModeChoices.entries.removeIf { now - it.value >= IDLE_TIMEOUT_MILLIS }
+	}
+
+	private fun newSessionId(): String = UUID.randomUUID().toString().substring(0, 8)
+
+	companion object {
+
+		const val BUTTON_PREFIX = "aki:"
+
+		private const val MODE_PREFIX = BUTTON_PREFIX + "mode:"
+		private const val MODE_PUBLIC = "public"
+		private const val MODE_PRIVATE = "private"
+
+		/**
+		 * 個人プレイの ephemeral メッセージは InteractionHook (15 分で失効) でしか編集できないため、それより短くする
+		 */
+		private val IDLE_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10)
+
+		private const val CONNECTING_MESSAGE = "アキネーターに接続しています...。\n" +
+			"ボタン、または番号 (1〜5) を発言して回答してください。一つ戻る場合は \"もどる\" (7)、中止する場合は \"やめる\" (8)。"
+
 	}
 
 }

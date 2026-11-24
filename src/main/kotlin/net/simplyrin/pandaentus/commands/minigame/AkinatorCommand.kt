@@ -7,8 +7,6 @@ import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
-import net.simplyrin.pandaentus.gamemanager.AkinatorManager
-import net.simplyrin.pandaentus.utils.ThreadPool
 
 /**
  * Created by SimplyRin on 2020/07/09.
@@ -41,17 +39,19 @@ class AkinatorCommand : BaseCommand() {
 
 	override val permission = CommandPermission.Everyone
 
+	// /akinator では開始ユーザーだけに見える返信をするため、チャンネルに入力中表示を出さない
+	override fun sendTyping(): Boolean = false
+
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
-		val channel = event.channel
-		val message = "**アキネーターに接続しています...。\n\n中止する場合、\"やめる\" と発言してください。\n一つ戻る場合、\"もどる\" と発言してください。**"
-
-		event.reply(message)
-
-		ThreadPool.run {
-			// AkinatorManager は生成時にゲームを開始し、終了するまでブロックする (質問の送信も内部で行う)
-			val manager = AkinatorManager(event.guild, channel.id)
-			instance.akiMap[channel.id] = manager
+		val slashCommandEvent = event.slashCommandEvent
+		if (slashCommandEvent != null) {
+			// 開始ユーザーだけに見えるメッセージで、全体プレイにするか自分だけで遊ぶかを聞く
+			instance.akinatorManager.promptMode(slashCommandEvent)
+			return
 		}
+
+		// !akinator はチャンネル全体でプレイする
+		instance.akinatorManager.startPublic(event.channel, event.user, event.member.effectiveName)
 	}
 
 }
