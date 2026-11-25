@@ -1,24 +1,14 @@
 package net.simplyrin.pandaentus.commands.botowner
 
 import java.io.File
-import java.io.IOException
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URI
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-import java.security.DigestInputStream
-import java.security.MessageDigest
-import java.util.HexFormat
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import net.simplyrin.pandaentus.PandaEntus
 import net.simplyrin.pandaentus.classes.BaseCommand
 import net.simplyrin.pandaentus.classes.CommandPermission
 import net.simplyrin.pandaentus.classes.CommandType
 import net.simplyrin.pandaentus.classes.PandaMessageEvent
+import net.simplyrin.pandaentus.tools.Updater
 import net.simplyrin.pandaentus.utils.Version
 
 /**
@@ -41,18 +31,6 @@ import net.simplyrin.pandaentus.utils.Version
  */
 class UpdateCommand : BaseCommand() {
 
-	companion object {
-
-		private const val REPOSITORY = "SimplyRin/PandaEntus"
-		private const val RELEASES_URL = "https://github.com/$REPOSITORY/releases"
-		private const val RELEASES_API = "https://api.github.com/repos/$REPOSITORY/releases?per_page=10"
-		private const val USER_AGENT = "PandaEntus-Updater"
-
-		// Windows で、次の起動のときに置き換える jar に付ける拡張子 (start.bat が参照する)
-		private const val UPDATE_SUFFIX = ".update"
-
-	}
-
 	override val command = "!update"
 
 	override val description = "PandaEntus のアップデート確認し、最新バージョンにアップデートします。"
@@ -64,17 +42,17 @@ class UpdateCommand : BaseCommand() {
 	override fun execute(instance: PandaEntus, event: PandaMessageEvent, args: Array<String>) {
 		try {
 			if (Version.GITHUB_RUN_NUMBER.isEmpty()) {
-				event.reply("開発者ビルドを使用しているため、アップデートを確認できません。\n$RELEASES_URL")
+				event.reply("開発者ビルドを使用しているため、アップデートを確認できません。\n${Updater.RELEASES_URL}")
 				return
 			}
 
-			val release = this.getLatestRelease()
+			val release = Updater.getLatestRelease()
 			if (release == null) {
 				event.reply("アップデートの確認に失敗しました。")
 				return
 			}
 
-			val runNumber = this.getRunNumber(release)
+			val runNumber = Updater.getRunNumber(release)
 			val releaseUrl = release.get("html_url")?.asString.orEmpty()
 
 			if (Version.GITHUB_RUN_NUMBER.equals(runNumber, ignoreCase = true)) {
@@ -82,8 +60,8 @@ class UpdateCommand : BaseCommand() {
 				return
 			}
 
-			val jarName = this.getJarName()
-			val downloadUrl = this.getAssetUrl(release, jarName)
+			val jarName = Updater.getJarName()
+			val downloadUrl = Updater.getAssetUrl(release, jarName)
 			if (downloadUrl == null) {
 				event.reply("最新のリリースに $jarName が添付されていませんでした。\n$releaseUrl")
 				return
@@ -95,25 +73,23 @@ class UpdateCommand : BaseCommand() {
 				releaseUrl)
 
 			// 実行中の jar と同じフォルダに保存する
-			val now = this.getRunningJar() ?: File(jarName).absoluteFile
+			val now = Updater.getRunningJar() ?: File(jarName).absoluteFile
 			val file = File(now.parentFile, "PandaEntus-" + Version.POMVERSION + "-jar-with-dependencies-v" + runNumber + ".jar")
 
 			val message = event.reply("ファイルをダウンロードしています...。")
-			if (!this.downloadJar(downloadUrl, file, this.getAssetSha256(release, jarName))) {
+			if (!Updater.downloadJar(downloadUrl, file, Updater.getAssetSha256(release, jarName))) {
 				file.delete()
 				message.editMessage("ファイルのダウンロードに失敗しました。").complete()
 				return
 			}
 			message.editMessage("ファイルをダウンロードしました。").complete()
 
-			try {
+			val pending = Updater.install(file, now)
+			if (pending == null) {
 				// Linux / macOS では、実行中の jar をそのまま置き換えられる
-				Files.move(file.toPath(), now.toPath(), StandardCopyOption.REPLACE_EXISTING)
 				message.editMessage("PandaEntus を更新しました。再起動してください。").complete()
-			} catch (e: IOException) {
+			} else {
 				// Windows では、実行中の jar を置き換えられない。別名で残して、次の起動のときに start.bat が置き換える
-				val pending = File(now.parentFile, now.name + UPDATE_SUFFIX)
-				Files.move(file.toPath(), pending.toPath(), StandardCopyOption.REPLACE_EXISTING)
 				message.editMessage("新しいバージョンを " + pending.name + " に保存しました。\n" +
 					"同梱の start.bat で再起動すると、自動で置き換わります。" +
 					"自分で置き換える場合は、Bot を停止してから " + pending.name + " を " + now.name + " に上書きしてください。").complete()
@@ -124,122 +100,6 @@ class UpdateCommand : BaseCommand() {
 		}
 
 		event.reply("アップデートの確認に失敗しました。")
-	}
-
-	fun getJarName(): String {
-		return "PandaEntus-" + Version.POMVERSION + "-jar-with-dependencies.jar"
-	}
-
-	/**
-	 * Pre-release も含めた最新のリリースを返します。draft は対象外です。
-	 */
-	fun getLatestRelease(): JsonObject? {
-		try {
-			val connection = URI.create(RELEASES_API).toURL().openConnection() as HttpURLConnection
-			connection.addRequestProperty("user-agent", USER_AGENT)
-			connection.addRequestProperty("accept", "application/vnd.github+json")
-			connection.connect()
-
-			val releases = InputStreamReader(connection.inputStream, StandardCharsets.UTF_8).use { reader ->
-				JsonParser.parseReader(reader).asJsonArray
-			}
-
-			// リリース一覧は作成日時の新しい順に返るため、draft でない最初の要素が最新。
-			for (element in releases) {
-				val release = element.asJsonObject
-				if (release.get("draft")?.asBoolean != true) {
-					return release
-				}
-			}
-		} catch (e: Exception) {
-			e.printStackTrace()
-		}
-
-		return null
-	}
-
-	/**
-	 * タグ名 (v123) から GitHub Actions の run number (123) を取り出します。
-	 */
-	fun getRunNumber(release: JsonObject): String {
-		val tagName = release.get("tag_name")?.asString.orEmpty()
-		return tagName.removePrefix("v")
-	}
-
-	fun getAssetUrl(release: JsonObject, assetName: String): String? {
-		val assets = release.getAsJsonArray("assets") ?: return null
-
-		for (element in assets) {
-			val asset = element.asJsonObject
-			if (asset.get("name")?.asString == assetName) {
-				return asset.get("browser_download_url")?.asString
-			}
-		}
-
-		return null
-	}
-
-	/**
-	 * GitHub が返す、添付ファイルの SHA-256。古いリリースなどで取得できなければ null を返す。
-	 */
-	fun getAssetSha256(release: JsonObject, assetName: String): String? {
-		val assets = release.getAsJsonArray("assets") ?: return null
-
-		for (element in assets) {
-			val asset = element.asJsonObject
-			if (asset.get("name")?.asString == assetName) {
-				val digest = asset.get("digest")?.takeIf { !it.isJsonNull }?.asString ?: return null
-				return digest.takeIf { it.startsWith("sha256:") }?.removePrefix("sha256:")
-			}
-		}
-
-		return null
-	}
-
-	/**
-	 * 実行中の jar ファイル。jar から起動していない (開発中など) 場合は null を返す。
-	 */
-	fun getRunningJar(): File? {
-		return try {
-			val location = PandaEntus::class.java.protectionDomain?.codeSource?.location ?: return null
-			File(location.toURI()).takeIf { it.isFile && it.name.endsWith(".jar") }
-		} catch (e: Exception) {
-			null
-		}
-	}
-
-	/**
-	 * url のファイルを file に保存する。sha256 が分かっているときは、一致することも確認する。
-	 */
-	fun downloadJar(url: String, file: File, sha256: String?): Boolean {
-		try {
-			if (!url.startsWith("https://github.com/$REPOSITORY/")) {
-				println("[Update] 想定していないダウンロード元です: $url")
-				return false
-			}
-
-			val connection = URI.create(url).toURL().openConnection() as HttpURLConnection
-			connection.addRequestProperty("user-agent", USER_AGENT)
-			// browser_download_url は objects.githubusercontent.com へリダイレクトされる。
-			connection.instanceFollowRedirects = true
-			connection.connect()
-
-			val digest = MessageDigest.getInstance("SHA-256")
-			DigestInputStream(connection.inputStream, digest).use { inputStream ->
-				Files.copy(inputStream, file.toPath(), StandardCopyOption.REPLACE_EXISTING)
-			}
-
-			val actual = HexFormat.of().formatHex(digest.digest())
-			if (sha256 != null && !actual.equals(sha256, ignoreCase = true)) {
-				println("[Update] ダウンロードしたファイルの SHA-256 が一致しません。")
-				return false
-			}
-			return true
-		} catch (e: Exception) {
-			e.printStackTrace()
-		}
-
-		return false
 	}
 
 }

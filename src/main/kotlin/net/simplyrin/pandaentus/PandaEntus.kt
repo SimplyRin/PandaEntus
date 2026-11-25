@@ -65,6 +65,7 @@ import net.simplyrin.pandaentus.listeners.ReactionListener
 import net.simplyrin.pandaentus.coefont.CoeFontClient
 import net.simplyrin.pandaentus.coefont.CoeFontLimiter
 import net.simplyrin.pandaentus.commands.botowner.RestartCommand
+import net.simplyrin.pandaentus.tools.AutoUpdater
 import net.simplyrin.pandaentus.tools.ExternalTools
 import net.simplyrin.pandaentus.tts.TtsManager
 import net.simplyrin.pandaentus.utils.DataMigration
@@ -145,6 +146,8 @@ class PandaEntus {
 	lateinit var coeFontLimiter: CoeFontLimiter
 		private set
 	lateinit var externalTools: ExternalTools
+		private set
+	lateinit var autoUpdater: AutoUpdater
 		private set
 
 	val startupDate = Date()
@@ -402,6 +405,10 @@ class PandaEntus {
 		// yt-dlp と ffmpeg の用意と、定期的な更新
 		this.externalTools = ExternalTools(this.config, this.dataConfig) { this.saveDataConfig() }
 		this.externalTools.start()
+
+		// 深夜に PandaEntus 自身のアップデートを確認して、あれば更新して再起動する
+		this.autoUpdater = AutoUpdater(this)
+		this.autoUpdater.start()
 
 		this.jda.presence.setActivity(Activity.playing("🐼"))
 

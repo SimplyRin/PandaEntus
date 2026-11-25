@@ -9,6 +9,19 @@ Windows / macOS / Linux で動作します。Java 25 以降が必要です。
 `mvn clean package` でビルドして、`target/PandaEntus-1.3-jar-with-dependencies.jar` を Bot 用のフォルダに置きます。
 起動スクリプトの見本は `start.sh` (Linux / macOS) と `start.bat` (Windows) です。
 
+# 自動アップデート
+GitHub Actions でビルドした jar を使っている場合、毎日 4:00 (日本時間) にアップデートを確認して、新しいバージョンがあれば更新してから自動で再起動します。
+再起動は、Bot のフォルダにある起動スクリプト (`start.sh` / `start.bat`) を実行して行うため、スクリプトがない場合は自動では更新しません (`!update` で手動更新できます)。
+`!ps` の読み上げ中に再起動した場合は、再起動後に同じボイスチャンネルへ再接続します。
+
+| config.yml | 内容 |
+----|----
+| `AutoUpdate.Enabled` | `false` で自動アップデートを止めます (既定は `true`) |
+| `AutoUpdate.Time` | 確認する時刻 `HH:mm` (既定は `04:00`) |
+| `AutoUpdate.Zone` | その時刻のタイムゾーン (既定は `Asia/Tokyo`) |
+
+開発者ビルド (自分でビルドした jar) では動きません。
+
 # 外部ツール
 | ツール | 使う機能 | 用意の方法 |
 ----|----|----
