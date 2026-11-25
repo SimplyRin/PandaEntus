@@ -393,6 +393,8 @@ class PandaEntus {
 		// 読み上げ (!ps)
 		this.ttsManager = TtsManager(this)
 		this.jda.addEventListener(this.ttsManager)
+		// 再起動の前に読み上げていたボイスチャンネルへ再接続する
+		ThreadPool.run { this.ttsManager.restoreSessions() }
 
 		this.coeFontClient = CoeFontClient(this.config)
 		this.coeFontLimiter = CoeFontLimiter(this)
@@ -404,6 +406,8 @@ class PandaEntus {
 		this.jda.presence.setActivity(Activity.playing("🐼"))
 
 		this.addShutdownHook {
+			// 終了に伴う切断で、読み上げの状態を消さないようにする (次の起動で再開する)
+			this.ttsManager.prepareShutdown()
 			this.jda.shutdown()
 			this.saveConfig()
 			this.saveDataConfig()
