@@ -611,6 +611,20 @@ class PandaEntus {
 		}
 	}
 
+	/**
+	 * Bot オーナー全員の DM にメッセージを送る。送れなかった相手がいても、残りには送る。
+	 */
+	fun notifyBotOwners(message: String) {
+		for (id in this.getBotOwner().orEmpty()) {
+			try {
+				val user = this.jda.retrieveUserById(id).complete()
+				user.openPrivateChannel().complete().sendMessage(message).complete()
+			} catch (e: Exception) {
+				println("[Notify] Bot オーナー ($id) の DM に送れませんでした: $e")
+			}
+		}
+	}
+
 	fun stringToTempFile(message: String): File? {
 		try {
 			val folder = File("temp")

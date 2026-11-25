@@ -4,6 +4,8 @@ import java.io.File
 import java.io.IOException
 import java.lang.ProcessBuilder.Redirect
 
+import net.simplyrin.config.Configuration
+import net.simplyrin.pandaentus.commands.botowner.RestartCommand
 import net.simplyrin.pandaentus.utils.Platform
 
 /**
@@ -17,11 +19,12 @@ import net.simplyrin.pandaentus.utils.Platform
 object Restarter {
 
 	/**
-	 * 再起動に使う起動スクリプト。なければ null
+	 * 再起動に使う起動スクリプト。config.yml の Bot.Restart-Script ([RestartCommand] と同じ)、
+	 * 未設定なら start.bat (Windows) / start.sh。なければ null
 	 */
-	fun startScript(): File? {
-		val script = File(if (Platform.isWindows) "start.bat" else "start.sh").absoluteFile
-		return script.takeIf { it.isFile }
+	fun startScript(config: Configuration): File? {
+		val name = config.getString("Bot.Restart-Script").takeUnless { it.isNullOrBlank() } ?: RestartCommand.defaultScript()
+		return File(name).absoluteFile.takeIf { it.isFile }
 	}
 
 	/**
@@ -29,8 +32,8 @@ object Restarter {
 	 *
 	 * @return 用意できたら true。起動スクリプトがない、または用意できなかったときは false
 	 */
-	fun scheduleRestart(): Boolean {
-		val script = this.startScript() ?: return false
+	fun scheduleRestart(config: Configuration): Boolean {
+		val script = this.startScript(config) ?: return false
 		val folder = script.parentFile
 		val pid = ProcessHandle.current().pid()
 

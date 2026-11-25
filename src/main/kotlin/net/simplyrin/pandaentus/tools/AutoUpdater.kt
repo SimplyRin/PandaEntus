@@ -21,6 +21,9 @@ import net.simplyrin.pandaentus.utils.Version
  * - AutoUpdate.Zone: その時刻のタイムゾーン (既定は Asia/Tokyo)
  *
  * GitHub Actions でビルドした jar (Pre-release) が対象。開発者ビルドでは動かない。
+ *
+ * 状況は Bot オーナーの DM に送る (更新を始めたとき、失敗したとき、再起動して更新が完了したとき)。
+ * 更新がなかったときは送らない。
  */
 class AutoUpdater(private val instance: PandaEntus) {
 
@@ -29,6 +32,9 @@ class AutoUpdater(private val instance: PandaEntus) {
 		private const val DEFAULT_TIME = "04:00"
 		private const val DEFAULT_ZONE = "Asia/Tokyo"
 
+		// 再起動する前に data.yml に書いておき、再起動後に結果を知らせるためのキー
+		private const val PENDING_KEY = "AutoUpdate.Pending"
+
 	}
 
 	private val scheduler = Executors.newSingleThreadScheduledExecutor { runnable ->
@@ -36,6 +42,15 @@ class AutoUpdater(private val instance: PandaEntus) {
 	}
 
 	fun start() {
+		// 自動アップデートで再起動したあとなら、その結果を知らせる (自動アップデートを止めていても、知らせる)
+		this.scheduler.execute {
+			try {
+				this.reportResult()
+			} catch (e: Exception) {
+				println("[AutoUpdate] 結果の通知に失敗しました: $e")
+			}
+		}
+
 		val config = this.instance.config
 		if (!config.contains("AutoUpdate.Enabled")) {
 			config.set("AutoUpdate.Enabled", true)
@@ -97,7 +112,7 @@ class AutoUpdater(private val instance: PandaEntus) {
 	private fun check() {
 		val release = Updater.getLatestRelease()
 		if (release == null) {
-			println("[AutoUpdate] アップデートの確認に失敗しました。")
+			this.fail("アップデートの確認に失敗しました。(GitHub に接続できませんでした)")
 			return
 		}
 
@@ -118,42 +133,92 @@ class AutoUpdater(private val instance: PandaEntus) {
 		val jarName = Updater.getJarName()
 		val downloadUrl = Updater.getAssetUrl(release, jarName)
 		if (downloadUrl == null) {
-			println("[AutoUpdate] 最新のリリース ($runNumber) に $jarName が添付されていません。")
+			this.fail("最新のリリース ($runNumber) に $jarName が添付されていません。")
 			return
 		}
 
 		println("[AutoUpdate] アップデートを確認しました。" + Version.GITHUB_RUN_NUMBER + " -> " + runNumber)
 
 		// 再起動できないと、手動で再起動するまで古いまま動き続けるので、jar を置き換えるのは再起動できるときだけにする
-		if (Restarter.startScript() == null) {
-			println("[AutoUpdate] 起動スクリプト (start.sh / start.bat) がないため、自動では更新しません。!update で更新して、手動で再起動してください。")
+		if (Restarter.startScript(this.instance.config) == null) {
+			this.fail("新しいバージョン ($runNumber) がありますが、起動スクリプトがないため自動では更新しません。" +
+				"!update で更新して、手動で再起動してください。\n" + release.get("html_url")?.asString.orEmpty())
 			return
 		}
 
 		val now = Updater.getRunningJar()
 		if (now == null) {
-			println("[AutoUpdate] 実行中の jar を特定できないため、更新しません。")
+			this.fail("実行中の jar を特定できないため、更新しません。")
 			return
 		}
 
 		val file = File(now.parentFile, "PandaEntus-" + Version.POMVERSION + "-jar-with-dependencies-v" + runNumber + ".jar")
 		if (!Updater.downloadJar(downloadUrl, file, Updater.getAssetSha256(release, jarName))) {
 			file.delete()
-			println("[AutoUpdate] ファイルのダウンロードに失敗しました。")
+			this.fail("新しいバージョン ($runNumber) のダウンロードに失敗しました。")
 			return
 		}
 
 		val pending = Updater.install(file, now)
 		println("[AutoUpdate] " + (pending?.name ?: now.name) + " を更新しました。")
 
-		if (!Restarter.scheduleRestart()) {
-			println("[AutoUpdate] 再起動を用意できませんでした。手動で再起動してください。")
+		if (!Restarter.scheduleRestart(this.instance.config)) {
+			this.fail("新しいバージョン ($runNumber) に更新しましたが、再起動を用意できませんでした。手動で再起動してください。")
 			return
 		}
 
+		// 再起動したあとに、更新が終わったことを知らせるための記録。再起動の前に確実に保存しておく
+		val data = this.instance.dataConfig
+		synchronized(data) {
+			data.set("$PENDING_KEY.From", Version.GITHUB_RUN_NUMBER)
+			data.set("$PENDING_KEY.To", runNumber)
+		}
+		this.instance.saveDataConfig()
+
 		println("[AutoUpdate] 再起動します。")
+		this.instance.notifyBotOwners("🔄 **自動アップデート**\n" +
+			"新しいバージョンをインストールしました。再起動します。\n" +
+			"現在: **" + Version.GITHUB_RUN_NUMBER + "** → 最新: **" + runNumber + "**\n" +
+			release.get("html_url")?.asString.orEmpty())
+
 		// 終了処理 (シャットダウンフック) で、設定が保存される
 		System.exit(0)
+	}
+
+	/**
+	 * 自動アップデートのあとの起動なら、更新できたかどうかを Bot オーナーに知らせる。
+	 */
+	private fun reportResult() {
+		val data = this.instance.dataConfig
+		val from: String
+		val to: String
+		synchronized(data) {
+			if (!data.contains(PENDING_KEY)) {
+				return
+			}
+			from = data.getString("$PENDING_KEY.From", "")
+			to = data.getString("$PENDING_KEY.To", "")
+			data.set(PENDING_KEY, null)
+		}
+		this.instance.saveDataConfig()
+
+		if (Version.GITHUB_RUN_NUMBER.equals(to, ignoreCase = true)) {
+			println("[AutoUpdate] $from -> $to の更新が完了しました。")
+			this.instance.notifyBotOwners("✅ **自動アップデート**\n更新が完了しました。バージョン **$from** → **$to** で起動しました。")
+		} else {
+			println("[AutoUpdate] $from -> $to に更新するはずでしたが、" + Version.GITHUB_RUN_NUMBER + " で起動しています。")
+			this.instance.notifyBotOwners("⚠️ **自動アップデート**\n" +
+				"**$to** に更新するはずでしたが、**" + Version.GITHUB_RUN_NUMBER.ifEmpty { "開発者ビルド" } + "** で起動しています。" +
+				"jar の置き換えか、起動スクリプトを確認してください。")
+		}
+	}
+
+	/**
+	 * 失敗をログに出して、Bot オーナーにも知らせる。
+	 */
+	private fun fail(message: String) {
+		println("[AutoUpdate] $message")
+		this.instance.notifyBotOwners("⚠️ **自動アップデート**\n$message")
 	}
 
 }
